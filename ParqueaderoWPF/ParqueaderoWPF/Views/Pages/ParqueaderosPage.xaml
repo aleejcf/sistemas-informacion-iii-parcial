@@ -1,0 +1,83 @@
+﻿<UserControl x:Class="ParqueaderosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="360"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Lista -->
+        <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,16,0">
+            <DataGrid x:Name="dgParqueaderos">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Código" Binding="{Binding codigo_parqueadero}" Width="Auto"/>
+                    <DataGridTextColumn Header="Dirección" Binding="{Binding direccion}" Width="2*"/>
+                    <DataGridTextColumn Header="Teléfono" Binding="{Binding telefono}" Width="*"/>
+                    <DataGridTextColumn Header="NIT" Binding="{Binding nit}" Width="*"/>
+                    <DataGridTextColumn Header="Administrador" Binding="{Binding administrador}" Width="1.5*"/>
+                    <DataGridTextColumn Header="Horario" Binding="{Binding horario}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Formulario -->
+        <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Datos del parqueadero" FontSize="16" FontWeight="Bold"
+                               Foreground="{StaticResource BrushTexto}"/>
+
+                    <!-- Foto -->
+                    <Border Background="#F8FAFC" CornerRadius="10" Height="130" Margin="0,12,0,0"
+                            BorderBrush="{StaticResource BrushBorde}" BorderThickness="1.5">
+                        <Grid>
+                            <TextBlock x:Name="lblSinFoto" Text="Sin foto 📷" FontSize="13"
+                                       Foreground="{StaticResource BrushTextoSuave}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Image x:Name="imgFoto" Stretch="UniformToFill"/>
+                        </Grid>
+                    </Border>
+                    <Button x:Name="btnFoto" Content="📷 Seleccionar foto…" Style="{StaticResource BotonGris}"
+                            Height="32" Margin="0,8,0,0" FontSize="12"/>
+
+                    <TextBlock Text="CÓDIGO (AUTOMÁTICO)" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtCodigo" Style="{StaticResource CajaTexto}" Height="36" MaxLength="5"
+                             IsEnabled="False"/>
+
+                    <TextBlock Text="DIRECCIÓN" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtDireccion" Style="{StaticResource CajaTexto}" Height="36" MaxLength="50"/>
+
+                    <TextBlock Text="TELÉFONO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtTelefono" Style="{StaticResource CajaTexto}" Height="36" MaxLength="25"/>
+
+                    <TextBlock Text="NIT" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtNit" Style="{StaticResource CajaTexto}" Height="36" MaxLength="15"/>
+
+                    <TextBlock Text="ADMINISTRADOR" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtAdministrador" Style="{StaticResource CajaTexto}" Height="36" MaxLength="50"/>
+
+                    <TextBlock Text="OPERADOR" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtOperador" Style="{StaticResource CajaTexto}" Height="36" MaxLength="50"/>
+
+                    <TextBlock Text="HORARIO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtHorario" Style="{StaticResource CajaTexto}" Height="36" MaxLength="20"/>
+
+                    <UniformGrid Columns="3" Margin="0,18,0,0">
+                        <Button x:Name="btnNuevo" Content="➕ Nuevo" Style="{StaticResource BotonGris}"
+                                Margin="0,0,4,0" Height="38"/>
+                        <Button x:Name="btnGuardar" Content="💾 Guardar" Style="{StaticResource BotonExito}"
+                                Margin="4,0" Height="38"/>
+                        <Button x:Name="btnEliminar" Content="🗑 Eliminar" Style="{StaticResource BotonPeligro}"
+                                Margin="4,0,0,0" Height="38"/>
+                    </UniformGrid>
+                    <TextBlock x:Name="lblSoloAdmin" Text="Solo un Administrador puede eliminar registros."
+                               FontSize="11" Foreground="{StaticResource BrushTextoSuave}"
+                               Margin="0,8,0,0" Visibility="Collapsed" TextWrapping="Wrap"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
+

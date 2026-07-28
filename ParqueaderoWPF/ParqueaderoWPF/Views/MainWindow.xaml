@@ -1,0 +1,77 @@
+<Window x:Class="MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PARKO Honduras — Sistema de Parqueadero"
+        Height="760" Width="1280" MinHeight="640" MinWidth="1080"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BrushFondo}" FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ===== MENÚ LATERAL ===== -->
+        <Border Grid.Column="0" Background="{StaticResource BrushLateral}">
+            <DockPanel>
+                <!-- Logo -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="20,22,20,10">
+                    <Image Source="/Assets/logo.png" Width="42" Height="42"/>
+                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock FontSize="17" FontWeight="Bold">
+                            <Run Text="PAR" Foreground="White"/><Run Text="KO" Foreground="{StaticResource BrushAcento}"/>
+                        </TextBlock>
+                        <TextBlock Text="Honduras · Sistema de control" Foreground="#8FB0CE" FontSize="10"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Usuario conectado -->
+                <Border DockPanel.Dock="Top" Background="{StaticResource BrushLateralHover}"
+                        CornerRadius="10" Margin="14,12" Padding="12,10">
+                    <StackPanel>
+                        <TextBlock x:Name="lblNombreUsuario" Foreground="White" FontSize="13"
+                                   FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                        <Border x:Name="bdRol" Background="{StaticResource BrushAcento}" CornerRadius="6"
+                                Padding="7,2" HorizontalAlignment="Left" Margin="0,5,0,0">
+                            <TextBlock x:Name="lblRol" FontSize="10" FontWeight="Bold" Foreground="#0F172A"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Cerrar sesión (abajo) -->
+                <Button x:Name="btnCerrarSesion" DockPanel.Dock="Bottom" Content="⟵  Cerrar sesión"
+                        Style="{StaticResource BotonPeligro}" Margin="14,14" Height="38"/>
+
+                <!-- Navegación -->
+                <StackPanel Margin="4,8">
+                    <RadioButton x:Name="rbDashboard"    Content="📊  Dashboard"          Style="{StaticResource BotonMenu}" GroupName="Nav"/>
+                    <RadioButton x:Name="rbClientes"     Content="👥  Clientes"           Style="{StaticResource BotonMenu}" GroupName="Nav"/>
+                    <RadioButton x:Name="rbParqueaderos" Content="🏢  Parqueaderos"       Style="{StaticResource BotonMenu}" GroupName="Nav"/>
+                    <RadioButton x:Name="rbVehiculos"    Content="🚗  Vehículos"          Style="{StaticResource BotonMenu}" GroupName="Nav"/>
+                    <RadioButton x:Name="rbMovimientos"  Content="⏱  Entradas y salidas" Style="{StaticResource BotonMenu}" GroupName="Nav"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ===== CONTENIDO ===== -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Encabezado -->
+            <Border Grid.Row="0" Background="White" Padding="24,14"
+                    BorderBrush="{StaticResource BrushBorde}" BorderThickness="0,0,0,1">
+                <DockPanel>
+                    <TextBlock x:Name="lblFecha" DockPanel.Dock="Right" VerticalAlignment="Center"
+                               FontSize="12" Foreground="{StaticResource BrushTextoSuave}"/>
+                    <TextBlock x:Name="lblTituloPagina" Style="{StaticResource TituloPagina}" Text="Dashboard"/>
+                </DockPanel>
+            </Border>
+
+            <!-- Página activa -->
+            <ContentControl x:Name="Contenido" Grid.Row="1" Margin="24"/>
+        </Grid>
+    </Grid>
+</Window>

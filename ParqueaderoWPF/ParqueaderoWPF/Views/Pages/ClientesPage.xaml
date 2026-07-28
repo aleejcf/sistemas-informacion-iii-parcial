@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="ClientesPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="360"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Lista -->
+        <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,16,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                    <Button x:Name="btnLimpiarBusqueda" DockPanel.Dock="Right" Content="✕"
+                            Style="{StaticResource BotonGris}" Padding="10,6" Margin="6,0,0,0"/>
+                    <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}" Height="36"
+                             VerticalAlignment="Center"/>
+                </DockPanel>
+                <DataGrid x:Name="dgClientes" Grid.Row="1">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Código" Binding="{Binding codigo_cliente}" Width="Auto"/>
+                        <DataGridTextColumn Header="Nombre" Binding="{Binding nombre}" Width="2*"/>
+                        <DataGridTextColumn Header="Cédula" Binding="{Binding cedula}" Width="*"/>
+                        <DataGridTextColumn Header="Celular" Binding="{Binding celular}" Width="*"/>
+                        <DataGridTextColumn Header="Vehículo" Binding="{Binding tipo_vehiculo}" Width="*"/>
+                        <DataGridTextColumn Header="Parq." Binding="{Binding codigo_parqueadero}" Width="Auto"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- Formulario -->
+        <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Datos del cliente" FontSize="16" FontWeight="Bold"
+                               Foreground="{StaticResource BrushTexto}"/>
+
+                    <TextBlock Text="CÓDIGO (AUTOMÁTICO)" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtCodigo" Style="{StaticResource CajaTexto}" Height="36" MaxLength="5"
+                             IsEnabled="False"/>
+
+                    <TextBlock Text="PARQUEADERO" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox x:Name="cboParqueadero" Height="36" FontSize="14"
+                              DisplayMemberPath="etiqueta" SelectedValuePath="codigo_parqueadero"/>
+
+                    <TextBlock Text="NOMBRE" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtNombre" Style="{StaticResource CajaTexto}" Height="36" MaxLength="50"/>
+
+                    <TextBlock Text="CÉDULA" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtCedula" Style="{StaticResource CajaTexto}" Height="36" MaxLength="15"/>
+
+                    <TextBlock Text="CELULAR" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtCelular" Style="{StaticResource CajaTexto}" Height="36" MaxLength="25"/>
+
+                    <TextBlock Text="TIPO DE VEHÍCULO" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox x:Name="cboTipo" Height="36" FontSize="14"
+                              DisplayMemberPath="tipo_vehiculo" SelectedValuePath="tipo_vehiculo"/>
+
+                    <UniformGrid Columns="3" Margin="0,18,0,0">
+                        <Button x:Name="btnNuevo" Content="➕ Nuevo" Style="{StaticResource BotonGris}"
+                                Margin="0,0,4,0" Height="38"/>
+                        <Button x:Name="btnGuardar" Content="💾 Guardar" Style="{StaticResource BotonExito}"
+                                Margin="4,0" Height="38"/>
+                        <Button x:Name="btnEliminar" Content="🗑 Eliminar" Style="{StaticResource BotonPeligro}"
+                                Margin="4,0,0,0" Height="38"/>
+                    </UniformGrid>
+                    <TextBlock x:Name="lblSoloAdmin" Text="Solo un Administrador puede eliminar registros."
+                               FontSize="11" Foreground="{StaticResource BrushTextoSuave}"
+                               Margin="0,8,0,0" Visibility="Collapsed" TextWrapping="Wrap"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
+

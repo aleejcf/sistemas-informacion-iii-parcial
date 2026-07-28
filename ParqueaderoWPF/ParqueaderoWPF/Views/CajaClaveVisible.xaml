@@ -1,0 +1,47 @@
+<UserControl x:Class="CajaClaveVisible"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <PasswordBox x:Name="caja" Style="{StaticResource CajaClave}" Padding="10,0,44,0"/>
+        <TextBox x:Name="cajaVisible" Style="{StaticResource CajaTexto}" Padding="10,0,44,0"
+                 Visibility="Collapsed"/>
+
+        <!-- Botón del ojo: mostrar / ocultar la contraseña (iconos vectoriales) -->
+        <Button x:Name="btnOjo" Width="34"
+                HorizontalAlignment="Right" Margin="0,4,6,4"
+                Cursor="Hand" Focusable="False" ToolTip="Mostrar contraseña">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="fondoOjo" Background="Transparent" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="fondoOjo" Property="Background" Value="#E2E8F0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+            <Grid>
+                <!-- Ojo abierto: la clave está oculta, clic para verla -->
+                <Grid x:Name="iconoVer" Width="18" Height="14">
+                    <Path Data="M1,7 C4.5,1.8 13.5,1.8 17,7 C13.5,12.2 4.5,12.2 1,7 Z"
+                          Stroke="#64748B" StrokeThickness="1.6" StrokeLineJoin="Round"
+                          Fill="Transparent" Stretch="None"/>
+                    <Ellipse Width="5" Height="5" Fill="#64748B"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+                <!-- Ojo tachado: la clave está visible, clic para ocultarla -->
+                <Grid x:Name="iconoOcultar" Width="18" Height="14" Visibility="Collapsed">
+                    <Path Data="M1,7 C4.5,1.8 13.5,1.8 17,7 C13.5,12.2 4.5,12.2 1,7 Z"
+                          Stroke="#64748B" StrokeThickness="1.6" StrokeLineJoin="Round"
+                          Fill="Transparent" Stretch="None"/>
+                    <Ellipse Width="5" Height="5" Fill="#64748B"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Line X1="2.5" Y1="13.5" X2="15.5" Y2="0.5" Stroke="#64748B" StrokeThickness="1.7"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                </Grid>
+            </Grid>
+        </Button>
+    </Grid>
+</UserControl>

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ParqueaderoWPF.Tests/ParqueaderoWPF.Tests.vbproj" />
+  <Project Path="ParqueaderoWPF/ParqueaderoWPF.vbproj" />
+</Solution>

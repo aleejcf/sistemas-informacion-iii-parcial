@@ -1,0 +1,39 @@
+# ---- Compilación de .NET ----
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.cache
+*.dll
+*.pdb
+*.exe
+
+# ---- Visual Studio ----
+.vs/
+*.userprefs
+*.sln.docstates
+
+# ---- NuGet ----
+packages/
+*.nupkg
+.nuget/
+
+# ---- Bitácoras del sistema ----
+logs/
+*.log
+
+# ---- Base de datos local ----
+*.mdf
+*.ldf
+*.bak
+
+# ---- Sistema operativo ----
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---- Temporales ----
+*.tmp
+*~

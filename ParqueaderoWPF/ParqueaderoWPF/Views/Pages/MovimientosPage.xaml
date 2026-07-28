@@ -1,0 +1,98 @@
+﻿<UserControl x:Class="MovimientosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Registrar entrada -->
+        <Border Grid.Row="0" Style="{StaticResource Tarjeta}">
+            <StackPanel>
+                <TextBlock Text="Registrar entrada" FontSize="16" FontWeight="Bold"
+                           Foreground="{StaticResource BrushTexto}"/>
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="PLACA" Style="{StaticResource Etiqueta}" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtPlaca" Style="{StaticResource CajaTexto}" Height="38"
+                                 MaxLength="10" CharacterCasing="Upper"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0">
+                        <TextBlock Text="TIPO DE VEHÍCULO" Style="{StaticResource Etiqueta}" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="cboTipo" Height="38" FontSize="14"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="tipo_vehiculo"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Margin="8,0">
+                        <TextBlock Text="PARQUEADERO" Style="{StaticResource Etiqueta}" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="cboParqueadero" Height="38" FontSize="14"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="codigo_parqueadero"/>
+                    </StackPanel>
+                    <Button x:Name="btnEntrada" Grid.Column="3" Content="⬇ Registrar entrada"
+                            Style="{StaticResource BotonExito}" Height="38" VerticalAlignment="Bottom"
+                            Margin="8,0,0,0"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Vehículos dentro -->
+        <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Margin="0,16,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                    <Button x:Name="btnSalida" DockPanel.Dock="Right" Content="⬆ Registrar salida y cobrar"
+                            Style="{StaticResource BotonPrimario}" Padding="14,8"/>
+                    <TextBlock FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrushTexto}"
+                               VerticalAlignment="Center">
+                        <Run Text="Vehículos dentro"/>
+                        <Run x:Name="lblCantidadDentro" Text="(0)" Foreground="{StaticResource BrushPrimario}"/>
+                    </TextBlock>
+                </DockPanel>
+                <DataGrid x:Name="dgAbiertos" Grid.Row="1">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Placa" Binding="{Binding placa}" Width="*"/>
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding tipo_vehiculo}" Width="*"/>
+                        <DataGridTextColumn Header="Parqueadero" Binding="{Binding codigo_parqueadero}" Width="*"/>
+                        <DataGridTextColumn Header="Entrada" Binding="{Binding fecha_entrada, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="1.5*"/>
+                        <DataGridTextColumn Header="Tarifa/hora" Binding="{Binding valor_hora, StringFormat='L {0:N2}'}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- Historial -->
+        <Border Grid.Row="2" Style="{StaticResource Tarjeta}" Margin="0,16,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Historial de salidas" FontSize="16" FontWeight="Bold"
+                           Foreground="{StaticResource BrushTexto}" Margin="0,0,0,10"/>
+                <DataGrid x:Name="dgHistorial" Grid.Row="1">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Placa" Binding="{Binding placa}" Width="*"/>
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding tipo_vehiculo}" Width="*"/>
+                        <DataGridTextColumn Header="Entrada" Binding="{Binding fecha_entrada, StringFormat='{}{0:dd/MM HH:mm}'}" Width="*"/>
+                        <DataGridTextColumn Header="Salida" Binding="{Binding fecha_salida, StringFormat='{}{0:dd/MM HH:mm}'}" Width="*"/>
+                        <DataGridTextColumn Header="Minutos" Binding="{Binding minutos}" Width="Auto"/>
+                        <DataGridTextColumn Header="Total" Binding="{Binding total, StringFormat='L {0:N2}'}" Width="*"/>
+                        <DataGridTextColumn Header="Registró" Binding="{Binding usuario_registra}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+
