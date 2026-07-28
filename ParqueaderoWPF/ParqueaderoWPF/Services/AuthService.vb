@@ -60,24 +60,93 @@ Public Class AuthService
 
     ' ---------- Recuperación de contraseña ----------
 
-    ''' <summary>Devuelve la pregunta de seguridad del usuario, o Nothing si no existe o no tiene.</summary>
-    Public Shared Function ObtenerPregunta(usuario As String) As String
-        Dim dt = Db.Consultar("SELECT pregunta_seguridad FROM usuario
+    ''' <summary>Resultado de buscar la pregunta de seguridad de un usuario.</summary>
+    Public Enum EstadoPregunta
+        Encontrada
+        UsuarioNoExiste
+        SinConfigurar
+    End Enum
+
+    Public Class ConsultaPregunta
+        Public Property Estado As EstadoPregunta
+        Public Property Pregunta As String
+    End Class
+
+    ''' <summary>Busca la pregunta de seguridad e informa por qué no se pudo obtener,
+    ''' para poder guiar al usuario con un mensaje útil.</summary>
+    Public Shared Function ObtenerPregunta(usuario As String) As ConsultaPregunta
+        Dim dt = Db.Consultar("SELECT pregunta_seguridad, respuesta_seguridad FROM usuario
                                WHERE usuario = @u AND esta_activo = 1",
                               New SqlParameter("@u", usuario.Trim()))
-        If dt.Rows.Count = 0 OrElse IsDBNull(dt.Rows(0)("pregunta_seguridad")) Then Return Nothing
-        Dim pregunta = dt.Rows(0)("pregunta_seguridad").ToString()
-        Return If(String.IsNullOrWhiteSpace(pregunta), Nothing, pregunta)
+
+        If dt.Rows.Count = 0 Then
+            Return New ConsultaPregunta With {.Estado = EstadoPregunta.UsuarioNoExiste}
+        End If
+
+        Dim fila = dt.Rows(0)
+        Dim pregunta = If(IsDBNull(fila("pregunta_seguridad")), "", fila("pregunta_seguridad").ToString())
+        Dim respuesta = If(IsDBNull(fila("respuesta_seguridad")), "", fila("respuesta_seguridad").ToString())
+
+        ' Ambos campos deben estar completos: sin la respuesta guardada no hay nada que verificar
+        If String.IsNullOrWhiteSpace(pregunta) OrElse String.IsNullOrWhiteSpace(respuesta) Then
+            Return New ConsultaPregunta With {.Estado = EstadoPregunta.SinConfigurar}
+        End If
+
+        Return New ConsultaPregunta With {.Estado = EstadoPregunta.Encontrada, .Pregunta = pregunta}
     End Function
 
     Public Shared Function VerificarRespuesta(usuario As String, respuesta As String) As Boolean
         If String.IsNullOrWhiteSpace(respuesta) Then Return False
+
         Dim dt = Db.Consultar("SELECT respuesta_seguridad FROM usuario
                                WHERE usuario = @u AND esta_activo = 1",
                               New SqlParameter("@u", usuario.Trim()))
         If dt.Rows.Count = 0 OrElse IsDBNull(dt.Rows(0)("respuesta_seguridad")) Then Return False
-        Return BCrypt.Net.BCrypt.Verify(respuesta.Trim().ToLower(),
-                                        dt.Rows(0)("respuesta_seguridad").ToString())
+
+        Dim guardada = dt.Rows(0)("respuesta_seguridad").ToString()
+        If String.IsNullOrWhiteSpace(guardada) Then Return False
+
+        Try
+            Return BCrypt.Net.BCrypt.Verify(respuesta.Trim().ToLower(), guardada)
+        Catch ex As Exception
+            ' Una respuesta guardada con formato inválido no debe tumbar la aplicación
+            Registro.Advertencia($"Respuesta de seguridad con formato inválido para el usuario {usuario.Trim()}")
+            Return False
+        End Try
+    End Function
+
+    ' ---------- Configuración de la pregunta desde la cuenta ----------
+
+    Public Shared Function TienePreguntaConfigurada(usuario As String) As Boolean
+        Return ObtenerPregunta(usuario).Estado = EstadoPregunta.Encontrada
+    End Function
+
+    ''' <summary>Guarda o cambia la pregunta de seguridad de un usuario que ya inició sesión.
+    ''' Devuelve Nothing si salió bien, o el mensaje de error.</summary>
+    Public Shared Function ConfigurarPregunta(usuario As String, pregunta As String,
+                                              respuesta As String) As String
+        If String.IsNullOrWhiteSpace(pregunta) Then Return "Selecciona o escribe una pregunta de seguridad."
+        If String.IsNullOrWhiteSpace(respuesta) Then Return "Escribe la respuesta de tu pregunta de seguridad."
+
+        Dim hashRespuesta As String = BCrypt.Net.BCrypt.HashPassword(respuesta.Trim().ToLower(), workFactor:=11)
+        Dim filas = Db.Ejecutar("UPDATE usuario SET pregunta_seguridad = @p, respuesta_seguridad = @r
+                                 WHERE usuario = @u AND esta_activo = 1",
+                                New SqlParameter("@p", pregunta.Trim()),
+                                New SqlParameter("@r", hashRespuesta),
+                                New SqlParameter("@u", usuario.Trim()))
+
+        If filas = 0 Then Return "No se encontró el usuario."
+        Registro.Info($"Pregunta de seguridad configurada para el usuario: {usuario.Trim()}")
+        Return Nothing
+    End Function
+
+    ''' <summary>Cambia la contraseña verificando primero la actual.</summary>
+    Public Shared Function CambiarContrasenaConActual(usuario As String, claveActual As String,
+                                                      claveNueva As String) As String
+        If Autenticar(usuario, claveActual) Is Nothing Then
+            Return "La contraseña actual no es correcta."
+        End If
+        Return CambiarContrasena(usuario, claveNueva)
     End Function
 
     ''' <summary>Cambia la contraseña. Devuelve Nothing si salió bien, o el mensaje de error.</summary>

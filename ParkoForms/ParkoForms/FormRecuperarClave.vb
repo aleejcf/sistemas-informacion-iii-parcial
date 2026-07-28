@@ -109,13 +109,20 @@ Public Class FormRecuperarClave
         End If
 
         Try
-            Dim pregunta = AuthService.ObtenerPregunta(txtUsuario.Text)
-            If pregunta Is Nothing Then
-                MostrarError("No se encontró ese usuario, o su cuenta no tiene pregunta de seguridad configurada.")
-                Return
-            End If
+            Dim consulta = AuthService.ObtenerPregunta(txtUsuario.Text)
 
-            lblPregunta.Text = pregunta
+            Select Case consulta.Estado
+                Case AuthService.EstadoPregunta.UsuarioNoExiste
+                    MostrarError("No existe un usuario con ese nombre. Revisa que esté bien escrito.")
+                    Return
+
+                Case AuthService.EstadoPregunta.SinConfigurar
+                    MostrarError("Esta cuenta todavía no tiene pregunta de seguridad. Inicia sesión y " &
+                                 "ve a «Mi cuenta» para configurarla.")
+                    Return
+            End Select
+
+            lblPregunta.Text = consulta.Pregunta
             txtRespuesta.Clear()
             panelPregunta.Visible = True
             txtRespuesta.Focus()

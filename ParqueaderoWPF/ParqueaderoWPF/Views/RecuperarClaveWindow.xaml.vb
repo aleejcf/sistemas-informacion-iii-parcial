@@ -19,13 +19,22 @@
         End If
 
         Try
-            Dim pregunta = AuthService.ObtenerPregunta(txtUsuario.Text)
-            If pregunta Is Nothing Then
-                MostrarError("No se encontró ese usuario, o su cuenta no tiene pregunta de seguridad configurada.")
-                Return
-            End If
+            Dim consulta = AuthService.ObtenerPregunta(txtUsuario.Text)
 
-            lblPregunta.Text = pregunta
+            Select Case consulta.Estado
+                Case AuthService.EstadoPregunta.UsuarioNoExiste
+                    MostrarError("No existe un usuario con ese nombre. Revisa que esté bien escrito.")
+                    Return
+
+                Case AuthService.EstadoPregunta.SinConfigurar
+                    MostrarError("Esta cuenta todavía no tiene pregunta de seguridad configurada, " &
+                                 "por eso no se puede recuperar así." & Environment.NewLine & Environment.NewLine &
+                                 "Inicia sesión con tu contraseña actual y ve a «Mi cuenta» en el menú " &
+                                 "para configurarla. Si no la recuerdas, pídele a un Administrador que te ayude.")
+                    Return
+            End Select
+
+            lblPregunta.Text = consulta.Pregunta
             txtRespuesta.Clear()
             panelPregunta.Visibility = Visibility.Visible
             txtRespuesta.Focus()

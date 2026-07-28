@@ -31,10 +31,27 @@
                     <StackPanel>
                         <TextBlock x:Name="lblNombreUsuario" Foreground="White" FontSize="13"
                                    FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                        <Border x:Name="bdRol" Background="{StaticResource BrushAcento}" CornerRadius="6"
-                                Padding="7,2" HorizontalAlignment="Left" Margin="0,5,0,0">
-                            <TextBlock x:Name="lblRol" FontSize="10" FontWeight="Bold" Foreground="#0F172A"/>
-                        </Border>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Border x:Name="bdRol" Background="{StaticResource BrushAcento}" CornerRadius="6"
+                                    Padding="7,2" HorizontalAlignment="Left">
+                                <TextBlock x:Name="lblRol" FontSize="10" FontWeight="Bold" Foreground="#0A2540"/>
+                            </Border>
+                            <TextBlock x:Name="lblAvisoSeguridad" Text="⚠" FontSize="13" Margin="7,0,0,0"
+                                       VerticalAlignment="Center" Foreground="#FBBF24" Visibility="Collapsed"
+                                       ToolTip="Aún no configuras tu pregunta de seguridad"/>
+                        </StackPanel>
+                        <Button x:Name="btnMiCuenta" Content="Mi cuenta" Margin="0,7,0,0"
+                                HorizontalAlignment="Left" Cursor="Hand" Foreground="#8FB0CE"
+                                FontSize="11" Background="Transparent" BorderThickness="0" Padding="0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <TextBlock Text="{TemplateBinding Content}"
+                                               Foreground="{TemplateBinding Foreground}"
+                                               FontSize="{TemplateBinding FontSize}"
+                                               TextDecorations="Underline"/>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
                     </StackPanel>
                 </Border>
 

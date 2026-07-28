@@ -12,6 +12,7 @@ Proyecto del III Parcial — Alejandro Calderón.
 - **Inicio de sesión y registro** de usuarios con contraseñas cifradas (BCrypt)
 - **Roles**: Administrador (control total) y Operador (no puede eliminar registros)
 - **Recuperación de contraseña** mediante pregunta de seguridad
+- **Mi cuenta**: configurar la pregunta de seguridad y cambiar la contraseña
 - **Gestión de clientes**, parqueaderos (con fotografía) y vehículos
 - **Control de entradas y salidas** con cálculo automático de tarifa y ticket de cobro
 - **Panel de indicadores** con vehículos dentro, ingresos del día y últimos movimientos
@@ -57,6 +58,10 @@ sqlcmd -S "ALECALDE\SQLEXPRESS" -E -i "ParqueaderoWPF/Scripts/02_indices_y_proce
 El **primer usuario registrado queda como Administrador**; los siguientes serán Operadores.
 
 Si la cadena de conexión de tu servidor es distinta, edítala en `ParqueaderoWPF/Services/Db.vb`.
+
+> **Cuentas creadas antes de la pregunta de seguridad:** si tu cuenta es anterior a esa
+> función, no podrá recuperar la contraseña hasta que la configures. Inicia sesión y entra
+> a **Mi cuenta** desde el menú lateral (un ⚠ junto a tu rol te avisa si te falta).
 
 ---
 

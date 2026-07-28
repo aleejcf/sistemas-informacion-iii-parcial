@@ -64,6 +64,10 @@ Public Class FormMenu
         AddHandler btnVehiculos.Click, Sub()
                                            Using f As New FormVehiculos() : f.ShowDialog(Me) : End Using
                                        End Sub
+        Dim btnMiCuenta = BotonMenu("👤   Mi cuenta", 432)
+        AddHandler btnMiCuenta.Click, Sub()
+                                          Using f As New FormMiCuenta() : f.ShowDialog(Me) : End Using
+                                      End Sub
 
         Dim btnCerrarSesion As New Button With {
             .Text = "⟵   Cerrar sesión", .Size = New Size(230, 42), .Location = New Point(15, 556)
@@ -72,7 +76,8 @@ Public Class FormMenu
         AddHandler btnCerrarSesion.Click, AddressOf btnCerrarSesion_Click
 
         panelLateral.Controls.AddRange({pbLogo, lblParko, lblSlogan, panelUsuario,
-                                        btnClientes, btnParqueaderos, btnVehiculos, btnCerrarSesion})
+                                        btnClientes, btnParqueaderos, btnVehiculos,
+                                        btnMiCuenta, btnCerrarSesion})
 
         ' ===== Panel de bienvenida =====
         Dim pbGrande As New PictureBox With {

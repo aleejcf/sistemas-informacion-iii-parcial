@@ -21,7 +21,24 @@ Public Class MainWindow
         Dim cultura = New CultureInfo("es-HN")
         lblFecha.Text = DateTime.Now.ToString("dddd, dd 'de' MMMM 'de' yyyy", cultura)
 
+        RevisarPreguntaDeSeguridad()
         rbDashboard.IsChecked = True
+    End Sub
+
+    ''' <summary>Avisa con un ícono si la cuenta todavía no puede recuperar su contraseña.</summary>
+    Private Sub RevisarPreguntaDeSeguridad()
+        Try
+            Dim configurada = AuthService.TienePreguntaConfigurada(Sesion.UsuarioActual.NombreUsuario)
+            lblAvisoSeguridad.Visibility = If(configurada, Visibility.Collapsed, Visibility.Visible)
+        Catch
+            lblAvisoSeguridad.Visibility = Visibility.Collapsed
+        End Try
+    End Sub
+
+    Private Sub btnMiCuenta_Click(sender As Object, e As RoutedEventArgs) Handles btnMiCuenta.Click
+        Dim miCuenta As New MiCuentaWindow With {.Owner = Me}
+        miCuenta.ShowDialog()
+        RevisarPreguntaDeSeguridad()
     End Sub
 
     Private Sub rbDashboard_Checked(sender As Object, e As RoutedEventArgs) Handles rbDashboard.Checked

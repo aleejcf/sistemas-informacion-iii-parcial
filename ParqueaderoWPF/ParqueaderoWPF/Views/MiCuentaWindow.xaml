@@ -1,0 +1,70 @@
+<Window x:Class="MiCuentaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ParqueaderoWPF"
+        Title="Mi cuenta — PARKO Honduras"
+        SizeToContent="Height" Width="500"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource BrushFondo}" FontFamily="Segoe UI">
+    <StackPanel Margin="20">
+
+        <!-- Datos del usuario -->
+        <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,14">
+            <StackPanel>
+                <TextBlock x:Name="lblNombre" FontSize="19" FontWeight="Bold"
+                           Foreground="{StaticResource BrushTexto}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <Border Background="{StaticResource BrushAcento}" CornerRadius="6" Padding="8,2">
+                        <TextBlock x:Name="lblRol" FontSize="10" FontWeight="Bold" Foreground="#0A2540"/>
+                    </Border>
+                    <TextBlock x:Name="lblUsuario" FontSize="12" Margin="10,0,0,0"
+                               VerticalAlignment="Center" Foreground="{StaticResource BrushTextoSuave}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Pregunta de seguridad -->
+        <Border Style="{StaticResource Tarjeta}" Margin="0,0,0,14">
+            <StackPanel>
+                <TextBlock Text="Pregunta de seguridad" FontSize="15" FontWeight="Bold"
+                           Foreground="{StaticResource BrushTexto}"/>
+                <TextBlock x:Name="lblEstadoPregunta" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/>
+
+                <TextBlock Text="PREGUNTA" Style="{StaticResource Etiqueta}"/>
+                <ComboBox x:Name="cboPregunta" Height="38" FontSize="14" IsEditable="True"/>
+
+                <TextBlock Text="RESPUESTA" Style="{StaticResource Etiqueta}"/>
+                <TextBox x:Name="txtRespuesta" Style="{StaticResource CajaTexto}" Height="38"/>
+
+                <Button x:Name="btnGuardarPregunta" Content="Guardar pregunta de seguridad"
+                        Style="{StaticResource BotonExito}" Height="38" Margin="0,14,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Cambio de contraseña -->
+        <Border Style="{StaticResource Tarjeta}">
+            <StackPanel>
+                <TextBlock Text="Cambiar mi contraseña" FontSize="15" FontWeight="Bold"
+                           Foreground="{StaticResource BrushTexto}"/>
+
+                <TextBlock Text="CONTRASEÑA ACTUAL" Style="{StaticResource Etiqueta}"/>
+                <local:CajaClaveVisible x:Name="txtActual" Height="38"/>
+
+                <TextBlock Text="NUEVA CONTRASEÑA (mínimo 6, letras y números)" Style="{StaticResource Etiqueta}"/>
+                <local:CajaClaveVisible x:Name="txtNueva" Height="38"/>
+
+                <TextBlock Text="CONFIRMAR NUEVA CONTRASEÑA" Style="{StaticResource Etiqueta}"/>
+                <local:CajaClaveVisible x:Name="txtConfirmar" Height="38"/>
+
+                <Button x:Name="btnCambiarClave" Content="Cambiar contraseña"
+                        Style="{StaticResource BotonPrimario}" Height="38" Margin="0,14,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <TextBlock x:Name="lblError" Foreground="{StaticResource BrushPeligro}" FontSize="12"
+                   TextWrapping="Wrap" Margin="0,12,0,0" Visibility="Collapsed"/>
+
+        <Button x:Name="btnCerrar" Content="Cerrar" Style="{StaticResource BotonGris}"
+                Height="36" Margin="0,14,0,0"/>
+    </StackPanel>
+</Window>
