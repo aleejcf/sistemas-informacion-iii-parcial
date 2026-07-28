@@ -1,0 +1,35 @@
+name: Compilar y probar
+
+# Se ejecuta en cada cambio subido y en cada Pull Request
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Compilar PARKO y correr las pruebas
+    runs-on: windows-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restaurar dependencias (WPF)
+        run: dotnet restore ParqueaderoWPF/ParqueaderoWPF.slnx
+
+      - name: Compilar el sistema WPF
+        run: dotnet build ParqueaderoWPF/ParqueaderoWPF.slnx --no-restore --configuration Release
+
+      - name: Correr las pruebas unitarias
+        run: dotnet test ParqueaderoWPF/ParqueaderoWPF.Tests/ParqueaderoWPF.Tests.vbproj --configuration Release --verbosity normal
+
+      - name: Compilar el sistema Windows Forms
+        run: dotnet build ParkoForms/ParkoForms/ParkoForms.vbproj --configuration Release

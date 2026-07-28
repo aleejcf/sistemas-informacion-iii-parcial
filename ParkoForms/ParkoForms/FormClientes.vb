@@ -1,4 +1,4 @@
-Imports System.Data
+﻿Imports System.Data
 
 Public Class FormClientes
     Inherits Form
@@ -92,7 +92,7 @@ Public Class FormClientes
             cboParqueadero.DisplayMember = "etiqueta"
             cboParqueadero.ValueMember = "codigo_parqueadero"
         Catch ex As Exception
-            DialogoParko.Show("Error al cargar parqueaderos: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al cargar parqueaderos", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
         CargarLista()
@@ -106,7 +106,7 @@ Public Class FormClientes
             ConfigurarColumnas()
             dgv.ClearSelection()
         Catch ex As Exception
-            DialogoParko.Show("Error al cargar clientes: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al cargar clientes", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             cargandoLista = False
@@ -164,7 +164,7 @@ Public Class FormClientes
             CargarLista(txtBuscar.Text)
             LimpiarFormulario()
         Catch ex As Exception
-            DialogoParko.Show("Error al guardar: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al guardar", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub

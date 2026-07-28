@@ -1,4 +1,4 @@
-Imports System.Data
+﻿Imports System.Data
 Imports System.IO
 
 Public Class FormParqueaderos
@@ -112,7 +112,7 @@ Public Class FormParqueaderos
             End If
             dgv.ClearSelection()
         Catch ex As Exception
-            DialogoParko.Show("Error al cargar parqueaderos: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al cargar parqueaderos", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             cargandoLista = False
@@ -159,7 +159,7 @@ Public Class FormParqueaderos
                 File.Copy(dialogo.FileName, Path.Combine(CarpetaFotos, txtCodigo.Text.Trim() & ".jpg"), True)
                 MostrarFoto(txtCodigo.Text.Trim())
             Catch ex As Exception
-                DialogoParko.Show("No se pudo copiar la foto: " & ex.Message, "Error",
+                DialogoParko.Show(MensajeError.Traducir("No se pudo copiar la foto", ex), "Error",
                                   MessageBoxButtons.OK, MessageBoxIcon.Error)
             End Try
         End Using
@@ -186,7 +186,7 @@ Public Class FormParqueaderos
             CargarLista()
             LimpiarFormulario()
         Catch ex As Exception
-            DialogoParko.Show("Error al guardar: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al guardar", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub

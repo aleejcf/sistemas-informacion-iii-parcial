@@ -2,7 +2,7 @@ Public Class FormLogin
     Inherits Form
 
     Private txtUsuario As TextBox
-    Private txtClave As TextBox
+    Private txtClave As CajaClaveParko
     Private lblError As Label
     Private btnIngresar As Button
     Private intentosFallidos As Integer = 0
@@ -47,7 +47,7 @@ Public Class FormLogin
 
         ' ===== Lado derecho: formulario =====
         Dim lblBienvenido As New Label With {
-            .Text = "Bienvenido 👋", .AutoSize = True, .Location = New Point(487, 110),
+            .Text = SaludoSegunLaHora(), .AutoSize = True, .Location = New Point(487, 110),
             .Font = New Font("Segoe UI", 20.0F, FontStyle.Bold), .ForeColor = TextoOscuro
         }
         Dim lblSub As New Label With {
@@ -58,8 +58,7 @@ Public Class FormLogin
         Me.Controls.Add(EtiquetaCampo("USUARIO", 490, 200))
         txtUsuario = CajaTexto(490, 219, 320)
         Me.Controls.Add(EtiquetaCampo("CONTRASEÑA", 490, 262))
-        txtClave = CajaTexto(490, 281, 320)
-        txtClave.UseSystemPasswordChar = True
+        txtClave = New CajaClaveParko With {.Location = New Point(490, 281), .Width = 320}
 
         lblError = New Label With {
             .AutoSize = False, .Size = New Size(320, 40), .Location = New Point(490, 320),
@@ -71,9 +70,21 @@ Public Class FormLogin
         EstilizarBoton(btnIngresar, Azul)
         AddHandler btnIngresar.Click, AddressOf btnIngresar_Click
 
+        Dim linkOlvide As New LinkLabel With {
+            .Text = "¿Olvidaste tu contraseña?", .AutoSize = False,
+            .Size = New Size(320, 22), .Location = New Point(490, 418),
+            .TextAlign = ContentAlignment.MiddleCenter, .LinkColor = TextoSuave,
+            .Font = New Font("Segoe UI", 9.0F), .LinkBehavior = LinkBehavior.NeverUnderline
+        }
+        AddHandler linkOlvide.LinkClicked, Sub()
+                                               Using recuperar As New FormRecuperarClave()
+                                                   recuperar.ShowDialog(Me)
+                                               End Using
+                                           End Sub
+
         Dim linkRegistro As New LinkLabel With {
             .Text = "¿No tienes cuenta? Regístrate aquí", .AutoSize = False,
-            .Size = New Size(320, 24), .Location = New Point(490, 422),
+            .Size = New Size(320, 24), .Location = New Point(490, 444),
             .TextAlign = ContentAlignment.MiddleCenter, .LinkColor = Azul,
             .Font = New Font("Segoe UI", 9.5F, FontStyle.Bold), .LinkBehavior = LinkBehavior.NeverUnderline
         }
@@ -83,20 +94,29 @@ Public Class FormLogin
                                                  End Using
                                              End Sub
 
-        Me.Controls.AddRange({lblBienvenido, lblSub, txtUsuario, txtClave, lblError, btnIngresar, linkRegistro, panelMarca})
+        Me.Controls.AddRange({lblBienvenido, lblSub, txtUsuario, txtClave, lblError,
+                              btnIngresar, linkOlvide, linkRegistro, panelMarca})
         Me.AcceptButton = btnIngresar
     End Sub
+
+    ''' <summary>El saludo cambia según la hora del día.</summary>
+    Private Function SaludoSegunLaHora() As String
+        Dim hora = DateTime.Now.Hour
+        If hora >= 5 AndAlso hora < 12 Then Return "¡Buenos días!"
+        If hora >= 12 AndAlso hora < 19 Then Return "¡Buenas tardes!"
+        Return "¡Buenas noches!"
+    End Function
 
     Private Sub btnIngresar_Click(sender As Object, e As EventArgs)
         lblError.Visible = False
 
-        If String.IsNullOrWhiteSpace(txtUsuario.Text) OrElse String.IsNullOrWhiteSpace(txtClave.Text) Then
+        If String.IsNullOrWhiteSpace(txtUsuario.Text) OrElse String.IsNullOrWhiteSpace(txtClave.Password) Then
             MostrarError("Escribe tu usuario y contraseña.")
             Return
         End If
 
         Try
-            Dim usuario = AuthService.Autenticar(txtUsuario.Text, txtClave.Text)
+            Dim usuario = AuthService.Autenticar(txtUsuario.Text, txtClave.Password)
 
             If usuario Is Nothing Then
                 intentosFallidos += 1
@@ -126,7 +146,7 @@ Public Class FormLogin
             End If
 
         Catch ex As Exception
-            MostrarError("No se pudo conectar a la base de datos. Verifica que SQL Server esté encendido.")
+            MostrarError(MensajeError.Traducir("Inicio de sesión", ex))
         End Try
     End Sub
 

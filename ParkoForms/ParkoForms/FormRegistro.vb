@@ -4,14 +4,16 @@ Public Class FormRegistro
     Private txtNombre As TextBox
     Private txtEmail As TextBox
     Private txtUsuario As TextBox
-    Private txtClave As TextBox
-    Private txtConfirmar As TextBox
+    Private txtClave As CajaClaveParko
+    Private txtConfirmar As CajaClaveParko
+    Private cboPregunta As ComboBox
+    Private txtRespuesta As TextBox
     Private lblInfoRol As Label
     Private lblError As Label
 
     Public Sub New()
         Me.Text = "Crear cuenta — PARKO Honduras"
-        Me.ClientSize = New Size(448, 560)
+        Me.ClientSize = New Size(448, 660)
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.MinimizeBox = False
@@ -30,34 +32,50 @@ Public Class FormRegistro
 
         Me.Controls.Add(EtiquetaCampo("NOMBRE COMPLETO", 24, 96))
         txtNombre = CajaTexto(24, 114, 400)
-        Me.Controls.Add(EtiquetaCampo("CORREO ELECTRÓNICO", 24, 152))
-        txtEmail = CajaTexto(24, 170, 400)
-        Me.Controls.Add(EtiquetaCampo("USUARIO", 24, 208))
-        txtUsuario = CajaTexto(24, 226, 400)
-        Me.Controls.Add(EtiquetaCampo("CONTRASEÑA (MÍNIMO 6, LETRAS Y NÚMEROS)", 24, 264))
-        txtClave = CajaTexto(24, 282, 400)
-        txtClave.UseSystemPasswordChar = True
-        Me.Controls.Add(EtiquetaCampo("CONFIRMAR CONTRASEÑA", 24, 320))
-        txtConfirmar = CajaTexto(24, 338, 400)
-        txtConfirmar.UseSystemPasswordChar = True
+        Me.Controls.Add(EtiquetaCampo("CORREO ELECTRÓNICO", 24, 150))
+        txtEmail = CajaTexto(24, 168, 400)
+        Me.Controls.Add(EtiquetaCampo("USUARIO", 24, 204))
+        txtUsuario = CajaTexto(24, 222, 400)
+
+        Me.Controls.Add(EtiquetaCampo("CONTRASEÑA (MÍNIMO 6, LETRAS Y NÚMEROS)", 24, 258))
+        txtClave = New CajaClaveParko With {.Location = New Point(24, 276), .Width = 400}
+        Me.Controls.Add(EtiquetaCampo("CONFIRMAR CONTRASEÑA", 24, 312))
+        txtConfirmar = New CajaClaveParko With {.Location = New Point(24, 330), .Width = 400}
+
+        Me.Controls.Add(EtiquetaCampo("PREGUNTA DE SEGURIDAD (PARA RECUPERAR TU CUENTA)", 24, 366))
+        cboPregunta = New ComboBox With {
+            .Location = New Point(24, 384), .Width = 400,
+            .Font = New Font("Segoe UI", 10.0F), .DropDownStyle = ComboBoxStyle.DropDown
+        }
+        cboPregunta.Items.AddRange({
+            "¿Cuál es el nombre de tu primera mascota?",
+            "¿En qué ciudad naciste?",
+            "¿Cuál es tu comida favorita?",
+            "¿Cómo se llama tu mejor amigo de la infancia?",
+            "¿Cuál es tu equipo favorito?"
+        })
+
+        Me.Controls.Add(EtiquetaCampo("RESPUESTA DE SEGURIDAD", 24, 420))
+        txtRespuesta = CajaTexto(24, 438, 400)
 
         lblError = New Label With {
-            .AutoSize = False, .Size = New Size(400, 36), .Location = New Point(24, 378),
+            .AutoSize = False, .Size = New Size(400, 36), .Location = New Point(24, 476),
             .ForeColor = Peligro, .Font = New Font("Segoe UI", 9.0F), .Visible = False
         }
 
         Dim btnRegistrar As New Button With {.Text = "Registrarme", .Size = New Size(400, 42),
-            .Location = New Point(24, 420)}
+            .Location = New Point(24, 518)}
         EstilizarBoton(btnRegistrar, VerdeBoton)
         AddHandler btnRegistrar.Click, AddressOf btnRegistrar_Click
 
         Dim btnCancelar As New Button With {.Text = "Cancelar", .Size = New Size(400, 36),
-            .Location = New Point(24, 470)}
+            .Location = New Point(24, 568)}
         EstilizarBoton(btnCancelar, Gris)
         AddHandler btnCancelar.Click, Sub() Me.Close()
 
         Me.Controls.AddRange({lblTitulo, lblInfoRol, txtNombre, txtEmail, txtUsuario,
-                              txtClave, txtConfirmar, lblError, btnRegistrar, btnCancelar})
+                              txtClave, txtConfirmar, cboPregunta, txtRespuesta,
+                              lblError, btnRegistrar, btnCancelar})
         Me.AcceptButton = btnRegistrar
         Me.CancelButton = btnCancelar
     End Sub
@@ -79,7 +97,7 @@ Public Class FormRegistro
     Private Sub btnRegistrar_Click(sender As Object, e As EventArgs)
         lblError.Visible = False
 
-        If txtClave.Text <> txtConfirmar.Text Then
+        If txtClave.Password <> txtConfirmar.Password Then
             MostrarError("Las contraseñas no coinciden.")
             Return
         End If
@@ -89,7 +107,8 @@ Public Class FormRegistro
             Dim esPrimero As Boolean = Not AuthService.HayUsuarios()
 
             Dim mensajeError = AuthService.Registrar(txtNombre.Text, txtEmail.Text,
-                                                     txtUsuario.Text, txtClave.Text)
+                                                     txtUsuario.Text, txtClave.Password,
+                                                     cboPregunta.Text, txtRespuesta.Text)
             If mensajeError IsNot Nothing Then
                 MostrarError(mensajeError)
                 Return
@@ -102,7 +121,7 @@ Public Class FormRegistro
             Me.Close()
 
         Catch ex As Exception
-            MostrarError("Error al registrar: " & ex.Message)
+            MostrarError(MensajeError.Traducir("Registrar usuario", ex))
         End Try
     End Sub
 

@@ -1,4 +1,4 @@
-Imports System.Data
+﻿Imports System.Data
 
 Public Class FormVehiculos
     Inherits Form
@@ -103,7 +103,7 @@ Public Class FormVehiculos
             cboCliente.DisplayMember = "etiqueta"
             cboCliente.ValueMember = "codigo_cliente"
         Catch ex As Exception
-            DialogoParko.Show("Error al cargar los combos: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al cargar los combos", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
         CargarLista()
@@ -130,7 +130,7 @@ Public Class FormVehiculos
             End If
             dgv.ClearSelection()
         Catch ex As Exception
-            DialogoParko.Show("Error al cargar vehículos: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al cargar vehículos", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             cargandoLista = False
@@ -192,7 +192,7 @@ Public Class FormVehiculos
             CargarLista(txtBuscar.Text)
             LimpiarFormulario()
         Catch ex As Exception
-            DialogoParko.Show("Error al guardar: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al guardar", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
@@ -213,7 +213,7 @@ Public Class FormVehiculos
             CargarLista(txtBuscar.Text)
             LimpiarFormulario()
         Catch ex As Exception
-            DialogoParko.Show("Error al eliminar: " & ex.Message, "Error",
+            DialogoParko.Show(MensajeError.Traducir("Error al eliminar", ex), "Error",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
