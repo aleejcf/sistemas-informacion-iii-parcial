@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SistemaAerolinea.Tests/SistemaAerolinea.Tests.vbproj" />
+  <Project Path="SistemaAerolinea/SistemaAerolinea.vbproj" />
+</Solution>

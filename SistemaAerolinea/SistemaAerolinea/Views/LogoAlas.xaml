@@ -1,0 +1,20 @@
+<UserControl x:Class="LogoAlas"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- El logotipo es vectorial: no depende de ningún archivo de imagen y se ve
+         nítido en cualquier tamaño. La propiedad Tamano lo escala completo. -->
+    <Viewbox x:Name="caja" Width="44" Height="44" Stretch="Uniform">
+        <Grid Width="24" Height="24">
+            <Ellipse x:Name="halo" Width="24" Height="24" Fill="{StaticResource BrushPrimario}" Opacity="0.14"/>
+            <Path x:Name="avion" Data="{StaticResource GeoAvion}"
+                  Fill="{StaticResource BrushAcento}" Stretch="Uniform"
+                  Width="17" Height="17"
+                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                  RenderTransformOrigin="0.5,0.5">
+                <Path.RenderTransform>
+                    <RotateTransform Angle="45"/>
+                </Path.RenderTransform>
+            </Path>
+        </Grid>
+    </Viewbox>
+</UserControl>

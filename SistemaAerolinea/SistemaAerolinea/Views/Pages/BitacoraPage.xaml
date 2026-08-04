@@ -1,0 +1,124 @@
+<UserControl x:Class="BitacoraPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaAerolinea"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ═══════════ FILTROS ═══════════ -->
+        <Border Grid.Row="0" Style="{StaticResource Tarjeta}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Text="Esta bitácora vive en la base de datos y registra quién hizo qué. Es independiente del registro técnico de errores, que queda en la carpeta logs junto al programa."/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="USUARIO" Style="{StaticResource Etiqueta}" Margin="0,0,0,5"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="ACCIÓN" Style="{StaticResource Etiqueta}" Margin="12,0,0,5"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="DESDE" Style="{StaticResource Etiqueta}" Margin="12,0,0,5"/>
+
+                    <ComboBox x:Name="cboUsuario" Grid.Row="1" Grid.Column="0"/>
+                    <ComboBox x:Name="cboAccion" Grid.Row="1" Grid.Column="1" Margin="12,0,0,0"/>
+                    <DatePicker x:Name="dpDesde" Grid.Row="1" Grid.Column="2" Margin="12,0,0,0"/>
+
+                    <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" Margin="12,0,0,0">
+                        <Button x:Name="btnFiltrar" Content="Filtrar" Style="{StaticResource BotonPrimario}"
+                                Height="38" Width="110"/>
+                        <Button x:Name="btnLimpiar" Content="Limpiar filtros" Style="{StaticResource BotonGris}"
+                                Height="38" Width="140" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════ CONTADORES ═══════════ -->
+        <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Margin="0,16,0,0" Padding="18,14">
+            <UniformGrid Columns="3">
+                <StackPanel>
+                    <TextBlock x:Name="lblRegistros" Text="0" Style="{StaticResource Cifra}" FontSize="24"/>
+                    <TextBlock Text="Registros mostrados" Style="{StaticResource Subtitulo}"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock x:Name="lblCorrectos" Text="0" Style="{StaticResource Cifra}" FontSize="24"
+                               Foreground="{StaticResource BrushExito}"/>
+                    <TextBlock Text="Operaciones correctas" Style="{StaticResource Subtitulo}"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock x:Name="lblFallidos" Text="0" Style="{StaticResource Cifra}" FontSize="24"
+                               Foreground="{StaticResource BrushPeligro}"/>
+                    <TextBlock Text="Intentos fallidos" Style="{StaticResource Subtitulo}"/>
+                </StackPanel>
+            </UniformGrid>
+        </Border>
+
+        <!-- ═══════════ TABLA ═══════════ -->
+        <Border Grid.Row="2" Style="{StaticResource Tarjeta}" Margin="0,16,0,0">
+            <Grid>
+                <DataGrid x:Name="dgBitacora">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Fecha" Width="160"
+                                            Binding="{Binding fecha, StringFormat='{}{0:dd/MM/yyyy HH:mm:ss}'}"/>
+                        <DataGridTextColumn Header="Usuario" Binding="{Binding usuario}" Width="140"/>
+                        <DataGridTextColumn Header="Acción" Binding="{Binding accion}" Width="180"/>
+                        <DataGridTextColumn Header="Entidad" Binding="{Binding entidad}" Width="120"/>
+                        <DataGridTextColumn Header="Detalle" Binding="{Binding detalle}" Width="*"/>
+                        <DataGridTextColumn Header="Equipo" Binding="{Binding equipo}" Width="140"/>
+                        <DataGridTemplateColumn Header="Resultado" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border>
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource Insignia}">
+                                                <Setter Property="Background" Value="{StaticResource BrushPeligroSuave}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding exito}" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource BrushExitoSuave}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock>
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource TextoInsignia}">
+                                                    <Setter Property="Text" Value="Fallido"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushPeligro}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding exito}" Value="True">
+                                                            <Setter Property="Text" Value="Correcto"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource BrushExito}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <TextBlock x:Name="lblVacio" Visibility="Collapsed"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           TextAlignment="Center" FontSize="13"
+                           Foreground="{StaticResource BrushTextoSuave}"
+                           Text="No hay registros que coincidan con el filtro."/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,138 @@
+Imports System.Data
+Imports Microsoft.Data.SqlClient
+
+''' <summary>Gestión de las cuentas del sistema. Solo un Administrador llega aquí
+''' (lo decide la clase Permisos), pero el servicio protege además las reglas que
+''' no deben romperse ni por error: no quedarse sin administradores y no dejar que
+''' alguien se desactive o se degrade a sí mismo.</summary>
+Public Class UsuarioService
+
+    Public Shared ReadOnly Roles As String() = {"Administrador", "Agente"}
+
+    Public Shared Function Listar(Optional filtro As String = "") As DataTable
+        Return Db.Consultar(
+            "SELECT usuario_id, nombre_completo, usuario, email, rol,
+                    esta_activo, debe_cambiar_contrasena, ultimo_acceso, fecha_creacion,
+                    CASE WHEN esta_activo = 1 THEN 'Activo' ELSE 'Inactivo' END AS estado,
+                    CASE WHEN pregunta_seguridad IS NULL OR respuesta_seguridad IS NULL
+                         THEN 'Sin configurar' ELSE 'Configurada' END AS seguridad
+             FROM usuario
+             WHERE @f = '' OR nombre_completo LIKE @like OR usuario LIKE @like OR email LIKE @like
+             ORDER BY rol, nombre_completo",
+            New SqlParameter("@f", If(filtro, "").Trim()),
+            New SqlParameter("@like", "%" & If(filtro, "").Trim() & "%"))
+    End Function
+
+    Public Shared Function Obtener(usuarioId As Integer) As DataRow
+        Return Db.ConsultarFila("SELECT * FROM usuario WHERE usuario_id = @i",
+                                New SqlParameter("@i", usuarioId))
+    End Function
+
+    Private Shared Function AdministradoresActivos(Optional exceptoId As Integer = 0) As Integer
+        Return Db.Contar("SELECT COUNT(*) FROM usuario
+                          WHERE rol = 'Administrador' AND esta_activo = 1 AND usuario_id <> @i",
+                         New SqlParameter("@i", exceptoId))
+    End Function
+
+    ''' <summary>Activa o desactiva una cuenta. Devuelve Nothing si salió bien,
+    ''' o el mensaje que explica por qué no se pudo.</summary>
+    Public Shared Function CambiarEstado(usuarioId As Integer, activo As Boolean) As String
+        Dim fila = Obtener(usuarioId)
+        If fila Is Nothing Then Return "No se encontró la cuenta."
+
+        Dim nombre = fila("usuario").ToString()
+
+        If Not activo Then
+            If Sesion.UsuarioActual IsNot Nothing AndAlso Sesion.UsuarioActual.UsuarioID = usuarioId Then
+                Return "No puedes desactivar tu propia cuenta."
+            End If
+            If fila("rol").ToString() = "Administrador" AndAlso AdministradoresActivos(usuarioId) = 0 Then
+                Return "No se puede desactivar: es el único Administrador activo del sistema."
+            End If
+        End If
+
+        Db.Ejecutar("UPDATE usuario SET esta_activo = @a WHERE usuario_id = @i",
+                    New SqlParameter("@a", activo),
+                    New SqlParameter("@i", usuarioId))
+
+        BitacoraService.Registrar(BitacoraService.EDITAR, "usuario",
+                                  $"{nombre} → {If(activo, "activada", "desactivada")}")
+        Return Nothing
+    End Function
+
+    Public Shared Function CambiarRol(usuarioId As Integer, rol As String) As String
+        If Not Roles.Contains(rol) Then Return "Selecciona un rol válido."
+
+        Dim fila = Obtener(usuarioId)
+        If fila Is Nothing Then Return "No se encontró la cuenta."
+
+        If Sesion.UsuarioActual IsNot Nothing AndAlso Sesion.UsuarioActual.UsuarioID = usuarioId AndAlso
+           rol <> "Administrador" Then
+            Return "No puedes quitarte a ti mismo el rol de Administrador."
+        End If
+
+        If fila("rol").ToString() = "Administrador" AndAlso rol <> "Administrador" AndAlso
+           AdministradoresActivos(usuarioId) = 0 Then
+            Return "No se puede cambiar: es el único Administrador activo del sistema."
+        End If
+
+        Db.Ejecutar("UPDATE usuario SET rol = @r WHERE usuario_id = @i",
+                    New SqlParameter("@r", rol),
+                    New SqlParameter("@i", usuarioId))
+
+        BitacoraService.Registrar(BitacoraService.EDITAR, "usuario",
+                                  $"{fila("usuario")} → rol {rol}")
+        Return Nothing
+    End Function
+
+    ''' <summary>Genera una contraseña temporal y obliga a cambiarla al entrar.
+    ''' Devuelve Nothing y la clave por referencia si salió bien.</summary>
+    Public Shared Function RestablecerContrasena(usuarioId As Integer,
+                                                 ByRef claveTemporal As String) As String
+        claveTemporal = ""
+
+        Dim fila = Obtener(usuarioId)
+        If fila Is Nothing Then Return "No se encontró la cuenta."
+
+        Dim clave = GeneradorClave.GenerarTemporal()
+        Dim hash = BCrypt.Net.BCrypt.HashPassword(clave, workFactor:=11)
+
+        Db.Ejecutar("UPDATE usuario SET contrasena_hash = @h, debe_cambiar_contrasena = 1,
+                                        codigo_recuperacion = NULL, fecha_expiracion_codigo = NULL
+                     WHERE usuario_id = @i",
+                    New SqlParameter("@h", hash),
+                    New SqlParameter("@i", usuarioId))
+
+        claveTemporal = clave
+        BitacoraService.Registrar(BitacoraService.CAMBIO_CLAVE, "usuario",
+                                  $"Contraseña restablecida a {fila("usuario")}")
+        Return Nothing
+    End Function
+
+    ''' <summary>Elimina una cuenta. Las cuentas con historial en la bitácora se
+    ''' desactivan en vez de borrarse, para no perder la trazabilidad.</summary>
+    Public Shared Function Eliminar(usuarioId As Integer) As String
+        Dim fila = Obtener(usuarioId)
+        If fila Is Nothing Then Return "No se encontró la cuenta."
+
+        If Sesion.UsuarioActual IsNot Nothing AndAlso Sesion.UsuarioActual.UsuarioID = usuarioId Then
+            Return "No puedes eliminar tu propia cuenta."
+        End If
+        If fila("rol").ToString() = "Administrador" AndAlso AdministradoresActivos(usuarioId) = 0 Then
+            Return "No se puede eliminar: es el único Administrador activo del sistema."
+        End If
+
+        Dim nombre = fila("usuario").ToString()
+
+        Dim conHistorial = Db.Contar("SELECT COUNT(*) FROM bitacora WHERE usuario = @u",
+                                     New SqlParameter("@u", nombre))
+        If conHistorial > 0 Then
+            Return "Esta cuenta tiene actividad registrada en la bitácora. " &
+                   "Desactívala en lugar de eliminarla para conservar la trazabilidad."
+        End If
+
+        Db.Ejecutar("DELETE FROM usuario WHERE usuario_id = @i", New SqlParameter("@i", usuarioId))
+        BitacoraService.Registrar(BitacoraService.ELIMINAR, "usuario", nombre)
+        Return Nothing
+    End Function
+End Class

@@ -1,0 +1,380 @@
+<UserControl x:Class="PagosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaAerolinea"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== Indicadores del día ===== -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="COBRADO HOY" Style="{StaticResource Etiqueta}" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="lblCobradoHoy" Text="L 0.00" Style="{StaticResource Cifra}"
+                               Foreground="{StaticResource BrushExito}"/>
+                    <TextBlock Text="Suma de los cobros registrados hoy" Style="{StaticResource Subtitulo}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="8,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="NÚMERO DE COBROS" Style="{StaticResource Etiqueta}" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="lblCantidadCobros" Text="0" Style="{StaticResource Cifra}"/>
+                    <TextBlock Text="Movimientos de caja del día" Style="{StaticResource Subtitulo}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource Tarjeta}" Margin="8,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="FACTURADO HOY" Style="{StaticResource Etiqueta}" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="lblFacturadoHoy" Text="L 0.00" Style="{StaticResource Cifra}"
+                               Foreground="{StaticResource BrushPrimario}"/>
+                    <TextBlock Text="Solo lo cobrado con factura" Style="{StaticResource Subtitulo}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <TabControl Grid.Row="1" Margin="0,16,0,0">
+
+            <!-- ══════════════════ COBRAR ══════════════════ -->
+            <TabItem Header="Cobrar">
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="360"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Reservas que todavía deben dinero -->
+                    <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,8,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                                <TextBlock x:Name="lblConteoSaldos" DockPanel.Dock="Right"
+                                           Style="{StaticResource Subtitulo}" VerticalAlignment="Center"/>
+                                <StackPanel>
+                                    <TextBlock Text="Reservas con saldo pendiente"
+                                               Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock Text="Elige una reserva para cobrarla en el panel de la derecha"
+                                               Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </DockPanel>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgSaldos">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Localizador" Width="110">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding codigo_reserva}"
+                                                               Style="{StaticResource Codigo}" FontSize="13"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTextColumn Header="Titular" Binding="{Binding titular}" Width="*"/>
+                                        <DataGridTextColumn Header="Documento" Binding="{Binding num_documento}" Width="120"/>
+
+                                        <DataGridTemplateColumn Header="Boletos" Width="75">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding boletos}" HorizontalAlignment="Center"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Total" Width="105">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding costo, StringFormat='L {0:N2}'}"
+                                                               HorizontalAlignment="Right"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Pagado" Width="105">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding pagado, StringFormat='L {0:N2}'}"
+                                                               HorizontalAlignment="Right"
+                                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Saldo" Width="115">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding saldo, StringFormat='L {0:N2}'}"
+                                                               HorizontalAlignment="Right" FontWeight="Bold"
+                                                               Foreground="{StaticResource BrushPeligro}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <Border x:Name="pnlSinSaldos" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="No hay reservas con saldo pendiente."
+                                                   FontSize="13.5" HorizontalAlignment="Center"
+                                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                                        <TextBlock Text="Toda la venta activa está cobrada." Margin="0,5,0,0"
+                                                   FontSize="12" HorizontalAlignment="Center"
+                                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- Formulario de cobro -->
+                    <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="8,0,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Text="Registrar cobro" Style="{StaticResource TituloTarjeta}"/>
+
+                                <TextBlock x:Name="pnlSinReserva" Margin="0,60,0,0" TextWrapping="Wrap"
+                                           TextAlignment="Center" FontSize="13"
+                                           Foreground="{StaticResource BrushTextoSuave}"
+                                           Text="Selecciona una reserva de la lista para registrar su cobro."/>
+
+                                <StackPanel x:Name="pnlReserva" Visibility="Collapsed">
+
+                                    <Border Background="{StaticResource BrushPrimarioSuave}" CornerRadius="12"
+                                            Padding="15,13" Margin="0,14,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="LOCALIZADOR" Style="{StaticResource Etiqueta}"
+                                                       Margin="0,0,0,2"/>
+                                            <TextBlock x:Name="lblLocalizador" Style="{StaticResource Codigo}"
+                                                       FontSize="26" Foreground="{StaticResource BrushPrimario}"/>
+                                            <TextBlock x:Name="lblTitular" FontSize="13.5" FontWeight="SemiBold"
+                                                       TextWrapping="Wrap" Margin="0,7,0,0"/>
+                                            <TextBlock x:Name="lblDocumento" Style="{StaticResource Subtitulo}"
+                                                       Margin="0,2,0,0"/>
+
+                                            <Grid Margin="0,13,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Total de la reserva"
+                                                           FontSize="12.5" Foreground="{StaticResource BrushGris}"/>
+                                                <TextBlock x:Name="lblTotalReserva" Grid.Row="0" Grid.Column="1"
+                                                           FontSize="12.5" FontWeight="SemiBold"/>
+
+                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Ya pagado"
+                                                           FontSize="12.5" Margin="0,5,0,0"
+                                                           Foreground="{StaticResource BrushGris}"/>
+                                                <TextBlock x:Name="lblPagadoReserva" Grid.Row="1" Grid.Column="1"
+                                                           FontSize="12.5" FontWeight="SemiBold" Margin="0,5,0,0"/>
+
+                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Saldo pendiente"
+                                                           FontSize="13" FontWeight="SemiBold" Margin="0,8,0,0"
+                                                           Foreground="{StaticResource BrushPeligro}"/>
+                                                <TextBlock x:Name="lblSaldoReserva" Grid.Row="2" Grid.Column="1"
+                                                           FontSize="15" FontWeight="Bold" Margin="0,8,0,0"
+                                                           Foreground="{StaticResource BrushPeligro}"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <TextBlock Text="MÉTODO DE PAGO" Style="{StaticResource Etiqueta}"/>
+                                    <ComboBox x:Name="cboMetodo" Tag="Elige el método de pago"
+                                              DisplayMemberPath="etiqueta" SelectedValuePath="idmetodopago"/>
+
+                                    <TextBlock Text="TIPO DE COMPROBANTE" Style="{StaticResource Etiqueta}"/>
+                                    <ComboBox x:Name="cboTipoComprobante" Tag="Factura o recibo"/>
+
+                                    <TextBlock Text="MONTO A COBRAR (L)" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtMonto" Style="{StaticResource CajaTexto}" MaxLength="12"/>
+
+                                    <TextBlock Text="Puedes cobrar menos del saldo: queda registrado como abono y la reserva se confirma al quedar saldada."
+                                               FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+
+                                    <Button x:Name="btnCobrar" Content="💳  Registrar cobro"
+                                            Style="{StaticResource BotonExito}" Height="42" Margin="0,18,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ══════════════════ HISTORIAL ══════════════════ -->
+            <TabItem Header="Historial">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Style="{StaticResource Tarjeta}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="165"/>
+                                <ColumnDefinition Width="165"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="BUSCAR"
+                                       Style="{StaticResource Etiqueta}" Margin="0,0,0,5"/>
+                            <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,10,0">
+                                <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}"/>
+                                <TextBlock Text="Buscar por comprobante, localizador o pasajero" FontSize="13.5"
+                                           IsHitTestVisible="False" VerticalAlignment="Center"
+                                           Margin="13,0,0,0" Foreground="{StaticResource BrushTextoSuave}"
+                                           Visibility="{Binding Text, ElementName=txtBuscar,
+                                                        Converter={StaticResource VacioAVisible}}"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="DESDE"
+                                       Style="{StaticResource Etiqueta}" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="dpDesde" Grid.Row="1" Grid.Column="1" Margin="0,0,10,0"/>
+
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="HASTA"
+                                       Style="{StaticResource Etiqueta}" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="dpHasta" Grid.Row="1" Grid.Column="2" Margin="0,0,10,0"/>
+
+                            <Button x:Name="btnLimpiar" Grid.Row="1" Grid.Column="3" Content="Limpiar filtros"
+                                    Style="{StaticResource BotonContorno}" Height="38"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Margin="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                                <TextBlock x:Name="lblConteoHistorial" DockPanel.Dock="Right"
+                                           Style="{StaticResource Subtitulo}" VerticalAlignment="Center"/>
+                                <TextBlock Text="Cobros registrados" Style="{StaticResource TituloTarjeta}"/>
+                            </DockPanel>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgHistorial">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="Comprobante" Width="130">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding num_comprobante}"
+                                                               Style="{StaticResource Codigo}" FontSize="12.5"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Tipo" Width="110">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border Style="{StaticResource Insignia}"
+                                                            Background="{Binding tipo_comprobante,
+                                                                        Converter={StaticResource EstadoAColorFondo}}">
+                                                        <TextBlock Text="{Binding tipo_comprobante}"
+                                                                   Style="{StaticResource TextoInsignia}"
+                                                                   Foreground="{Binding tipo_comprobante,
+                                                                               Converter={StaticResource EstadoAColor}}"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTextColumn Header="Fecha" Width="140"
+                                                            Binding="{Binding fecha, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"/>
+
+                                        <DataGridTemplateColumn Header="Localizador" Width="110">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding codigo_reserva}"
+                                                               Style="{StaticResource Codigo}" FontSize="12.5"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTextColumn Header="Pasajero" Binding="{Binding pasajero}" Width="*"/>
+                                        <DataGridTextColumn Header="Método de pago" Binding="{Binding metodo_pago}" Width="140"/>
+
+                                        <DataGridTemplateColumn Header="Impuesto" Width="105">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding impuesto, StringFormat='L {0:N2}'}"
+                                                               HorizontalAlignment="Right"
+                                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Header="Monto" Width="115">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding monto, StringFormat='L {0:N2}'}"
+                                                               HorizontalAlignment="Right" FontWeight="Bold"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <Border x:Name="pnlSinPagos" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="No se encontraron cobros con estos filtros."
+                                                   FontSize="13.5" HorizontalAlignment="Center"
+                                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                                        <TextBlock Text="Prueba con otro texto o amplía el rango de fechas."
+                                                   Margin="0,5,0,0" FontSize="12" HorizontalAlignment="Center"
+                                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Border Grid.Row="2" Background="{StaticResource BrushPrimarioSuave}" CornerRadius="10"
+                                    Padding="16,11" Margin="0,12,0,0">
+                                <DockPanel>
+                                    <TextBlock x:Name="lblTotalHistorial" DockPanel.Dock="Right" Text="L 0.00"
+                                               FontSize="18" FontWeight="Bold"
+                                               Foreground="{StaticResource BrushPrimario}"/>
+                                    <TextBlock Text="Total de lo mostrado" FontSize="13" FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               Foreground="{StaticResource BrushGris}"/>
+                                </DockPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

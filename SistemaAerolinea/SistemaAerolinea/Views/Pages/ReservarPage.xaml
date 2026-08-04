@@ -1,0 +1,576 @@
+<UserControl x:Class="ReservarPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaAerolinea"
+             FontFamily="Segoe UI">
+
+    <UserControl.Resources>
+
+        <!-- Un asiento del mapa. El color de fondo lo pone el code-behind según la
+             clase del asiento y si está libre, ocupado o seleccionado. -->
+        <Style x:Key="BotonAsiento" TargetType="Button">
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushTexto}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <!-- Esquinas más redondeadas arriba: la silueta recuerda a un asiento -->
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.6"
+                                CornerRadius="10,10,4,4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource BrushTexto}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Cursor" Value="Arrow"/>
+                                <Setter Property="Foreground" Value="#94A3B8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Tarjeta de un vuelo en los resultados de búsqueda -->
+        <Style x:Key="ItemVuelo" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="bd" Background="White" CornerRadius="13" Padding="18,15"
+                                BorderBrush="{StaticResource BrushBorde}" BorderThickness="1.6">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#A9C7E6"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource BrushPrimario}"/>
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource BrushPrimarioSuave}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ListaLimpia" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ═══════════ INDICADOR DE PASOS ═══════════ -->
+        <Border Grid.Row="0" Style="{StaticResource Tarjeta}" Padding="16,12" Margin="0,0,0,16">
+            <DockPanel>
+                <Button x:Name="btnReiniciar" DockPanel.Dock="Right" Content="Empezar de nuevo"
+                        Style="{StaticResource BotonPlano}" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal">
+                    <Border x:Name="paso1" Style="{StaticResource PasoAsistente}">
+                        <TextBlock x:Name="txtPaso1" Text="1 · Vuelo" FontSize="12" FontWeight="SemiBold"/>
+                    </Border>
+                    <Border x:Name="paso2" Style="{StaticResource PasoAsistente}">
+                        <TextBlock x:Name="txtPaso2" Text="2 · Asientos" FontSize="12" FontWeight="SemiBold"/>
+                    </Border>
+                    <Border x:Name="paso3" Style="{StaticResource PasoAsistente}">
+                        <TextBlock x:Name="txtPaso3" Text="3 · Pasajeros" FontSize="12" FontWeight="SemiBold"/>
+                    </Border>
+                    <Border x:Name="paso4" Style="{StaticResource PasoAsistente}">
+                        <TextBlock x:Name="txtPaso4" Text="4 · Pago" FontSize="12" FontWeight="SemiBold"/>
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+
+            <!-- ══════════════════ PASO 1 · BUSCAR VUELO ══════════════════ -->
+            <Grid x:Name="pnlPaso1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Style="{StaticResource Tarjeta}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="ORIGEN" Style="{StaticResource Etiqueta}" Margin="0,0,0,5"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="DESTINO" Style="{StaticResource Etiqueta}" Margin="12,0,0,5"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="FECHA DE SALIDA (OPCIONAL)"
+                                   Style="{StaticResource Etiqueta}" Margin="12,0,0,5"/>
+
+                        <ComboBox x:Name="cboOrigen" Grid.Row="1" Grid.Column="0" Tag="Cualquier aeropuerto"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idaeropuerto"/>
+                        <ComboBox x:Name="cboDestino" Grid.Row="1" Grid.Column="1" Margin="12,0,0,0"
+                                  Tag="Cualquier aeropuerto"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idaeropuerto"/>
+                        <DatePicker x:Name="dpFecha" Grid.Row="1" Grid.Column="2" Margin="12,0,0,0"/>
+                        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" Margin="12,0,0,0">
+                            <Button x:Name="btnBuscar" Content="🔍  Buscar vuelos"
+                                    Style="{StaticResource BotonPrimario}" Height="38" Width="160"/>
+                            <Button x:Name="btnLimpiarBusqueda" Content="Limpiar"
+                                    Style="{StaticResource BotonPlano}" Margin="6,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Margin="0,16,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                            <TextBlock x:Name="lblResumenBusqueda" Style="{StaticResource Subtitulo}"
+                                       DockPanel.Dock="Right" VerticalAlignment="Bottom"/>
+                            <StackPanel>
+                                <TextBlock Text="Vuelos disponibles" Style="{StaticResource TituloTarjeta}"/>
+                                <TextBlock Style="{StaticResource Subtitulo}" Margin="0,3,0,0"
+                                           Text="Se listan solos al elegir la ruta. Usa la fecha y el botón para filtrar un día concreto."/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Grid Grid.Row="1">
+                            <ListBox x:Name="lstVuelos" Style="{StaticResource ListaLimpia}"
+                                     ItemContainerStyle="{StaticResource ItemVuelo}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Horarios y ruta -->
+                                            <StackPanel Grid.Column="0" Width="230">
+                                                <!-- La fecha va primero: al listar toda la ruta
+                                                     hay varios vuelos con el mismo horario y lo
+                                                     único que los distingue es el día -->
+                                                <TextBlock Text="{Binding fecha_salida, StringFormat='{}{0:ddd dd MMM yyyy}'}"
+                                                           FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource BrushPrimario}"
+                                                           Margin="0,0,0,3"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding fecha_salida, StringFormat='{}{0:HH:mm}'}"
+                                                               Style="{StaticResource Codigo}" FontSize="22"/>
+                                                    <TextBlock Text="{Binding iata_origen}" FontSize="12.5"
+                                                               Foreground="{StaticResource BrushTextoSuave}"
+                                                               Margin="8,0,0,0" VerticalAlignment="Bottom"/>
+
+                                                    <TextBlock Text="→" FontSize="15" Margin="14,0"
+                                                               Foreground="{StaticResource BrushTextoSuave}"
+                                                               VerticalAlignment="Center"/>
+
+                                                    <TextBlock Text="{Binding fecha_llegada, StringFormat='{}{0:HH:mm}'}"
+                                                               Style="{StaticResource Codigo}" FontSize="22"/>
+                                                    <TextBlock Text="{Binding iata_destino}" FontSize="12.5"
+                                                               Foreground="{StaticResource BrushTextoSuave}"
+                                                               Margin="8,0,0,0" VerticalAlignment="Bottom"/>
+                                                </StackPanel>
+                                                <TextBlock Margin="0,4,0,0" FontSize="11.5"
+                                                           Foreground="{StaticResource BrushTextoSuave}">
+                                                    <Run Text="{Binding ciudad_origen, Mode=OneWay}"/>
+                                                    <Run Text="→"/>
+                                                    <Run Text="{Binding ciudad_destino, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Aerolínea y avión -->
+                                            <StackPanel Grid.Column="1" Margin="24,0,0,0" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding codigo_vuelo}" Style="{StaticResource Codigo}"
+                                                               FontSize="13"/>
+                                                    <TextBlock Text="{Binding nombre_aero}" FontSize="12.5" Margin="10,0,0,0"
+                                                               Foreground="{StaticResource BrushTexto}"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                    <TextBlock Text="{Binding tipo_avion}" FontSize="11.5"
+                                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                                    <TextBlock Text="·" Margin="6,0" Foreground="{StaticResource BrushTextoSuave}"/>
+                                                    <TextBlock FontSize="11.5" Foreground="{StaticResource BrushTextoSuave}"
+                                                               Text="{Binding duracion_minutos, Converter={StaticResource MinutosADuracion}}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Disponibilidad -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center"
+                                                        HorizontalAlignment="Right" Margin="16,0,24,0">
+                                                <TextBlock FontSize="12.5" FontWeight="SemiBold"
+                                                           HorizontalAlignment="Right"
+                                                           Foreground="{StaticResource BrushExito}">
+                                                    <Run Text="{Binding asientos_disponibles, Mode=OneWay}"/>
+                                                    <Run Text="asientos libres"/>
+                                                </TextBlock>
+                                                <ProgressBar Style="{StaticResource BarraOcupacion}" Width="110"
+                                                             Margin="0,6,0,0" Value="{Binding ocupacion, Mode=OneWay}"/>
+                                            </StackPanel>
+
+                                            <!-- Precio -->
+                                            <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                <TextBlock Text="DESDE" FontSize="9.5" FontWeight="Bold"
+                                                           HorizontalAlignment="Right"
+                                                           Foreground="{StaticResource BrushTextoSuave}"/>
+                                                <TextBlock Text="{Binding precio_base, StringFormat='L {0:N2}'}"
+                                                           FontSize="20" FontWeight="Bold"
+                                                           HorizontalAlignment="Right"
+                                                           Foreground="{StaticResource BrushPrimario}"/>
+                                                <TextBlock Text="+ impuestos" FontSize="10"
+                                                           HorizontalAlignment="Right"
+                                                           Foreground="{StaticResource BrushTextoSuave}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <TextBlock x:Name="lblSinVuelos"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       TextAlignment="Center" FontSize="13"
+                                       Foreground="{StaticResource BrushTextoSuave}"
+                                       Text="Elige el origen o el destino y verás aquí los próximos vuelos de esa ruta."/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ══════════════════ PASO 2 · MAPA DE ASIENTOS ══════════════════ -->
+            <Grid x:Name="pnlPaso2" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="340"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,16,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="Elige los asientos" Style="{StaticResource TituloTarjeta}"/>
+                            <TextBlock x:Name="lblVueloElegido" Style="{StaticResource Subtitulo}" Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <!-- Leyenda de colores -->
+                        <WrapPanel Grid.Row="1" Margin="0,14,0,10">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,20,6">
+                                <Border Width="16" Height="16" CornerRadius="5,5,2,2" Background="#E3F0FC"
+                                        BorderBrush="#93C5FD" BorderThickness="1.4"/>
+                                <TextBlock Text="Económica" FontSize="11.5" Margin="7,0,0,0"
+                                           VerticalAlignment="Center" Foreground="{StaticResource BrushTextoSuave}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,20,6">
+                                <Border Width="16" Height="16" CornerRadius="5,5,2,2" Background="#EDE9FE"
+                                        BorderBrush="#C4B5FD" BorderThickness="1.4"/>
+                                <TextBlock Text="Ejecutiva" FontSize="11.5" Margin="7,0,0,0"
+                                           VerticalAlignment="Center" Foreground="{StaticResource BrushTextoSuave}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,20,6">
+                                <Border Width="16" Height="16" CornerRadius="5,5,2,2" Background="#FEF3C7"
+                                        BorderBrush="#FCD34D" BorderThickness="1.4"/>
+                                <TextBlock Text="Primera Clase" FontSize="11.5" Margin="7,0,0,0"
+                                           VerticalAlignment="Center" Foreground="{StaticResource BrushTextoSuave}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,20,6">
+                                <Border Width="16" Height="16" CornerRadius="5,5,2,2" Background="#E2E8F0"
+                                        BorderBrush="#CBD5E1" BorderThickness="1.4"/>
+                                <TextBlock Text="Ocupado" FontSize="11.5" Margin="7,0,0,0"
+                                           VerticalAlignment="Center" Foreground="{StaticResource BrushTextoSuave}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <Border Width="16" Height="16" CornerRadius="5,5,2,2" Background="#15A05A"
+                                        BorderBrush="#0F7A44" BorderThickness="1.4"/>
+                                <TextBlock Text="Tu selección" FontSize="11.5" Margin="7,0,0,0"
+                                           VerticalAlignment="Center" Foreground="{StaticResource BrushTextoSuave}"/>
+                            </StackPanel>
+                        </WrapPanel>
+
+                        <!-- La cabina se dibuja desde el code-behind: la distribución
+                             depende de los asientos por fila de cada aeronave -->
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="pnlCabina" HorizontalAlignment="Center" Margin="0,6,0,10"/>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Asientos seleccionados"
+                                   Style="{StaticResource TituloTarjeta}"/>
+
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="pnlSeleccion"/>
+                            </ScrollViewer>
+                            <TextBlock x:Name="lblSinAsientos" VerticalAlignment="Center"
+                                       HorizontalAlignment="Center" TextAlignment="Center" FontSize="12.5"
+                                       Foreground="{StaticResource BrushTextoSuave}" TextWrapping="Wrap"
+                                       Text="Toca un asiento libre en el mapa para agregarlo."/>
+                        </Grid>
+
+                        <StackPanel Grid.Row="2">
+                            <Line Style="{StaticResource LineaPunteada}" X1="0" Y1="0" X2="290" Y2="0"
+                                  Margin="0,12"/>
+                            <DockPanel Margin="0,0,0,4">
+                                <TextBlock x:Name="lblSubtotal2" DockPanel.Dock="Right" FontSize="12.5"
+                                           Text="L 0.00"/>
+                                <TextBlock Text="Subtotal" FontSize="12.5"
+                                           Foreground="{StaticResource BrushTextoSuave}"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,8">
+                                <TextBlock x:Name="lblImpuesto2" DockPanel.Dock="Right" FontSize="12.5"
+                                           Text="L 0.00"/>
+                                <TextBlock Text="Impuesto" FontSize="12.5"
+                                           Foreground="{StaticResource BrushTextoSuave}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <TextBlock x:Name="lblTotal2" DockPanel.Dock="Right" FontSize="20"
+                                           FontWeight="Bold" Foreground="{StaticResource BrushPrimario}"
+                                           Text="L 0.00"/>
+                                <TextBlock Text="Total" FontSize="13" FontWeight="Bold"
+                                           VerticalAlignment="Center"/>
+                            </DockPanel>
+
+                            <Button x:Name="btnAPasajeros" Content="Continuar  →"
+                                    Style="{StaticResource BotonPrimario}" Height="44" Margin="0,16,0,0"
+                                    IsEnabled="False"/>
+                            <Button x:Name="btnVolverAVuelos" Content="←  Cambiar de vuelo"
+                                    Style="{StaticResource BotonPlano}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ══════════════════ PASO 3 · PASAJEROS ══════════════════ -->
+            <Grid x:Name="pnlPaso3" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="340"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,16,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="¿Quién viaja en cada asiento?" Style="{StaticResource TituloTarjeta}"/>
+                            <TextBlock Style="{StaticResource Subtitulo}" Margin="0,4,0,0" TextWrapping="Wrap"
+                                       Text="Cada asiento necesita un pasajero. Si alguien no está registrado todavía, créalo con el botón ➕."/>
+                        </StackPanel>
+
+                        <!-- Encabezado de la tabla de asignación -->
+                        <Grid Grid.Row="1" Margin="0,16,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="130"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="44"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="ASIENTO" Style="{StaticResource Etiqueta}" Margin="0"/>
+                            <TextBlock Grid.Column="1" Text="CLASE" Style="{StaticResource Etiqueta}" Margin="0"/>
+                            <TextBlock Grid.Column="2" Text="PASAJERO" Style="{StaticResource Etiqueta}" Margin="0"/>
+                            <TextBlock Grid.Column="3" Text="TOTAL" Style="{StaticResource Etiqueta}" Margin="0"
+                                       TextAlignment="Right"/>
+                        </Grid>
+
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="pnlAsignacion"/>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+                    <StackPanel>
+                        <TextBlock Text="Titular de la reserva" Style="{StaticResource TituloTarjeta}"/>
+                        <TextBlock Style="{StaticResource Subtitulo}" Margin="0,4,0,0" TextWrapping="Wrap"
+                                   Text="Es la persona a nombre de quien queda el localizador y a quien se le factura."/>
+
+                        <ComboBox x:Name="cboTitular" Margin="0,14,0,0" Tag="Elige al titular"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idpasajero"/>
+
+                        <Border Background="{StaticResource BrushPrimarioSuave}" CornerRadius="10"
+                                Padding="14,12" Margin="0,20,0,0">
+                            <StackPanel>
+                                <TextBlock Text="RESUMEN" FontSize="9.5" FontWeight="Bold"
+                                           Foreground="{StaticResource BrushPrimario}"/>
+                                <TextBlock x:Name="lblResumenPaso3" FontSize="12.5" TextWrapping="Wrap"
+                                           Margin="0,7,0,0" Foreground="{StaticResource BrushTexto}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button x:Name="btnAPago" Content="Continuar al pago  →"
+                                Style="{StaticResource BotonPrimario}" Height="44" Margin="0,20,0,0"/>
+                        <Button x:Name="btnVolverAAsientos" Content="←  Cambiar de asientos"
+                                Style="{StaticResource BotonPlano}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ══════════════════ PASO 4 · CONFIRMAR Y PAGAR ══════════════════ -->
+            <Grid x:Name="pnlPaso4" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="380"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,16,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="Revisa antes de emitir" Style="{StaticResource TituloTarjeta}"/>
+
+                            <!-- Itinerario -->
+                            <Border Background="{StaticResource BrushCielo}" CornerRadius="13"
+                                    Padding="20,18" Margin="0,14,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock x:Name="lblHoraSalida" Foreground="White" FontSize="28"
+                                                   FontWeight="Bold" FontFamily="Consolas"/>
+                                        <TextBlock x:Name="lblOrigenResumen" Foreground="#BFD4E9" FontSize="12"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="24,0">
+                                        <TextBlock x:Name="lblDuracionResumen" Foreground="{StaticResource BrushAcento}"
+                                                   FontSize="11.5" HorizontalAlignment="Center"/>
+                                        <Path Data="M0,6 L200,6 M192,2 L200,6 L192,10" Stroke="#5A7A9C"
+                                              StrokeThickness="1.3" Stretch="Uniform" Height="12"
+                                              Margin="0,5,0,0"/>
+                                        <TextBlock x:Name="lblVueloResumen" Foreground="#BFD4E9" FontSize="11.5"
+                                                   HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                        <TextBlock x:Name="lblHoraLlegada" Foreground="White" FontSize="28"
+                                                   FontWeight="Bold" FontFamily="Consolas"
+                                                   HorizontalAlignment="Right"/>
+                                        <TextBlock x:Name="lblDestinoResumen" Foreground="#BFD4E9" FontSize="12"
+                                                   HorizontalAlignment="Right"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Detalle de boletos -->
+                            <TextBlock Text="Boletos" Style="{StaticResource Etiqueta}" Margin="0,20,0,8"/>
+                            <DataGrid x:Name="dgResumen" MaxHeight="260" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Asiento" Binding="{Binding Etiqueta}" Width="90"/>
+                                    <DataGridTextColumn Header="Clase" Binding="{Binding Clase}" Width="140"/>
+                                    <DataGridTextColumn Header="Pasajero" Binding="{Binding NombrePasajero}" Width="*"/>
+                                    <DataGridTextColumn Header="Precio" Binding="{Binding Precio, StringFormat='L {0:N2}'}" Width="110"/>
+                                    <DataGridTextColumn Header="Impuesto" Binding="{Binding Impuesto, StringFormat='L {0:N2}'}" Width="110"/>
+                                    <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat='L {0:N2}'}" Width="120"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <TextBlock Text="OBSERVACIÓN (OPCIONAL)" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtObservacion" Style="{StaticResource CajaTextoLarga}" MaxLength="200"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock Text="Cobro" Style="{StaticResource TituloTarjeta}"/>
+
+                            <CheckBox x:Name="chkCobrarAhora" Content="Cobrar ahora" IsChecked="True"
+                                      Margin="0,14,0,0" FontSize="13" FontWeight="SemiBold"/>
+                            <TextBlock Style="{StaticResource Subtitulo}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                       Text="Si lo desmarcas, la reserva queda como Pendiente de pago y se puede cobrar después desde la pantalla de Pagos."/>
+
+                            <StackPanel x:Name="pnlCobro">
+                                <TextBlock Text="MÉTODO DE PAGO" Style="{StaticResource Etiqueta}"/>
+                                <ComboBox x:Name="cboMetodoPago" Tag="Elige el método"
+                                          DisplayMemberPath="etiqueta" SelectedValuePath="idmetodopago"/>
+
+                                <TextBlock Text="COMPROBANTE" Style="{StaticResource Etiqueta}"/>
+                                <ComboBox x:Name="cboComprobante"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1">
+                            <Line Style="{StaticResource LineaPunteada}" X1="0" Y1="0" X2="330" Y2="0" Margin="0,16"/>
+
+                            <DockPanel Margin="0,0,0,4">
+                                <TextBlock x:Name="lblSubtotal4" DockPanel.Dock="Right" FontSize="12.5" Text="L 0.00"/>
+                                <TextBlock Text="Subtotal" FontSize="12.5" Foreground="{StaticResource BrushTextoSuave}"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,8">
+                                <TextBlock x:Name="lblImpuesto4" DockPanel.Dock="Right" FontSize="12.5" Text="L 0.00"/>
+                                <TextBlock Text="Impuesto (15 %)" FontSize="12.5"
+                                           Foreground="{StaticResource BrushTextoSuave}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <TextBlock x:Name="lblTotal4" DockPanel.Dock="Right" FontSize="24" FontWeight="Bold"
+                                           Foreground="{StaticResource BrushExito}" Text="L 0.00"/>
+                                <TextBlock Text="Total" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </DockPanel>
+
+                            <Button x:Name="btnEmitir" Content="✓  Emitir reserva"
+                                    Style="{StaticResource BotonExito}" Height="48" Margin="0,18,0,0"
+                                    FontSize="14.5"/>
+                            <Button x:Name="btnVolverAPasajeros" Content="←  Volver a los pasajeros"
+                                    Style="{StaticResource BotonPlano}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

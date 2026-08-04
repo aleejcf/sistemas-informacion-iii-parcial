@@ -1,0 +1,94 @@
+<Window x:Class="SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SistemaAerolinea"
+        Title="ALAS Honduras" Icon="{StaticResource IconoApp}"
+        Height="420" Width="680"
+        WindowStartupLocation="CenterScreen" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" FontFamily="Segoe UI"
+        RenderTransformOrigin="0.5,0.5">
+
+    <Window.RenderTransform>
+        <ScaleTransform x:Name="escalaVentana"/>
+    </Window.RenderTransform>
+
+    <Border CornerRadius="24" ClipToBounds="True" Background="{StaticResource BrushCielo}">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="32" ShadowDepth="6"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="104"/>
+            </Grid.RowDefinitions>
+
+            <!-- Estelas de vuelo de fondo: arcos que cruzan el cielo -->
+            <Canvas Grid.RowSpan="2" ClipToBounds="True" Opacity="0.16">
+                <Path Stroke="White" StrokeThickness="1.4" StrokeDashArray="5 5"
+                      Data="M -40,330 C 160,250 400,190 720,60"/>
+                <Path Stroke="White" StrokeThickness="1.1" StrokeDashArray="4 6"
+                      Data="M -40,410 C 200,360 460,280 720,190"/>
+                <Ellipse Canvas.Left="520" Canvas.Top="-90" Width="280" Height="280"
+                         Fill="{StaticResource BrushAtardecer}" Opacity="0.35"/>
+            </Canvas>
+
+            <!-- Marca -->
+            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <local:LogoAlas x:Name="logo" Tamano="104" HorizontalAlignment="Center"/>
+
+                <TextBlock HorizontalAlignment="Center" Margin="0,16,0,0">
+                    <Run Text="A L A S" FontSize="42" Foreground="White" FontWeight="Bold"/>
+                </TextBlock>
+                <TextBlock Text="H O N D U R A S" FontSize="13" Foreground="#BFD4E9"
+                           HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,2,0,0"/>
+                <TextBlock Text="Conectamos Honduras con el mundo."
+                           FontSize="13" FontStyle="Italic" Foreground="{StaticResource BrushAcento}"
+                           HorizontalAlignment="Center" Margin="0,14,0,0"/>
+            </StackPanel>
+
+            <!-- Carga -->
+            <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                <ProgressBar x:Name="barra" Style="{StaticResource BarraCarga}"
+                             Width="440" Height="8" Maximum="100"/>
+                <TextBlock x:Name="lblEstado" Text="Encendiendo motores…"
+                           Foreground="#BFD4E9" FontSize="12"
+                           FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,11,0,0"/>
+                <TextBlock Text="Sistema de Reserva de Vuelos · III Parcial · Alejandro Calderón"
+                           Foreground="#6E8CAB" FontSize="10"
+                           HorizontalAlignment="Center" Margin="0,7,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <!-- Aparece con fundido y un zoom suave -->
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1" Duration="0:0:0.6"/>
+                    <DoubleAnimation Storyboard.TargetName="escalaVentana"
+                                     Storyboard.TargetProperty="ScaleX"
+                                     From="0.93" To="1" Duration="0:0:0.8">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="escalaVentana"
+                                     Storyboard.TargetProperty="ScaleY"
+                                     From="0.93" To="1" Duration="0:0:0.8">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <!-- El logotipo despega: sube y se acerca mientras carga -->
+                    <DoubleAnimation Storyboard.TargetName="logo"
+                                     Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1" Duration="0:0:1" BeginTime="0:0:0.2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+</Window>

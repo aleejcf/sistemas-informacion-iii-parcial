@@ -1,0 +1,135 @@
+<UserControl x:Class="MiPerfilPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaAerolinea"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="380"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══════════ DATOS DE VIAJERO ═══════════ -->
+        <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,16,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="panelDatos" Margin="0,0,8,0">
+                    <TextBlock Text="Mis datos de viajero" Style="{StaticResource TituloTarjeta}"/>
+                    <TextBlock Style="{StaticResource Subtitulo}" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Text="Son los datos que se imprimen en tu pase de abordar. Tienen que coincidir con tu documento de identidad."/>
+
+                    <Border Background="{StaticResource BrushAdvSuave}" CornerRadius="9"
+                            Padding="12,10" Margin="0,14,0,0">
+                        <TextBlock FontSize="11.5" TextWrapping="Wrap" Foreground="#92400E"
+                                   Text="El nombre y el número de documento no se pueden cambiar desde aquí: son los que la aerolínea ya usó para emitir tus boletos. Si hay un error, acércate al mostrador."/>
+                    </Border>
+
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="CÓDIGO DE PASAJERO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtCodigo" Style="{StaticResource CajaTexto}" IsEnabled="False"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="NOMBRE COMPLETO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtNombre" Style="{StaticResource CajaTexto}" IsEnabled="False"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="DOCUMENTO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtDocumento" Style="{StaticResource CajaTexto}" IsEnabled="False"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="FECHA DE NACIMIENTO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtNacimiento" Style="{StaticResource CajaTexto}" IsEnabled="False"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="PAÍS" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="cboPais" DisplayMemberPath="etiqueta" SelectedValuePath="idpais"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="TELÉFONO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtTelefono" Style="{StaticResource CajaTexto}" MaxLength="15"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+                            <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtCorreo" Style="{StaticResource CajaTexto}" MaxLength="50"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button x:Name="btnGuardar" Content="💾 Guardar mis datos"
+                            Style="{StaticResource BotonExito}" Height="40" Margin="0,20,0,0"
+                            HorizontalAlignment="Left" Width="220"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- ═══════════ RESUMEN Y CUENTA ═══════════ -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Style="{StaticResource Tarjeta}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="52" Height="52" CornerRadius="26"
+                                    Background="{StaticResource BrushPrimario}">
+                                <TextBlock x:Name="lblIniciales" Foreground="White" FontSize="20" FontWeight="Bold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                                <TextBlock x:Name="lblNombreCuenta" Style="{StaticResource TituloTarjeta}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock x:Name="lblUsuarioCuenta" Style="{StaticResource Subtitulo}"
+                                           Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Button x:Name="btnMiCuenta" Content="🔐  Contraseña y seguridad"
+                                Style="{StaticResource BotonContorno}" Height="40" Margin="0,18,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Tarjeta}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Mi historial de vuelos" Style="{StaticResource TituloTarjeta}"/>
+                        <UniformGrid Columns="2" Margin="0,14,0,0">
+                            <StackPanel>
+                                <TextBlock x:Name="lblTotalVuelos" Text="0" Style="{StaticResource Cifra}" FontSize="26"/>
+                                <TextBlock Text="Vuelos" Style="{StaticResource Subtitulo}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock x:Name="lblDestinos" Text="0" Style="{StaticResource Cifra}" FontSize="26"
+                                           Foreground="{StaticResource BrushPrimario}"/>
+                                <TextBlock Text="Destinos distintos" Style="{StaticResource Subtitulo}"/>
+                            </StackPanel>
+                        </UniformGrid>
+
+                        <DataGrid x:Name="dgHistorial" Margin="0,14,0,0" MaxHeight="260">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Vuelo" Binding="{Binding codigo_vuelo}" Width="*"/>
+                                <DataGridTextColumn Header="Fecha" Width="95"
+                                                    Binding="{Binding fecha_salida, StringFormat='{}{0:dd/MM/yy}'}"/>
+                                <DataGridTextColumn Header="Asiento" Binding="{Binding asiento}" Width="70"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <TextBlock x:Name="lblSinHistorial" Visibility="Collapsed" Margin="0,14,0,0"
+                                   FontSize="12.5" TextAlignment="Center" TextWrapping="Wrap"
+                                   Foreground="{StaticResource BrushTextoSuave}"
+                                   Text="Todavía no has volado con nosotros. ¡Tu primer viaje te espera!"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

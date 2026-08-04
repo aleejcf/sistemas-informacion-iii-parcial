@@ -1,0 +1,300 @@
+<UserControl x:Class="PasajerosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaAerolinea"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===================== INDICADORES ===================== -->
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="16,13" Margin="0,0,6,0">
+                <StackPanel>
+                    <TextBlock Text="PASAJEROS REGISTRADOS" Style="{StaticResource Etiqueta}" Margin="0,0,0,3"/>
+                    <TextBlock x:Name="lblTotal" Text="0" Style="{StaticResource Cifra}" FontSize="24"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Padding="16,13" Margin="6,0">
+                <StackPanel>
+                    <TextBlock Text="CON VUELOS" Style="{StaticResource Etiqueta}" Margin="0,0,0,3"/>
+                    <TextBlock x:Name="lblConVuelos" Text="0" Style="{StaticResource Cifra}" FontSize="24"
+                               Foreground="{StaticResource BrushPrimario}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource Tarjeta}" Padding="16,13" Margin="6,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="NACIONALIDADES" Style="{StaticResource Etiqueta}" Margin="0,0,0,3"/>
+                    <TextBlock x:Name="lblPaises" Text="0" Style="{StaticResource Cifra}" FontSize="24"
+                               Foreground="{StaticResource BrushAcento}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ===================== LISTA E HISTORIAL ===================== -->
+        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,14,0,0" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition x:Name="filaHistorial" Height="220"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Directorio de pasajeros" Style="{StaticResource TituloTarjeta}"/>
+                        <TextBlock Text="Selecciona una fila para editar sus datos y ver su historial."
+                                   Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <Grid Grid.Column="1" Width="290" VerticalAlignment="Center">
+                        <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}"/>
+                        <TextBlock Text="Buscar por nombre, documento o correo" FontSize="13.5"
+                                   IsHitTestVisible="False" VerticalAlignment="Center"
+                                   Margin="13,0,0,0" Foreground="{StaticResource BrushTextoSuave}"
+                                   Visibility="{Binding Text, ElementName=txtBuscar,
+                                                Converter={StaticResource VacioAVisible}}"/>
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <DataGrid x:Name="dgPasajeros">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Código" Binding="{Binding idpasajero}" Width="92"
+                                                ElementStyle="{StaticResource Codigo}"/>
+
+                            <DataGridTextColumn Header="Pasajero" Binding="{Binding nombre_completo}" Width="2*"/>
+
+                            <DataGridTemplateColumn Header="Documento" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding num_documento}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding tipo_documento}" FontSize="10.5"
+                                                       Foreground="{StaticResource BrushTextoSuave}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Edad" Width="66"
+                                                Binding="{Binding edad, StringFormat='{}{0} años'}"/>
+
+                            <DataGridTextColumn Header="País" Binding="{Binding nombre_pais}" Width="130"/>
+
+                            <DataGridTextColumn Header="Teléfono" Binding="{Binding telefono}" Width="120"/>
+
+                            <DataGridTextColumn Header="Correo" Binding="{Binding email}" Width="2*"/>
+
+                            <DataGridTemplateColumn Header="Vuelos" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource Insignia}"
+                                                Background="{StaticResource BrushPrimarioSuave}">
+                                            <TextBlock Text="{Binding vuelos}" Style="{StaticResource TextoInsignia}"
+                                                       Foreground="{StaticResource BrushPrimario}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border x:Name="pnlVacio" Background="White" CornerRadius="10" Margin="1,44,1,1"
+                            Visibility="Collapsed">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="🧳" FontSize="30" HorizontalAlignment="Center" Opacity="0.55"/>
+                            <TextBlock x:Name="lblVacio" Text="No hay pasajeros registrados todavía."
+                                       Style="{StaticResource Subtitulo}" Margin="0,8,0,0"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Grid.Row="2" BorderBrush="{StaticResource BrushBorde}" BorderThickness="0,1,0,0"
+                        Margin="0,14,0,0" Padding="0,8,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button x:Name="btnHistorial" Grid.Column="0" Style="{StaticResource BotonPlano}"
+                                HorizontalAlignment="Left" Padding="6,4">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="lblFlecha" Text="▾" FontSize="12" Margin="0,0,7,0"/>
+                                <TextBlock Text="Historial de vuelos del pasajero" FontWeight="SemiBold"
+                                           FontSize="12.5"/>
+                            </StackPanel>
+                        </Button>
+
+                        <TextBlock x:Name="lblPasajeroHistorial" Grid.Column="1" Style="{StaticResource Subtitulo}"
+                                   VerticalAlignment="Center" Margin="10,0,0,0" TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+                </Border>
+
+                <Grid x:Name="pnlHistorial" Grid.Row="3" Margin="0,8,0,0">
+                    <DataGrid x:Name="dgHistorial" RowHeight="32" FontSize="12">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Localizador" Binding="{Binding codigo_reserva}" Width="110"
+                                                ElementStyle="{StaticResource Codigo}"/>
+
+                            <DataGridTextColumn Header="Vuelo" Binding="{Binding codigo_vuelo}" Width="90"
+                                                ElementStyle="{StaticResource Codigo}"/>
+
+                            <DataGridTextColumn Header="Salida" Width="140"
+                                                Binding="{Binding fecha_salida, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"/>
+
+                            <DataGridTemplateColumn Header="Ruta" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding iata_origen}" Style="{StaticResource Codigo}"/>
+                                            <TextBlock Text="→" Margin="7,0" Foreground="{StaticResource BrushTextoSuave}"/>
+                                            <TextBlock Text="{Binding iata_destino}" Style="{StaticResource Codigo}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Asiento" Binding="{Binding asiento}" Width="80"/>
+
+                            <DataGridTextColumn Header="Clase" Binding="{Binding clase}" Width="*"/>
+
+                            <DataGridTextColumn Header="Total" Width="110"
+                                                Binding="{Binding total, StringFormat='L {0:N2}'}"/>
+
+                            <DataGridTemplateColumn Header="Estado" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource Insignia}"
+                                                Background="{Binding estado, Converter={StaticResource EstadoAColorFondo}}">
+                                            <TextBlock Text="{Binding estado}" Style="{StaticResource TextoInsignia}"
+                                                       Foreground="{Binding estado, Converter={StaticResource EstadoAColor}}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border x:Name="pnlHistorialVacio" Background="White" CornerRadius="10" Margin="1,40,1,1">
+                        <TextBlock x:Name="lblHistorialVacio"
+                                   Text="Selecciona un pasajero para ver sus vuelos."
+                                   Style="{StaticResource Subtitulo}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ===================== FICHA DEL PASAJERO ===================== -->
+        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Width="390" Margin="16,0,0,0"
+                Style="{StaticResource Tarjeta}" Padding="18">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                    <TextBlock Text="Ficha del pasajero" Style="{StaticResource TituloTarjeta}"/>
+                    <TextBlock x:Name="lblModo" Text="Nuevo pasajero" Style="{StaticResource Subtitulo}"
+                               Margin="0,3,0,0"/>
+                    <TextBlock x:Name="lblAlta" Style="{StaticResource Subtitulo}" FontSize="11.5"
+                               Margin="0,2,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,4,0,0">
+                    <StackPanel Margin="0,0,6,0">
+
+                        <TextBlock Text="CÓDIGO DEL PASAJERO" Style="{StaticResource Etiqueta}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="txtCodigo" Grid.Column="0" Style="{StaticResource CajaTexto}"
+                                     MaxLength="8" CharacterCasing="Upper"/>
+                            <Button x:Name="btnSugerir" Grid.Column="1" Content="Sugerir"
+                                    Style="{StaticResource BotonContorno}" Margin="8,0,0,0" Padding="14,0"
+                                    Height="38"/>
+                        </Grid>
+
+                        <TextBlock Text="NOMBRE" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtNombre" Style="{StaticResource CajaTexto}" MaxLength="50"/>
+
+                        <TextBlock Text="APELLIDO PATERNO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtApaterno" Style="{StaticResource CajaTexto}" MaxLength="50"/>
+
+                        <TextBlock Text="APELLIDO MATERNO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtAmaterno" Style="{StaticResource CajaTexto}" MaxLength="50"/>
+
+                        <TextBlock Text="TIPO DE DOCUMENTO" Style="{StaticResource Etiqueta}"/>
+                        <ComboBox x:Name="cboTipoDocumento" Tag="Selecciona el tipo"/>
+
+                        <TextBlock Text="NÚMERO DE DOCUMENTO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtDocumento" Style="{StaticResource CajaTexto}" MaxLength="25"/>
+
+                        <TextBlock Text="FECHA DE NACIMIENTO" Style="{StaticResource Etiqueta}"/>
+                        <DatePicker x:Name="dtpNacimiento"/>
+
+                        <TextBlock Text="PAÍS" Style="{StaticResource Etiqueta}"/>
+                        <ComboBox x:Name="cboPais" Tag="Selecciona el país"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idpais"/>
+
+                        <TextBlock Text="TELÉFONO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtTelefono" Style="{StaticResource CajaTexto}" MaxLength="20"/>
+
+                        <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtCorreo" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+
+                        <TextBlock Text="El correo y el número de documento no se pueden repetir entre pasajeros."
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,10,0,0"
+                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="2">
+                    <Button x:Name="btnGuardar" Content="💾  Guardar" Style="{StaticResource BotonExito}"
+                            Height="42" Margin="0,16,0,0"/>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="btnNuevo" Grid.Column="0" Content="➕  Nuevo"
+                                Style="{StaticResource BotonContorno}" Height="40" Margin="0,0,4,0"/>
+                        <Button x:Name="btnEliminar" Grid.Column="1" Content="🗑  Eliminar"
+                                Style="{StaticResource BotonPeligro}" Height="40" Margin="4,0,0,0"
+                                IsEnabled="False"/>
+                    </Grid>
+                    <TextBlock x:Name="lblSinPermiso" Visibility="Collapsed" FontSize="11" TextWrapping="Wrap"
+                               Margin="0,9,0,0" Foreground="{StaticResource BrushTextoSuave}"
+                               Text="Solo un administrador puede eliminar pasajeros."/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

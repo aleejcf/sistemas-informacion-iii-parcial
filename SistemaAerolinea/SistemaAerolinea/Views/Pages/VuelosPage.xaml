@@ -1,0 +1,294 @@
+<UserControl x:Class="VuelosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaAerolinea"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ================= INDICADORES ================= -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,6,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndTotal" Text="0" Style="{StaticResource Cifra}"/>
+                    <TextBlock Text="Vuelos en la lista" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="6,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndProgramados" Text="0" Style="{StaticResource Cifra}"
+                               Foreground="{StaticResource BrushPrimario}"/>
+                    <TextBlock Text="Programados" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource Tarjeta}" Margin="6,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndOperacion" Text="0" Style="{StaticResource Cifra}"
+                               Foreground="{StaticResource BrushExito}"/>
+                    <TextBlock Text="En operación" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="3" Style="{StaticResource Tarjeta}" Margin="6,0,0,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndOcupacion" Text="0%" Style="{StaticResource Cifra}"
+                               Foreground="{StaticResource BrushAcento}"/>
+                    <TextBlock Text="Ocupación promedio" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ================= LISTA ================= -->
+            <Border Grid.Column="0" Style="{StaticResource Tarjeta}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Malla de vuelos" Style="{StaticResource TituloTarjeta}"/>
+
+                    <!-- Filtros -->
+                    <Grid Grid.Row="1" Margin="0,14,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0" Margin="0,0,8,0">
+                            <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}"/>
+                            <TextBlock Text="Buscar por código, ciudad, IATA o aerolínea…" FontSize="13.5"
+                                       IsHitTestVisible="False" VerticalAlignment="Center" Margin="13,0,0,0"
+                                       Foreground="{StaticResource BrushTextoSuave}"
+                                       Visibility="{Binding Text, ElementName=txtBuscar,
+                                                    Converter={StaticResource VacioAVisible}}"/>
+                        </Grid>
+
+                        <ComboBox x:Name="cboEstado" Grid.Column="1" Margin="0,0,8,0"
+                                  Tag="Todos los estados"/>
+
+                        <DatePicker x:Name="dtpDesde" Grid.Column="2" Margin="0,0,8,0"
+                                    ToolTip="Mostrar solo los vuelos que salen desde esta fecha"/>
+
+                        <Button x:Name="btnLimpiar" Grid.Column="3" Content="Limpiar"
+                                Style="{StaticResource BotonPlano}"/>
+                    </Grid>
+
+                    <!-- Tabla con su estado vacío superpuesto -->
+                    <Grid Grid.Row="2">
+                        <DataGrid x:Name="dgVuelos">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Código" Width="105">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding codigo_vuelo}"
+                                                       Style="{StaticResource Codigo}" FontSize="13"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="Aerolínea" Binding="{Binding nombre_aero}" Width="140"/>
+                                <DataGridTextColumn Header="Ruta" Binding="{Binding ruta}" Width="*" MinWidth="150"/>
+                                <DataGridTextColumn Header="Salida" Width="105"
+                                                    Binding="{Binding fecha_salida, StringFormat='{}{0:dd/MM HH:mm}'}"/>
+                                <DataGridTextColumn Header="Duración" Width="85"
+                                                    Binding="{Binding duracion_minutos,
+                                                              Converter={StaticResource MinutosADuracion}}"/>
+                                <DataGridTextColumn Header="Avión" Binding="{Binding tipo_avion}" Width="120"/>
+                                <DataGridTextColumn Header="Precio base" Width="105"
+                                                    Binding="{Binding precio_base, StringFormat='L {0:N2}'}"/>
+
+                                <DataGridTemplateColumn Header="Ocupación" Width="130">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <ProgressBar Style="{StaticResource BarraOcupacion}"
+                                                             Value="{Binding ocupacion, Mode=OneWay}"/>
+                                                <TextBlock FontSize="11" Margin="0,4,0,0"
+                                                           Foreground="{StaticResource BrushTextoSuave}">
+                                                    <Run Text="{Binding asientos_vendidos, Mode=OneWay}"/><Run Text="/"/><Run Text="{Binding capacidad_pasajeros, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Estado" Width="130">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource Insignia}"
+                                                    Background="{Binding estado,
+                                                                Converter={StaticResource EstadoAColorFondo}}">
+                                                <TextBlock Text="{Binding estado}"
+                                                           Style="{StaticResource TextoInsignia}"
+                                                           Foreground="{Binding estado,
+                                                                       Converter={StaticResource EstadoAColor}}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel x:Name="pnlVacio" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    Visibility="Collapsed" Background="White" Margin="1,40,1,1">
+                            <TextBlock Text="✈" FontSize="34" HorizontalAlignment="Center"
+                                       Foreground="{StaticResource BrushBorde}"/>
+                            <TextBlock Text="No hay vuelos que coincidan con la búsqueda."
+                                       Style="{StaticResource Subtitulo}" Margin="0,8,0,0"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ================= FORMULARIO ================= -->
+            <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="16,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock x:Name="lblTituloFormulario" Text="Nuevo vuelo"
+                                   Style="{StaticResource TituloTarjeta}"/>
+                        <TextBlock x:Name="lblSubtituloFormulario" Text="Programa un vuelo en la malla"
+                                   Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10,4,0">
+                        <StackPanel Margin="0,0,6,0">
+
+                            <Border x:Name="pnlAvisoBoletos" Background="{StaticResource BrushAdvSuave}"
+                                    CornerRadius="10" Padding="13,10" Margin="0,6,0,0" Visibility="Collapsed">
+                                <TextBlock x:Name="lblAvisoBoletos" TextWrapping="Wrap" FontSize="12"
+                                           Foreground="#92400E"/>
+                            </Border>
+
+                            <TextBlock Text="CÓDIGO DE VUELO" Style="{StaticResource Etiqueta}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="txtCodigo" Grid.Column="0" Style="{StaticResource CajaTexto}"
+                                         MaxLength="12" CharacterCasing="Upper"/>
+                                <Button x:Name="btnSugerir" Grid.Column="1" Content="Sugerir"
+                                        Style="{StaticResource BotonContorno}" Margin="8,0,0,0"
+                                        Padding="12,7" FontSize="12"
+                                        ToolTip="Propone un código con el prefijo de la aerolínea y el día de salida"/>
+                            </Grid>
+
+                            <TextBlock Text="AEROLÍNEA" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="cboAerolinea" Tag="Elige la aerolínea"
+                                      DisplayMemberPath="etiqueta" SelectedValuePath="idaerolinea"/>
+
+                            <TextBlock Text="AVIÓN" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="cboAvion" Tag="Elige primero la aerolínea"
+                                      DisplayMemberPath="etiqueta" SelectedValuePath="idavion"/>
+
+                            <TextBlock Text="ORIGEN" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="cboOrigen" Tag="Aeropuerto de salida"
+                                      DisplayMemberPath="etiqueta" SelectedValuePath="idaeropuerto"/>
+
+                            <TextBlock Text="DESTINO" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="cboDestino" Tag="Aeropuerto de llegada"
+                                      DisplayMemberPath="etiqueta" SelectedValuePath="idaeropuerto"/>
+
+                            <TextBlock Text="FECHA Y HORA DE SALIDA" Style="{StaticResource Etiqueta}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="72"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="72"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePicker x:Name="dtpSalida" Grid.Column="0" Margin="0,0,8,0"/>
+                                <ComboBox x:Name="cboHoraSalida" Grid.Column="1" Tag="hh"/>
+                                <TextBlock Grid.Column="2" Text=":" VerticalAlignment="Center" Margin="5,0"
+                                           FontWeight="Bold" Foreground="{StaticResource BrushTextoSuave}"/>
+                                <ComboBox x:Name="cboMinutoSalida" Grid.Column="3" Tag="mm"/>
+                            </Grid>
+
+                            <TextBlock Text="FECHA Y HORA DE LLEGADA" Style="{StaticResource Etiqueta}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="72"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="72"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePicker x:Name="dtpLlegada" Grid.Column="0" Margin="0,0,8,0"/>
+                                <ComboBox x:Name="cboHoraLlegada" Grid.Column="1" Tag="hh"/>
+                                <TextBlock Grid.Column="2" Text=":" VerticalAlignment="Center" Margin="5,0"
+                                           FontWeight="Bold" Foreground="{StaticResource BrushTextoSuave}"/>
+                                <ComboBox x:Name="cboMinutoLlegada" Grid.Column="3" Tag="mm"/>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="PRECIO BASE (L)" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtPrecio" Style="{StaticResource CajaTexto}" MaxLength="10"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="PUERTA" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtPuerta" Style="{StaticResource CajaTexto}"
+                                             MaxLength="6" CharacterCasing="Upper"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="ESTADO" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="cboEstadoVuelo" Tag="Estado del vuelo"/>
+
+                            <TextBlock x:Name="lblSinPermiso" Style="{StaticResource Subtitulo}"
+                                       Text="Solo un administrador puede eliminar vuelos."
+                                       TextWrapping="Wrap" Margin="0,14,0,0" Visibility="Collapsed"
+                                       Foreground="{StaticResource BrushAdvertencia}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="btnNuevo" Grid.Column="0" Content="➕ Nuevo"
+                                Style="{StaticResource BotonGris}" Height="40" Margin="0,0,4,0"/>
+                        <Button x:Name="btnGuardar" Grid.Column="1" Content="💾 Guardar"
+                                Style="{StaticResource BotonExito}" Height="40" Margin="4,0"/>
+                        <Button x:Name="btnEliminar" Grid.Column="2" Content="🗑 Eliminar"
+                                Style="{StaticResource BotonPeligro}" Height="40" Margin="4,0,0,0"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

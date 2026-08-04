@@ -1,0 +1,719 @@
+<UserControl x:Class="CatalogosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaAerolinea"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border x:Name="pnlSoloLectura" Grid.Row="0" Background="{StaticResource BrushAdvSuave}"
+                CornerRadius="10" Padding="14,11" Margin="0,0,0,12" Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="🔒" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Text="Los catálogos son de solo lectura para el rol Agente."
+                           FontSize="12.5" Foreground="#92400E" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <TabControl x:Name="tabCatalogos" Grid.Row="1">
+
+            <!-- ═══════════════════════ PAÍSES ═══════════════════════ -->
+            <TabItem Header="Países">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="330"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <TextBox x:Name="txtBuscarPais" Style="{StaticResource CajaTexto}"/>
+                                    <TextBlock Text="Buscar por nombre o código…" FontSize="13.5"
+                                               IsHitTestVisible="False" VerticalAlignment="Center"
+                                               Margin="13,0,0,0" Foreground="{StaticResource BrushTextoSuave}"
+                                               Visibility="{Binding Text, ElementName=txtBuscarPais,
+                                                            Converter={StaticResource VacioAVisible}}"/>
+                                </Grid>
+                                <TextBlock x:Name="lblTotalPaises" Grid.Column="1" Style="{StaticResource Subtitulo}"
+                                           VerticalAlignment="Center" Margin="14,0,4,0"/>
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgPaises">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Código" Width="90" Binding="{Binding idpais}"
+                                                            ElementStyle="{StaticResource Codigo}"/>
+                                        <DataGridTextColumn Header="País" Width="*" Binding="{Binding nombre_pais}"/>
+                                        <DataGridTextColumn Header="Aeropuertos" Width="120" Binding="{Binding aeropuertos}"/>
+                                        <DataGridTextColumn Header="Pasajeros" Width="120" Binding="{Binding pasajeros}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border x:Name="pnlVacioPaises" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="No hay países que coincidan con la búsqueda."
+                                               Style="{StaticResource Subtitulo}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Tarjeta}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="Datos del país" Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock x:Name="lblModoPais" Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+
+                                    <TextBlock Text="CÓDIGO" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtIdPais" Style="{StaticResource CajaTexto}"
+                                             MaxLength="4" CharacterCasing="Upper"/>
+
+                                    <TextBlock Text="NOMBRE DEL PAÍS" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtNombrePais" Style="{StaticResource CajaTexto}" MaxLength="60"/>
+
+                                    <Border x:Name="pnlUsoPais" Background="{StaticResource BrushPrimarioSuave}"
+                                            CornerRadius="9" Padding="12,10" Margin="0,16,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="lblUsoPais" FontSize="11.5" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource BrushPrimario}"/>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <Grid Grid.Row="1" Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Button x:Name="btnGuardarPais" Grid.Row="0" Grid.ColumnSpan="3"
+                                        Content="💾  Guardar" Style="{StaticResource BotonExito}" Height="40"/>
+                                <Button x:Name="btnNuevoPais" Grid.Row="1" Grid.Column="0" Content="➕  Nuevo"
+                                        Style="{StaticResource BotonContorno}" Height="38" Margin="0,8,0,0"/>
+                                <Button x:Name="btnEliminarPais" Grid.Row="1" Grid.Column="2" Content="🗑  Eliminar"
+                                        Style="{StaticResource BotonPeligro}" Height="38" Margin="0,8,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════ AEROPUERTOS ═══════════════════════ -->
+            <TabItem Header="Aeropuertos">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="330"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <TextBox x:Name="txtBuscarAeropuerto" Style="{StaticResource CajaTexto}"/>
+                                    <TextBlock Text="Buscar por IATA, ciudad o nombre…" FontSize="13.5"
+                                               IsHitTestVisible="False" VerticalAlignment="Center"
+                                               Margin="13,0,0,0" Foreground="{StaticResource BrushTextoSuave}"
+                                               Visibility="{Binding Text, ElementName=txtBuscarAeropuerto,
+                                                            Converter={StaticResource VacioAVisible}}"/>
+                                </Grid>
+                                <TextBlock x:Name="lblTotalAeropuertos" Grid.Column="1" Style="{StaticResource Subtitulo}"
+                                           VerticalAlignment="Center" Margin="14,0,4,0"/>
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgAeropuertos">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="IATA" Width="75" Binding="{Binding iata}"
+                                                            ElementStyle="{StaticResource Codigo}"/>
+                                        <DataGridTextColumn Header="Código" Width="90" Binding="{Binding idaeropuerto}"/>
+                                        <DataGridTextColumn Header="Aeropuerto" Width="*" Binding="{Binding nombre}"/>
+                                        <DataGridTextColumn Header="Ciudad" Width="150" Binding="{Binding ciudad}"/>
+                                        <DataGridTextColumn Header="País" Width="150" Binding="{Binding nombre_pais}"/>
+                                        <DataGridTextColumn Header="Vuelos" Width="85" Binding="{Binding vuelos}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border x:Name="pnlVacioAeropuertos" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="No hay aeropuertos que coincidan con la búsqueda."
+                                               Style="{StaticResource Subtitulo}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Tarjeta}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="Datos del aeropuerto" Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock x:Name="lblModoAeropuerto" Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="CÓDIGO" Style="{StaticResource Etiqueta}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="IATA" Style="{StaticResource Etiqueta}"/>
+                                        <TextBox x:Name="txtIdAeropuerto" Grid.Row="1" Grid.Column="0"
+                                                 Style="{StaticResource CajaTexto}" MaxLength="5" CharacterCasing="Upper"/>
+                                        <TextBox x:Name="txtIata" Grid.Row="1" Grid.Column="2"
+                                                 Style="{StaticResource CajaTexto}" MaxLength="3" CharacterCasing="Upper"/>
+                                    </Grid>
+
+                                    <TextBlock Text="NOMBRE" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtNombreAeropuerto" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+
+                                    <TextBlock Text="CIUDAD" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtCiudad" Style="{StaticResource CajaTexto}" MaxLength="60"/>
+
+                                    <TextBlock Text="PAÍS" Style="{StaticResource Etiqueta}"/>
+                                    <ComboBox x:Name="cboPaisAeropuerto" Tag="Selecciona el país"
+                                              DisplayMemberPath="etiqueta" SelectedValuePath="idpais"/>
+
+                                    <Border x:Name="pnlUsoAeropuerto" Background="{StaticResource BrushPrimarioSuave}"
+                                            CornerRadius="9" Padding="12,10" Margin="0,16,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="lblUsoAeropuerto" FontSize="11.5" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource BrushPrimario}"/>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <Grid Grid.Row="1" Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Button x:Name="btnGuardarAeropuerto" Grid.Row="0" Grid.ColumnSpan="3"
+                                        Content="💾  Guardar" Style="{StaticResource BotonExito}" Height="40"/>
+                                <Button x:Name="btnNuevoAeropuerto" Grid.Row="1" Grid.Column="0" Content="➕  Nuevo"
+                                        Style="{StaticResource BotonContorno}" Height="38" Margin="0,8,0,0"/>
+                                <Button x:Name="btnEliminarAeropuerto" Grid.Row="1" Grid.Column="2" Content="🗑  Eliminar"
+                                        Style="{StaticResource BotonPeligro}" Height="38" Margin="0,8,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════ AEROLÍNEAS ═══════════════════════ -->
+            <TabItem Header="Aerolíneas">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="330"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <TextBox x:Name="txtBuscarAerolinea" Style="{StaticResource CajaTexto}"/>
+                                    <TextBlock Text="Buscar por nombre, código o RTN…" FontSize="13.5"
+                                               IsHitTestVisible="False" VerticalAlignment="Center"
+                                               Margin="13,0,0,0" Foreground="{StaticResource BrushTextoSuave}"
+                                               Visibility="{Binding Text, ElementName=txtBuscarAerolinea,
+                                                            Converter={StaticResource VacioAVisible}}"/>
+                                </Grid>
+                                <TextBlock x:Name="lblTotalAerolineas" Grid.Column="1" Style="{StaticResource Subtitulo}"
+                                           VerticalAlignment="Center" Margin="14,0,4,0"/>
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgAerolineas">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="ID" Width="60" Binding="{Binding idaerolinea}"/>
+                                        <DataGridTextColumn Header="Código" Width="85" Binding="{Binding codigo}"
+                                                            ElementStyle="{StaticResource Codigo}"/>
+                                        <DataGridTextColumn Header="Aerolínea" Width="*" Binding="{Binding nombre_aero}"/>
+                                        <DataGridTextColumn Header="RTN" Width="170" Binding="{Binding rtn}"/>
+                                        <DataGridTextColumn Header="Aviones" Width="90" Binding="{Binding aviones}"/>
+                                        <DataGridTextColumn Header="Vuelos" Width="85" Binding="{Binding vuelos}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border x:Name="pnlVacioAerolineas" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="No hay aerolíneas que coincidan con la búsqueda."
+                                               Style="{StaticResource Subtitulo}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Tarjeta}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="Datos de la aerolínea" Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock x:Name="lblModoAerolinea" Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="ID" Style="{StaticResource Etiqueta}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="CÓDIGO" Style="{StaticResource Etiqueta}"/>
+                                        <TextBox x:Name="txtIdAerolinea" Grid.Row="1" Grid.Column="0"
+                                                 Style="{StaticResource CajaTexto}" MaxLength="4"/>
+                                        <TextBox x:Name="txtCodigoAerolinea" Grid.Row="1" Grid.Column="2"
+                                                 Style="{StaticResource CajaTexto}" MaxLength="2" CharacterCasing="Upper"/>
+                                    </Grid>
+
+                                    <TextBlock Text="NOMBRE COMERCIAL" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtNombreAerolinea" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+
+                                    <TextBlock Text="RTN" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtRtn" Style="{StaticResource CajaTexto}" MaxLength="20"/>
+
+                                    <TextBlock Text="El código de dos letras es el que aparece al inicio de cada número de vuelo (AH 210)."
+                                               FontSize="11" TextWrapping="Wrap" Margin="0,10,0,0"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+
+                                    <Border x:Name="pnlUsoAerolinea" Background="{StaticResource BrushPrimarioSuave}"
+                                            CornerRadius="9" Padding="12,10" Margin="0,16,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="lblUsoAerolinea" FontSize="11.5" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource BrushPrimario}"/>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <Grid Grid.Row="1" Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Button x:Name="btnGuardarAerolinea" Grid.Row="0" Grid.ColumnSpan="3"
+                                        Content="💾  Guardar" Style="{StaticResource BotonExito}" Height="40"/>
+                                <Button x:Name="btnNuevaAerolinea" Grid.Row="1" Grid.Column="0" Content="➕  Nueva"
+                                        Style="{StaticResource BotonContorno}" Height="38" Margin="0,8,0,0"/>
+                                <Button x:Name="btnEliminarAerolinea" Grid.Row="1" Grid.Column="2" Content="🗑  Eliminar"
+                                        Style="{StaticResource BotonPeligro}" Height="38" Margin="0,8,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════ AVIONES ═══════════════════════ -->
+            <TabItem Header="Aviones">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="330"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <TextBox x:Name="txtBuscarAvion" Style="{StaticResource CajaTexto}"/>
+                                    <TextBlock Text="Buscar por matrícula, tipo o aerolínea…" FontSize="13.5"
+                                               IsHitTestVisible="False" VerticalAlignment="Center"
+                                               Margin="13,0,0,0" Foreground="{StaticResource BrushTextoSuave}"
+                                               Visibility="{Binding Text, ElementName=txtBuscarAvion,
+                                                            Converter={StaticResource VacioAVisible}}"/>
+                                </Grid>
+                                <TextBlock x:Name="lblTotalAviones" Grid.Column="1" Style="{StaticResource Subtitulo}"
+                                           VerticalAlignment="Center" Margin="14,0,4,0"/>
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgAviones">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Matrícula" Width="100" Binding="{Binding idavion}"
+                                                            ElementStyle="{StaticResource Codigo}"/>
+                                        <DataGridTextColumn Header="Aerolínea" Width="*" Binding="{Binding nombre_aero}"/>
+                                        <DataGridTextColumn Header="Fabricante" Width="130" Binding="{Binding fabricante}"/>
+                                        <DataGridTextColumn Header="Tipo" Width="150" Binding="{Binding tipo}"/>
+                                        <DataGridTextColumn Header="Capacidad" Width="100" Binding="{Binding capacidad_pasajeros}"/>
+                                        <DataGridTextColumn Header="Por fila" Width="85" Binding="{Binding asientos_por_fila}"/>
+                                        <DataGridTextColumn Header="Asientos" Width="95" Binding="{Binding asientos}"/>
+                                        <DataGridTextColumn Header="Vuelos" Width="85" Binding="{Binding vuelos}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border x:Name="pnlVacioAviones" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="No hay aviones que coincidan con la búsqueda."
+                                               Style="{StaticResource Subtitulo}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Tarjeta}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="Datos del avión" Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock x:Name="lblModoAvion" Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+
+                                    <TextBlock Text="MATRÍCULA" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtIdAvion" Style="{StaticResource CajaTexto}"
+                                             MaxLength="5" CharacterCasing="Upper"/>
+
+                                    <TextBlock Text="AEROLÍNEA" Style="{StaticResource Etiqueta}"/>
+                                    <ComboBox x:Name="cboAerolineaAvion" Tag="Selecciona la aerolínea"
+                                              DisplayMemberPath="etiqueta" SelectedValuePath="idaerolinea"/>
+
+                                    <TextBlock Text="FABRICANTE" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtFabricante" Style="{StaticResource CajaTexto}" MaxLength="40"/>
+
+                                    <TextBlock Text="TIPO" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtTipoAvion" Style="{StaticResource CajaTexto}" MaxLength="40"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="CAPACIDAD" Style="{StaticResource Etiqueta}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="POR FILA" Style="{StaticResource Etiqueta}"/>
+                                        <TextBox x:Name="txtCapacidad" Grid.Row="1" Grid.Column="0"
+                                                 Style="{StaticResource CajaTexto}" MaxLength="3"/>
+                                        <ComboBox x:Name="cboAsientosPorFila" Grid.Row="1" Grid.Column="2"
+                                                  Tag="Filas"/>
+                                    </Grid>
+
+                                    <TextBlock x:Name="lblNotaAvion"
+                                               Text="Al guardar un avión nuevo se genera automáticamente todo su mapa de asientos."
+                                               FontSize="11" TextWrapping="Wrap" Margin="0,10,0,0"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+
+                                    <Border x:Name="pnlAvisoAvion" Background="{StaticResource BrushAdvSuave}"
+                                            CornerRadius="9" Padding="12,10" Margin="0,12,0,0" Visibility="Collapsed">
+                                        <TextBlock Text="La capacidad y la distribución no se pueden cambiar: el mapa de asientos ya está generado y hay boletos que dependen de él."
+                                                   FontSize="11.5" TextWrapping="Wrap" Foreground="#92400E"/>
+                                    </Border>
+
+                                    <Border x:Name="pnlUsoAvion" Background="{StaticResource BrushPrimarioSuave}"
+                                            CornerRadius="9" Padding="12,10" Margin="0,12,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="lblUsoAvion" FontSize="11.5" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource BrushPrimario}"/>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <Grid Grid.Row="1" Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Button x:Name="btnGuardarAvion" Grid.Row="0" Grid.ColumnSpan="3"
+                                        Content="💾  Guardar" Style="{StaticResource BotonExito}" Height="40"/>
+                                <Button x:Name="btnNuevoAvion" Grid.Row="1" Grid.Column="0" Content="➕  Nuevo"
+                                        Style="{StaticResource BotonContorno}" Height="38" Margin="0,8,0,0"/>
+                                <Button x:Name="btnEliminarAvion" Grid.Row="1" Grid.Column="2" Content="🗑  Eliminar"
+                                        Style="{StaticResource BotonPeligro}" Height="38" Margin="0,8,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════ TARIFAS ═══════════════════════ -->
+            <TabItem Header="Tarifas">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="330"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Margin="2,0,0,14">
+                                <TextBlock Text="Tarifas por clase" Style="{StaticResource TituloTarjeta}"/>
+                                <TextBlock Text="Las tres clases de cabina son fijas: solo se ajustan sus valores."
+                                           Style="{StaticResource Subtitulo}" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgTarifas">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Clase" Width="*" Binding="{Binding clase}"/>
+                                        <DataGridTextColumn Header="Multiplicador" Width="130"
+                                                            Binding="{Binding multiplicador, StringFormat='×{0:N2}'}"/>
+                                        <DataGridTextColumn Header="Impuesto" Width="110"
+                                                            Binding="{Binding impuesto_pct, StringFormat='{}{0:N2} %'}"/>
+                                        <DataGridTextColumn Header="Equipaje" Width="110"
+                                                            Binding="{Binding equipaje_incluido_kg, StringFormat='{}{0} kg'}"/>
+                                        <DataGridTextColumn Header="Asientos" Width="100" Binding="{Binding asientos}"/>
+                                        <DataGridTextColumn Header="Boletos" Width="100" Binding="{Binding boletos}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border x:Name="pnlVacioTarifas" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="No hay tarifas configuradas."
+                                               Style="{StaticResource Subtitulo}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Tarjeta}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="Ajustar la tarifa" Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock x:Name="lblModoTarifa" Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+
+                                    <TextBlock Text="CLASE" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtClaseTarifa" Style="{StaticResource CajaTexto}"
+                                             IsReadOnly="True" Focusable="False"/>
+
+                                    <TextBlock Text="MULTIPLICADOR" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtMultiplicador" Style="{StaticResource CajaTexto}" MaxLength="6"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="IMPUESTO (%)" Style="{StaticResource Etiqueta}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="EQUIPAJE (KG)" Style="{StaticResource Etiqueta}"/>
+                                        <TextBox x:Name="txtImpuestoTarifa" Grid.Row="1" Grid.Column="0"
+                                                 Style="{StaticResource CajaTexto}" MaxLength="5"/>
+                                        <TextBox x:Name="txtEquipaje" Grid.Row="1" Grid.Column="2"
+                                                 Style="{StaticResource CajaTexto}" MaxLength="3"/>
+                                    </Grid>
+
+                                    <Border Background="{StaticResource BrushPrimarioSuave}" CornerRadius="9"
+                                            Padding="12,10" Margin="0,18,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Cómo se calcula el precio" FontSize="11.5" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource BrushPrimario}"/>
+                                            <TextBlock Text="Precio del asiento = precio base del vuelo × multiplicador de la clase. El impuesto se aplica sobre ese resultado."
+                                                       FontSize="11.5" TextWrapping="Wrap" Margin="0,5,0,0"
+                                                       Foreground="{StaticResource BrushPrimario}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <TextBlock x:Name="lblUsoTarifa" FontSize="11" TextWrapping="Wrap" Margin="0,12,0,0"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <Button x:Name="btnGuardarTarifa" Grid.Row="1" Content="💾  Guardar"
+                                    Style="{StaticResource BotonExito}" Height="40" Margin="0,16,0,0"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ═══════════════════════ MÉTODOS DE PAGO ═══════════════════════ -->
+            <TabItem Header="Métodos de pago">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="330"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0" Margin="2,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Formas de cobro" Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock Text="Cada pago registrado en caja se asocia a uno de estos métodos."
+                                               Style="{StaticResource Subtitulo}" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                <TextBlock x:Name="lblTotalMetodos" Grid.Column="1" Style="{StaticResource Subtitulo}"
+                                           VerticalAlignment="Center" Margin="14,0,4,0"/>
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <DataGrid x:Name="dgMetodos">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Método" Width="*" Binding="{Binding nombre}"/>
+                                        <DataGridTextColumn Header="Pagos" Width="110" Binding="{Binding pagos}"/>
+                                        <DataGridTextColumn Header="Recaudado" Width="180"
+                                                            Binding="{Binding recaudado, StringFormat='L {0:N2}'}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border x:Name="pnlVacioMetodos" Background="White" Margin="1,40,1,1"
+                                        Visibility="Collapsed">
+                                    <TextBlock Text="No hay métodos de pago registrados."
+                                               Style="{StaticResource Subtitulo}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource Tarjeta}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="Datos del método" Style="{StaticResource TituloTarjeta}"/>
+                                    <TextBlock x:Name="lblModoMetodo" Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+
+                                    <TextBlock Text="NOMBRE" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtNombreMetodo" Style="{StaticResource CajaTexto}" MaxLength="40"/>
+
+                                    <Border x:Name="pnlUsoMetodo" Background="{StaticResource BrushPrimarioSuave}"
+                                            CornerRadius="9" Padding="12,10" Margin="0,16,0,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="lblUsoMetodo" FontSize="11.5" TextWrapping="Wrap"
+                                                   Foreground="{StaticResource BrushPrimario}"/>
+                                    </Border>
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <Grid Grid.Row="1" Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Button x:Name="btnGuardarMetodo" Grid.Row="0" Grid.ColumnSpan="3"
+                                        Content="💾  Guardar" Style="{StaticResource BotonExito}" Height="40"/>
+                                <Button x:Name="btnNuevoMetodo" Grid.Row="1" Grid.Column="0" Content="➕  Nuevo"
+                                        Style="{StaticResource BotonContorno}" Height="38" Margin="0,8,0,0"/>
+                                <Button x:Name="btnEliminarMetodo" Grid.Row="1" Grid.Column="2" Content="🗑  Eliminar"
+                                        Style="{StaticResource BotonPeligro}" Height="38" Margin="0,8,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</UserControl>
