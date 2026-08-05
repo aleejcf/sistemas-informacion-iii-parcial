@@ -7,6 +7,17 @@
     <UseWPF>true</UseWPF>
     <OptionStrict>Off</OptionStrict>
     <OptionExplicit>On</OptionExplicit>
+
+    <!-- Icono del ARCHIVO .exe. `Icon="{StaticResource IconoApp}"` en las ventanas
+         solo pinta el icono en tiempo de ejecución; sin esto, el Explorador, el
+         acceso directo del escritorio y la barra de tareas muestran el icono
+         genérico de Windows. Se regenera con Assets\GenerarIcono.ps1. -->
+    <ApplicationIcon>Assets\alas.ico</ApplicationIcon>
+
+    <AssemblyTitle>ALAS Honduras</AssemblyTitle>
+    <Product>ALAS Honduras</Product>
+    <Description>Sistema de reserva de vuelos — III Parcial</Description>
+    <Company>Alejandro Calderón</Company>
   </PropertyGroup>
 
   <ItemGroup>

@@ -14,9 +14,10 @@
     </Window.RenderTransform>
 
     <!-- La marca va a la izquierda y el cielo a la derecha. No hay barra de
-         progreso: el progreso ES el vuelo. El avión recorre la ruta TGU–MAD
-         dejando su estela detrás, y el aeropuerto de destino se enciende al
-         llegar. En cuanto la base de datos responde, el avión acelera y aterriza. -->
+         progreso: el progreso ES el vuelo. El avión recorre la ruta dejando su
+         estela detrás y el aeropuerto de destino se enciende al llegar.
+         El cielo nunca se queda quieto —nubes, estrellas, el radar del
+         aeropuerto y un avión lejano— para que la espera no parezca un cuelgue. -->
     <Border CornerRadius="24" ClipToBounds="True" Background="{StaticResource BrushCielo}">
         <Border.Effect>
             <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="32" ShadowDepth="6"/>
@@ -28,12 +29,12 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ══════════ FONDO: sol, estrellas y nubes ══════════ -->
+            <!-- ══════════ FONDO: amanecer, estrellas, nubes y tráfico lejano ══════════ -->
             <Canvas Grid.ColumnSpan="2" ClipToBounds="True">
 
                 <!-- El amanecer asomando por debajo del horizonte, a la derecha.
                      Va con degradado radial que muere en transparente: un relleno
-                     plano dejaria el canto del circulo marcado sobre el cielo. -->
+                     plano dejaría el canto del círculo marcado sobre el cielo. -->
                 <Ellipse Canvas.Left="486" Canvas.Top="214" Width="470" Height="470">
                     <Ellipse.Fill>
                         <RadialGradientBrush>
@@ -46,19 +47,39 @@
 
                 <!-- Estrellas: titilan con ritmos distintos para que ninguna
                      acompañe a otra y el cielo no parezca una guirnalda -->
-                <Ellipse x:Name="estrella1" Canvas.Left="96"  Canvas.Top="42"  Width="2.4" Height="2.4" Fill="White"/>
-                <Ellipse x:Name="estrella2" Canvas.Left="188" Canvas.Top="26"  Width="2"   Height="2"   Fill="White"/>
-                <Ellipse x:Name="estrella3" Canvas.Left="262" Canvas.Top="66"  Width="2.6" Height="2.6" Fill="White"/>
-                <Ellipse x:Name="estrella4" Canvas.Left="404" Canvas.Top="34"  Width="2.2" Height="2.2" Fill="White"/>
-                <Ellipse x:Name="estrella5" Canvas.Left="512" Canvas.Top="88"  Width="2"   Height="2"   Fill="White"/>
-                <Ellipse x:Name="estrella6" Canvas.Left="146" Canvas.Top="88"  Width="1.8" Height="1.8" Fill="White"/>
-                <Ellipse x:Name="estrella7" Canvas.Left="332" Canvas.Top="18"  Width="2"   Height="2"   Fill="White"/>
-                <Ellipse x:Name="estrella8" Canvas.Left="626" Canvas.Top="52"  Width="2.4" Height="2.4" Fill="White"/>
+                <Ellipse x:Name="estrella1"  Canvas.Left="96"  Canvas.Top="42"  Width="2.4" Height="2.4" Fill="White"/>
+                <Ellipse x:Name="estrella2"  Canvas.Left="188" Canvas.Top="26"  Width="2"   Height="2"   Fill="White"/>
+                <Ellipse x:Name="estrella3"  Canvas.Left="262" Canvas.Top="66"  Width="2.6" Height="2.6" Fill="White"/>
+                <Ellipse x:Name="estrella4"  Canvas.Left="404" Canvas.Top="34"  Width="2.2" Height="2.2" Fill="White"/>
+                <Ellipse x:Name="estrella5"  Canvas.Left="512" Canvas.Top="88"  Width="2"   Height="2"   Fill="White"/>
+                <Ellipse x:Name="estrella6"  Canvas.Left="146" Canvas.Top="88"  Width="1.8" Height="1.8" Fill="White"/>
+                <Ellipse x:Name="estrella7"  Canvas.Left="332" Canvas.Top="18"  Width="2"   Height="2"   Fill="White"/>
+                <Ellipse x:Name="estrella8"  Canvas.Left="626" Canvas.Top="52"  Width="2.4" Height="2.4" Fill="White"/>
+                <Ellipse x:Name="estrella9"  Canvas.Left="230" Canvas.Top="112" Width="1.8" Height="1.8" Fill="White"/>
+                <Ellipse x:Name="estrella10" Canvas.Left="466" Canvas.Top="16"  Width="2.2" Height="2.2" Fill="White"/>
+                <Ellipse x:Name="estrella11" Canvas.Left="700" Canvas.Top="96"  Width="2"   Height="2"   Fill="White"/>
+                <Ellipse x:Name="estrella12" Canvas.Left="58"  Canvas.Top="66"  Width="2"   Height="2"   Fill="White"/>
+
+                <!-- Otro avión, mucho más lejos: cruza el cielo sin parar y sin
+                     tener nada que ver con la carga. Está para que el cielo se
+                     sienta un cielo con tráfico y no un cartel quieto. -->
+                <Canvas Canvas.Left="-70" Canvas.Top="62">
+                    <Canvas.RenderTransform>
+                        <TranslateTransform x:Name="desplazaLejano"/>
+                    </Canvas.RenderTransform>
+                    <Path Data="{StaticResource GeoAvion}" Fill="White" Opacity="0.16"
+                          Stretch="Uniform" Width="13" Height="13"
+                          RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <RotateTransform Angle="90"/>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
 
                 <!-- Nube alta: cruza despacio, es la que queda más lejos.
                      El desenfoque es lo que las hace nube: sin él se les ve el
                      canto de cada elipse y parecen manchas pegadas. -->
-                <Canvas x:Name="nubeAlta" Canvas.Left="-200" Canvas.Top="74" Opacity="0.075">
+                <Canvas Canvas.Left="-200" Canvas.Top="74" Opacity="0.075">
                     <Canvas.RenderTransform>
                         <TranslateTransform x:Name="desplazaAlta"/>
                     </Canvas.RenderTransform>
@@ -72,7 +93,7 @@
 
                 <!-- Nube baja: más grande y más rápida, da sensación de profundidad.
                      Va pegada al borde de abajo para no cruzarse con la marca. -->
-                <Canvas x:Name="nubeBaja" Canvas.Left="-260" Canvas.Top="330" Opacity="0.06">
+                <Canvas Canvas.Left="-260" Canvas.Top="330" Opacity="0.06">
                     <Canvas.RenderTransform>
                         <TranslateTransform x:Name="desplazaBaja"/>
                     </Canvas.RenderTransform>
@@ -86,7 +107,7 @@
             </Canvas>
 
             <!-- ══════════ MARCA ══════════ -->
-            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="46,0,0,0">
+            <StackPanel Grid.Column="0" x:Name="panelMarca" VerticalAlignment="Center" Margin="46,0,0,0">
                 <local:LogoAlas x:Name="logo" Tamano="66" HorizontalAlignment="Left"/>
 
                 <TextBlock Margin="0,18,0,0">
@@ -119,34 +140,56 @@
                       StrokeDashArray="4 6" Opacity="0.22"
                       Data="M 26,236 C 140,236 250,180 404,62"/>
 
-                <!-- La estela: se dibuja por código conforme avanza el vuelo -->
+                <!-- La estela: se dibuja por código conforme avanza el vuelo.
+                     Arranca en transparente porque el aire la va deshaciendo:
+                     lo más viejo se borra y lo pegado al avión es lo más blanco. -->
                 <Path x:Name="estela" StrokeThickness="2.6"
                       StrokeStartLineCap="Round" StrokeEndLineCap="Round">
                     <Path.Stroke>
                         <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
-                            <GradientStop Color="#F2B01E" Offset="0"/>
-                            <GradientStop Color="#FFFFFF" Offset="1"/>
+                            <GradientStop Color="#00F2B01E" Offset="0"/>
+                            <GradientStop Color="#B3F2B01E" Offset="0.38"/>
+                            <GradientStop Color="#FFFFFFFF" Offset="1"/>
                         </LinearGradientBrush>
                     </Path.Stroke>
                 </Path>
+
+                <!-- Radar del aeropuerto de origen: tres anillos que se abren y se
+                     apagan, desfasados entre sí. Es lo que mantiene vivo el cielo
+                     cuando la carga se queda esperando a la base de datos. -->
+                <Ellipse x:Name="radar1" Canvas.Left="-6" Canvas.Top="204" Width="76" Height="76"
+                         Stroke="White" StrokeThickness="1.2" Opacity="0"
+                         RenderTransformOrigin="0.5,0.5">
+                    <Ellipse.RenderTransform>
+                        <ScaleTransform x:Name="escalaRadar1" ScaleX="0.2" ScaleY="0.2"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                <Ellipse x:Name="radar2" Canvas.Left="-6" Canvas.Top="204" Width="76" Height="76"
+                         Stroke="White" StrokeThickness="1.2" Opacity="0"
+                         RenderTransformOrigin="0.5,0.5">
+                    <Ellipse.RenderTransform>
+                        <ScaleTransform x:Name="escalaRadar2" ScaleX="0.2" ScaleY="0.2"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                <Ellipse x:Name="radar3" Canvas.Left="-6" Canvas.Top="204" Width="76" Height="76"
+                         Stroke="White" StrokeThickness="1.2" Opacity="0"
+                         RenderTransformOrigin="0.5,0.5">
+                    <Ellipse.RenderTransform>
+                        <ScaleTransform x:Name="escalaRadar3" ScaleX="0.2" ScaleY="0.2"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
 
                 <!-- Aeropuerto de origen: siempre encendido, de ahí se sale -->
                 <Ellipse Canvas.Left="20" Canvas.Top="230" Width="12" Height="12"
                          Fill="White" Opacity="0.85"/>
                 <Ellipse Canvas.Left="23" Canvas.Top="233" Width="6" Height="6"
                          Fill="{StaticResource BrushLateral}"/>
-                <TextBlock Canvas.Left="14" Canvas.Top="248" Text="TGU"
-                           Foreground="White" Opacity="0.75"
-                           FontFamily="Consolas" FontSize="11.5" FontWeight="Bold"/>
 
-                <!-- Aeropuerto de destino: apagado hasta que el avión llega -->
+                <!-- Aeropuerto de destino: late esperando y se enciende al llegar -->
                 <Ellipse x:Name="haloDestino" Canvas.Left="384" Canvas.Top="42"
                          Width="52" Height="52" Fill="{StaticResource BrushAcento}" Opacity="0"/>
                 <Ellipse x:Name="puntoDestino" Canvas.Left="398" Canvas.Top="56"
                          Width="12" Height="12" Fill="White" Opacity="0.28"/>
-                <TextBlock x:Name="lblDestino" Canvas.Left="392" Canvas.Top="26" Text="MAD"
-                           Foreground="White" Opacity="0.35"
-                           FontFamily="Consolas" FontSize="11.5" FontWeight="Bold"/>
 
                 <!-- El avión. Su posición y su inclinación las calcula el código
                      a partir de la propia curva, así que siempre va encarado
@@ -189,16 +232,12 @@
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
 
-                    <DoubleAnimation Storyboard.TargetName="logo"
-                                     Storyboard.TargetProperty="Opacity"
-                                     From="0" To="1" Duration="0:0:0.8" BeginTime="0:0:0.15"/>
-
                     <!-- El avión asoma en cuanto empieza a rodar -->
                     <DoubleAnimation Storyboard.TargetName="avion"
                                      Storyboard.TargetProperty="Opacity"
-                                     From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.3"/>
+                                     From="0" To="1" Duration="0:0:0.5" BeginTime="0:0:0.5"/>
 
-                    <!-- ── Nubes: cruzan sin parar, a distinta velocidad ── -->
+                    <!-- ── Nubes y tráfico lejano: cruzan sin parar ── -->
                     <DoubleAnimation Storyboard.TargetName="desplazaAlta"
                                      Storyboard.TargetProperty="X"
                                      From="0" To="1180" Duration="0:0:26"
@@ -207,24 +246,58 @@
                                      Storyboard.TargetProperty="X"
                                      From="0" To="1240" Duration="0:0:17"
                                      RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="desplazaLejano"
+                                     Storyboard.TargetProperty="X"
+                                     From="0" To="920" Duration="0:0:21"
+                                     RepeatBehavior="Forever"/>
+
+                    <!-- ── Radar del aeropuerto: tres anillos desfasados ── -->
+                    <DoubleAnimation Storyboard.TargetName="escalaRadar1" Storyboard.TargetProperty="ScaleX"
+                                     From="0.15" To="1" Duration="0:0:2.7" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="escalaRadar1" Storyboard.TargetProperty="ScaleY"
+                                     From="0.15" To="1" Duration="0:0:2.7" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="radar1" Storyboard.TargetProperty="Opacity"
+                                     From="0.55" To="0" Duration="0:0:2.7" RepeatBehavior="Forever"/>
+
+                    <DoubleAnimation Storyboard.TargetName="escalaRadar2" Storyboard.TargetProperty="ScaleX"
+                                     From="0.15" To="1" Duration="0:0:2.7" BeginTime="0:0:0.9" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="escalaRadar2" Storyboard.TargetProperty="ScaleY"
+                                     From="0.15" To="1" Duration="0:0:2.7" BeginTime="0:0:0.9" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="radar2" Storyboard.TargetProperty="Opacity"
+                                     From="0.55" To="0" Duration="0:0:2.7" BeginTime="0:0:0.9" RepeatBehavior="Forever"/>
+
+                    <DoubleAnimation Storyboard.TargetName="escalaRadar3" Storyboard.TargetProperty="ScaleX"
+                                     From="0.15" To="1" Duration="0:0:2.7" BeginTime="0:0:1.8" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="escalaRadar3" Storyboard.TargetProperty="ScaleY"
+                                     From="0.15" To="1" Duration="0:0:2.7" BeginTime="0:0:1.8" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="radar3" Storyboard.TargetProperty="Opacity"
+                                     From="0.55" To="0" Duration="0:0:2.7" BeginTime="0:0:1.8" RepeatBehavior="Forever"/>
 
                     <!-- ── Estrellas titilando ── -->
-                    <DoubleAnimation Storyboard.TargetName="estrella1" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella1"  Storyboard.TargetProperty="Opacity"
                                      From="0.85" To="0.15" Duration="0:0:1.7" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="estrella2" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella2"  Storyboard.TargetProperty="Opacity"
                                      From="0.25" To="0.9"  Duration="0:0:2.3" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="estrella3" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella3"  Storyboard.TargetProperty="Opacity"
                                      From="0.7"  To="0.2"  Duration="0:0:1.3" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="estrella4" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella4"  Storyboard.TargetProperty="Opacity"
                                      From="0.2"  To="0.8"  Duration="0:0:2.9" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="estrella5" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella5"  Storyboard.TargetProperty="Opacity"
                                      From="0.9"  To="0.3"  Duration="0:0:2.1" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="estrella6" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella6"  Storyboard.TargetProperty="Opacity"
                                      From="0.35" To="0.85" Duration="0:0:1.5" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="estrella7" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella7"  Storyboard.TargetProperty="Opacity"
                                      From="0.8"  To="0.25" Duration="0:0:2.6" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="estrella8" Storyboard.TargetProperty="Opacity"
+                    <DoubleAnimation Storyboard.TargetName="estrella8"  Storyboard.TargetProperty="Opacity"
                                      From="0.3"  To="0.9"  Duration="0:0:1.9" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="estrella9"  Storyboard.TargetProperty="Opacity"
+                                     From="0.75" To="0.2"  Duration="0:0:3.1" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="estrella10" Storyboard.TargetProperty="Opacity"
+                                     From="0.2"  To="0.85" Duration="0:0:1.6" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="estrella11" Storyboard.TargetProperty="Opacity"
+                                     From="0.65" To="0.25" Duration="0:0:2.4" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="estrella12" Storyboard.TargetProperty="Opacity"
+                                     From="0.3"  To="0.8"  Duration="0:0:2.8" AutoReverse="True" RepeatBehavior="Forever"/>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>

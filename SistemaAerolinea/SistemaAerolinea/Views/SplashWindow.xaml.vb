@@ -1,3 +1,4 @@
+Imports System.Diagnostics
 Imports System.Windows.Media
 Imports System.Windows.Media.Animation
 Imports System.Windows.Threading
@@ -8,11 +9,30 @@ Imports System.Windows.Threading
 '''
 ''' No hay barra de progreso: el progreso es el vuelo. El avión recorre la ruta
 ''' dejando su estela detrás y el aeropuerto de destino se enciende al llegar.
-''' Y no hay espera artificial — en cuanto la base responde, el vuelo se completa
-''' y la ventana cede el paso.</summary>
+'''
+''' El vuelo dura unos cinco segundos aunque la base conteste al instante. No es
+''' relleno: es el rato que tarda el sistema en terminar de arrancar, y verlo
+''' volar se lleva mejor que ver una ventana congelada.</summary>
 Public Class SplashWindow
 
     Private WithEvents temporizador As New DispatcherTimer With {.Interval = TimeSpan.FromMilliseconds(16)}
+
+    ''' <summary>Cuánto dura cada tramo del vuelo, en segundos.
+    '''
+    ''' El avance se calcula con el reloj y NO sumando un poco en cada fotograma:
+    ''' DispatcherTimer no garantiza el intervalo que se le pide —pedirle 16 ms y
+    ''' que dispare cada 28 es lo normal— así que contar fotogramas hacía que el
+    ''' splash durase casi el doble de lo previsto, y en otra máquina duraría otra
+    ''' cosa. Atado al reloj, dura lo que dice aquí en cualquier equipo.</summary>
+    Private Const SEGUNDOS_CRUCERO As Double = 3.0
+    Private Const SEGUNDOS_APROXIMACION As Double = 0.8
+
+    ''' <summary>Hasta dónde se vuela sin saber nada de la base de datos. El resto
+    ''' del trayecto solo se recorre cuando ya ha contestado.</summary>
+    Private Const ESPERA_A_LA_BASE As Double = 70
+
+    Private ReadOnly reloj As New Stopwatch()
+    Private segundoDeAproximacion As Double = -1
 
     Private progreso As Double = 0
     Private bdLista As Boolean = False
@@ -32,10 +52,16 @@ Public Class SplashWindow
         MuestrearRuta()
         ColocarAvion(0)
 
+        ' La marca entra escalonada, línea por línea, en vez de aparecer entera
+        TransicionVentana.EntradaEnCascada(panelMarca, pasoMs:=85)
+        LatirDestino()
+
         Task.Run(Sub()
                      bdConError = Not Db.HayConexion()
                      bdLista = True
                  End Sub)
+
+        reloj.Start()
         temporizador.Start()
     End Sub
 
@@ -68,12 +94,19 @@ Public Class SplashWindow
     End Sub
 
     Private Sub temporizador_Tick(sender As Object, e As EventArgs) Handles temporizador.Tick
-        ' Avanza hasta 70 por su cuenta; de ahí en adelante solo si la base ya
-        ' respondió. Si responde rápido, el vuelo dura poco más de un segundo.
-        If progreso < 70 Then
-            progreso += 1.15
+        Dim segundos = reloj.Elapsed.TotalSeconds
+
+        If progreso < ESPERA_A_LA_BASE Then
+            ' Tramo de crucero: se vuela a ciegas mientras la base contesta
+            progreso = Math.Min(ESPERA_A_LA_BASE, ESPERA_A_LA_BASE * segundos / SEGUNDOS_CRUCERO)
+
         ElseIf bdLista Then
-            progreso += 2.6
+            ' Aproximación: empieza a contar desde que la base contestó, no desde
+            ' que arrancó el splash, o una base lenta se saltaría el tramo entero
+            If segundoDeAproximacion < 0 Then segundoDeAproximacion = segundos
+
+            Dim avance = (segundos - segundoDeAproximacion) / SEGUNDOS_APROXIMACION
+            progreso = ESPERA_A_LA_BASE + (100 - ESPERA_A_LA_BASE) * Math.Min(1, avance)
         End If
         If progreso > 100 Then progreso = 100
 
@@ -127,7 +160,7 @@ Public Class SplashWindow
             lblEstado.Text = "Encendiendo motores…"
         ElseIf progreso < 50 Then
             lblEstado.Text = "Conectando con la torre de control…"
-        ElseIf progreso < 70 Then
+        ElseIf progreso < ESPERA_A_LA_BASE Then
             lblEstado.Text = "Cargando itinerarios…"
         ElseIf progreso < 100 Then
             lblEstado.Text = "En ruta…"
@@ -135,6 +168,17 @@ Public Class SplashWindow
             ' El avión acaba de aterrizar, así que aquí ya no toca "listos para despegar"
             lblEstado.Text = If(bdConError, "⚠  Sin conexión a la base de datos", "Bienvenido a bordo")
         End If
+    End Sub
+
+    ''' <summary>El aeropuerto de destino late flojito mientras espera al avión.
+    ''' Se anima desde el código, no desde el guion del XAML, para que el destello
+    ''' de la llegada pueda sustituir a este latido sin pelearse con él.</summary>
+    Private Sub LatirDestino()
+        puntoDestino.BeginAnimation(UIElement.OpacityProperty,
+            New DoubleAnimation(0.22, 0.55, TimeSpan.FromMilliseconds(1150)) With {
+                .AutoReverse = True,
+                .RepeatBehavior = RepeatBehavior.Forever
+            })
     End Sub
 
     ''' <summary>Enciende el aeropuerto de destino y deja ver el aterrizaje un
@@ -152,11 +196,11 @@ Public Class SplashWindow
             Return
         End If
 
-        Dim despedida As New DispatcherTimer With {.Interval = TimeSpan.FromMilliseconds(620)}
+        Dim despedida As New DispatcherTimer With {.Interval = TimeSpan.FromMilliseconds(900)}
         AddHandler despedida.Tick,
             Sub()
                 despedida.Stop()
-                Dim fundido As New DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(280))
+                Dim fundido As New DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(320))
                 AddHandler fundido.Completed, Sub() Terminar()
                 BeginAnimation(UIElement.OpacityProperty, fundido)
             End Sub
@@ -164,14 +208,14 @@ Public Class SplashWindow
     End Sub
 
     Private Sub EncenderDestino()
+        ' Sustituye al latido de la espera: la última animación que se lanza sobre
+        ' una propiedad es la que manda
         puntoDestino.BeginAnimation(UIElement.OpacityProperty,
-            New DoubleAnimation(1, TimeSpan.FromMilliseconds(320)))
-        lblDestino.BeginAnimation(UIElement.OpacityProperty,
             New DoubleAnimation(1, TimeSpan.FromMilliseconds(320)))
 
         ' El halo se abre y se apaga solo, como el destello de una baliza
         haloDestino.BeginAnimation(UIElement.OpacityProperty,
-            New DoubleAnimation(0.5, TimeSpan.FromMilliseconds(260)) With {
+            New DoubleAnimation(0.5, TimeSpan.FromMilliseconds(280)) With {
                 .AutoReverse = True
             })
     End Sub

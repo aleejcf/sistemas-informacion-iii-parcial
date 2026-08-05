@@ -306,3 +306,34 @@ de control, el buscador de vuelos y el mapa de asientos.
 Tipografía: Segoe UI, con Consolas para códigos de vuelo, asientos y localizadores —igual que en un
 tablero de aeropuerto. El logotipo es **vectorial**: no depende de ningún archivo de imagen y se ve
 nítido en cualquier resolución.
+
+### El icono de la aplicación
+
+`Icon="{StaticResource IconoApp}"` solo pinta el icono de las ventanas en tiempo de ejecución. Para
+que el Explorador, el acceso directo del escritorio y la barra de tareas muestren el avión en vez
+del icono genérico de Windows hace falta un `.ico` de verdad incrustado en el ejecutable, y eso es
+lo que hace `<ApplicationIcon>` en el `.vbproj`.
+
+El archivo se genera a partir de la misma geometría vectorial del logotipo, así que el icono y el
+logo nunca se separan:
+
+```bash
+powershell -ExecutionPolicy Bypass -File "SistemaAerolinea/Assets/GenerarIcono.ps1" "SistemaAerolinea/Assets/alas.ico"
+```
+
+Salen **siete resoluciones** (de 16 a 256 px) en un solo archivo. Las pequeñas van en el formato
+DIB clásico y solo la de 256 en PNG, que es lo que hacen las herramientas de iconos porque no todo
+el shell de Windows lee PNG incrustado. La estela solo se dibuja de 48 px hacia arriba: por debajo
+es un borrón que ensucia el avión.
+
+### La pantalla de bienvenida
+
+No tiene barra de progreso: **el progreso es el vuelo**. El avión recorre la ruta dejando su estela
+detrás y el aeropuerto de destino se enciende al llegar. La posición y la inclinación salen de la
+tangente de la propia curva, así que el avión va siempre encarado hacia donde vuela; si se cambia
+la curva en el XAML, se adapta solo.
+
+Dura unos **cinco segundos**, contados con el reloj y no sumando un poco en cada fotograma:
+`DispatcherTimer` no garantiza el intervalo que se le pide —pedirle 16 ms y que dispare cada 28 es
+lo normal— y contando fotogramas el splash duraba casi el doble de lo previsto y algo distinto en
+cada máquina.
