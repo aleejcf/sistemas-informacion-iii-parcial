@@ -326,6 +326,19 @@ DIB clásico y solo la de 256 en PNG, que es lo que hacen las herramientas de ic
 el shell de Windows lee PNG incrustado. La estela solo se dibuja de 48 px hacia arriba: por debajo
 es un borrón que ensucia el avión.
 
+### La pantalla de acceso
+
+No parte la ventana en marca y formulario: **la ventana es una tarjeta de embarque**. Se lee en
+horizontal, los dos campos van en paralelo como los datos de un pase y no apilados en una columna,
+y el talón lleva lo que lleva un talón.
+
+La perforación con sus dos muescas está **restada de la silueta** con `FillRule="EvenOdd"` en el
+`Clip`, así que son agujeros de verdad —se ve el escritorio a través— y la sombra los rodea. Un par
+de semicírculos pintados encima no habrían pasado por perforación.
+
+La franja de barras del talón es decoración y se dice en el código: el código de verdad, el PDF417
+con la cadena IATA BCBP, va en el pase de abordar que se emite tras el check-in.
+
 ### La pantalla de bienvenida
 
 No tiene barra de progreso: **el progreso es el vuelo**. El avión recorre la ruta dejando su estela

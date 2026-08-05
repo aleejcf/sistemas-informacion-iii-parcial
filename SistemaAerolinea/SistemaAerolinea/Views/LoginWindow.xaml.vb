@@ -12,12 +12,18 @@ Public Class LoginWindow
     Private WithEvents temporizador As New DispatcherTimer With {.Interval = TimeSpan.FromSeconds(1)}
 
     Private Sub LoginWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        TransicionVentana.FundirEntrada(Me)
+        ' La entrada del pase la hace el guion del XAML; aquí solo se escalona
+        ' el contenido del formulario dentro de él
         TransicionVentana.EntradaEnCascada(panelFormulario)
 
         lblSaludo.Text = Formato.Saludo()
         lblFechaMarca.Text = Formato.FechaLarga(DateTime.Now)
         txtUsuario.Focus()
+
+        ' El ancho del talón no se conoce hasta que se mide, así que las barras se
+        ' dibujan cuando el lienzo ya sabe cuánto ocupa
+        AddHandler barras.SizeChanged, Sub() DibujarBarras()
+        DibujarBarras()
 
         ' El botón de Google solo tiene sentido si hay credenciales configuradas
         pnlGoogle.Visibility = If(GoogleAuthService.EstaDisponible(),
@@ -35,6 +41,58 @@ Public Class LoginWindow
 
     Private Sub RevisarMayusculas()
         lblCaps.Visibility = If(Keyboard.IsKeyToggled(Key.CapsLock), Visibility.Visible, Visibility.Collapsed)
+    End Sub
+
+    ' ---------- La ventana sin marco ----------
+
+    ''' <summary>Al no haber barra de título, el pase se arrastra por cualquier
+    ''' punto suyo.</summary>
+    Private Sub Ventana_MouseLeftButtonDown(sender As Object, e As MouseButtonEventArgs)
+        If e.ChangedButton = MouseButton.Left AndAlso e.ButtonState = MouseButtonState.Pressed Then
+            Try
+                Me.DragMove()
+            Catch
+                ' Si el botón se soltó entre el evento y la llamada, no pasa nada
+            End Try
+        End If
+    End Sub
+
+    Private Sub btnCerrar_Click(sender As Object, e As RoutedEventArgs) Handles btnCerrar.Click
+        Application.Current.Shutdown()
+    End Sub
+
+    ''' <summary>La franja de barras del talón. Es decoración y nada más: el código
+    ''' de verdad —PDF417 con la cadena IATA BCBP— va en el pase de abordar que se
+    ''' emite después del check-in, no en una pantalla de acceso. Los anchos son
+    ''' una secuencia fija: con anchos al azar, cada arranque enseñaría un dibujo
+    ''' distinto y se notaría que no codifica nada.</summary>
+    Private Sub DibujarBarras()
+        Dim disponible = barras.ActualWidth
+        If disponible <= 0 Then Return
+
+        Dim anchos = {2.0, 1.0, 3.5, 1.0, 1.5, 2.5, 1.0, 4.0, 1.5, 1.0, 2.0, 3.0, 1.0, 2.5}
+        Dim huecos = {2.0, 3.0, 1.5, 2.5, 2.0, 1.5, 3.0, 2.0, 1.5, 2.5, 2.0, 3.5, 2.0, 1.5}
+
+        Dim tinta = TryCast(TryFindResource("BrushLateral"), Brush)
+        barras.Children.Clear()
+
+        Dim x As Double = 0
+        Dim i As Integer = 0
+
+        While x < disponible
+            Dim ancho = Math.Min(anchos(i Mod anchos.Length), disponible - x)
+
+            Dim barra As New Rectangle With {
+                .Width = ancho,
+                .Height = barras.Height,
+                .Fill = tinta
+            }
+            Canvas.SetLeft(barra, x)
+            barras.Children.Add(barra)
+
+            x += ancho + huecos(i Mod huecos.Length)
+            i += 1
+        End While
     End Sub
 
     ' ---------- Inicio de sesión ----------

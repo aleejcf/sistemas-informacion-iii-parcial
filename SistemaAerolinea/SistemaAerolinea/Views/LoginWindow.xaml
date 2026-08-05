@@ -3,136 +3,255 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:SistemaAerolinea"
         Title="Iniciar sesión — ALAS Honduras" Icon="{StaticResource IconoApp}"
-        Height="580" Width="940"
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Background="White" FontFamily="Segoe UI">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="5*"/>
-            <ColumnDefinition Width="6*"/>
-        </Grid.ColumnDefinitions>
+        Height="510" Width="960"
+        WindowStartupLocation="CenterScreen" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" FontFamily="Segoe UI">
 
-        <!-- ===== Panel de marca ===== -->
-        <Border Grid.Column="0" Background="{StaticResource BrushCielo}" ClipToBounds="True">
+    <!-- La ventana no se parte en marca y formulario: la ventana ES una tarjeta
+         de embarque. Se lee en horizontal, la perforación con sus dos muescas
+         parte de verdad la silueta —está recortada en el Clip, no pintada— y el
+         talón lleva lo que lleva un talón: la fecha, el sistema y su código. -->
+    <Grid x:Name="pase" Width="900" Height="450"
+          HorizontalAlignment="Center" VerticalAlignment="Center"
+          RenderTransformOrigin="0.5,0.5"
+          MouseLeftButtonDown="Ventana_MouseLeftButtonDown">
+
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="entradaPase"/>
+        </Grid.RenderTransform>
+
+        <!-- El recorte es lo que convierte un rectángulo en un billete: las dos
+             muescas se restan de la silueta con EvenOdd, así que son agujeros
+             de verdad y la sombra los rodea. -->
+        <Grid.Clip>
+            <GeometryGroup FillRule="EvenOdd">
+                <RectangleGeometry Rect="0,0,900,450" RadiusX="20" RadiusY="20"/>
+                <EllipseGeometry Center="640,0"   RadiusX="13" RadiusY="13"/>
+                <EllipseGeometry Center="640,450" RadiusX="13" RadiusY="13"/>
+            </GeometryGroup>
+        </Grid.Clip>
+
+        <Grid.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.42" BlurRadius="28" ShadowDepth="7"/>
+        </Grid.Effect>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="640"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="92"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ══════════ CABECERA ══════════ -->
+        <!-- Cruza el pase entero, talón incluido: el degradado del cielo no puede
+             cortarse a medias, y quien separa las dos partes es la perforación -->
+        <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
+                Background="{StaticResource BrushCielo}" ClipToBounds="True">
             <Grid>
-                <!-- Estelas de vuelo -->
-                <Canvas Opacity="0.15">
-                    <Ellipse Canvas.Left="-70" Canvas.Top="-70" Width="240" Height="240"
-                             Fill="{StaticResource BrushAtardecer}" Opacity="0.5"/>
-                    <Path Stroke="White" StrokeThickness="1.3" StrokeDashArray="5 5"
-                          Data="M -40,470 C 120,400 300,300 470,140"/>
-                    <Path Stroke="White" StrokeThickness="1" StrokeDashArray="4 6"
-                          Data="M -40,560 C 150,500 320,420 470,330"/>
+                <!-- Estelas de fondo. Las rayas corren solas: es lo único que se
+                     mueve todo el rato, y no late como un logotipo. -->
+                <Canvas Opacity="0.17">
+                    <Path x:Name="estelaAlta" Stroke="White" StrokeThickness="1.3" StrokeDashArray="5 5"
+                          Data="M -30,86 C 130,66 320,44 700,6"/>
+                    <Path x:Name="estelaBaja" Stroke="White" StrokeThickness="1" StrokeDashArray="4 6"
+                          Data="M -30,116 C 160,104 340,84 700,44"/>
                 </Canvas>
 
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="34">
-                    <local:LogoAlas x:Name="logo" Tamano="116" HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="40,0,0,0">
+                    <local:LogoAlas Tamano="54" VerticalAlignment="Center"/>
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <TextBlock>
+                            <Run Text="A L A S" FontSize="27" Foreground="White" FontWeight="Bold"/>
+                        </TextBlock>
+                        <TextBlock Text="H O N D U R A S" FontSize="10" Foreground="#BFD4E9"
+                                   FontWeight="SemiBold" Margin="1,3,0,0"/>
+                    </StackPanel>
+                </StackPanel>
 
-                    <TextBlock HorizontalAlignment="Center" Margin="0,20,0,0">
-                        <Run Text="A L A S" FontSize="34" Foreground="White" FontWeight="Bold"/>
+            </Grid>
+        </Border>
+
+        <!-- Rótulos de cada mitad, encima de la cabecera -->
+        <TextBlock Grid.Column="0" Grid.Row="0" Text="CONTROL DE ACCESO"
+                   FontSize="10" FontWeight="Bold" Foreground="#7FA0C4"
+                   VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,32,0"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="0" Text="TALÓN"
+                   FontSize="10" FontWeight="Bold" Foreground="#7FA0C4"
+                   VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,18"/>
+
+        <Button x:Name="btnCerrar" Grid.Column="1" Grid.Row="0" Content="✕"
+                Style="{StaticResource BotonPlano}" Foreground="#8AA8C8" FontSize="13"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,10,0"
+                ToolTip="Salir del sistema"/>
+
+        <!-- ══════════ FORMULARIO ══════════ -->
+        <Border Grid.Column="0" Grid.Row="1" Background="White">
+            <StackPanel x:Name="panelFormulario" VerticalAlignment="Center" Margin="46,0,42,0">
+
+                <TextBlock x:Name="lblSaludo" Text="¡Bienvenido!" FontSize="25" FontWeight="Bold"
+                           Foreground="{StaticResource BrushTexto}"/>
+                <TextBlock Text="Identifícate para entrar al mostrador"
+                           Style="{StaticResource Subtitulo}" Margin="0,4,0,0"/>
+
+                <!-- Los dos campos van en paralelo, como los datos de un pase van
+                     uno al lado del otro y no en una columna -->
+                <Grid Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,11,0">
+                        <TextBlock Text="USUARIO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtUsuario" Style="{StaticResource CajaTexto}" Height="42"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="11,0,0,0">
+                        <TextBlock Text="CONTRASEÑA" Style="{StaticResource Etiqueta}"/>
+                        <local:CajaClaveVisible x:Name="txtClave" Height="42"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock x:Name="lblCaps" Text="⚠ Bloq Mayús está activado" FontSize="11"
+                           Foreground="{StaticResource BrushAdvertencia}" Margin="0,8,0,0"
+                           Visibility="Collapsed"/>
+
+                <TextBlock x:Name="lblError" Foreground="{StaticResource BrushPeligro}" FontSize="12"
+                           TextWrapping="Wrap" Margin="0,8,0,0" Visibility="Collapsed"/>
+
+                <!-- Ingresar manda y ocupa lo que queda; Google se pone al lado y
+                     no debajo, y cuando no hay credenciales su columna vale cero
+                     y el botón principal recupera el ancho entero -->
+                <Grid Margin="0,18,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="btnIngresar" Grid.Column="0" Content="Ingresar"
+                            Style="{StaticResource BotonPrimario}" Height="46" FontSize="14"/>
+
+                    <StackPanel x:Name="pnlGoogle" Grid.Column="1" Visibility="Collapsed">
+                        <Button x:Name="btnGoogle" Height="46" Margin="12,0,0,0" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="bd" Background="White" CornerRadius="9"
+                                            BorderBrush="{StaticResource BrushBorde}" BorderThickness="1.5"
+                                            Padding="18,0">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+                                            <!-- La G de Google, vectorial -->
+                                            <Canvas Width="18" Height="18" VerticalAlignment="Center">
+                                                <Path Fill="#4285F4" Data="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+                                                <Path Fill="#34A853" Data="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/>
+                                                <Path Fill="#FBBC05" Data="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/>
+                                                <Path Fill="#EA4335" Data="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
+                                            </Canvas>
+                                            <TextBlock Text="Google" FontSize="13.5"
+                                                       FontWeight="SemiBold" Margin="10,0,0,0"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{StaticResource BrushTexto}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="bd" Property="Background" Value="#F5F8FC"/>
+                                            <Setter TargetName="bd" Property="BorderBrush" Value="#B9CADC"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="bd" Property="Opacity" Value="0.5"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Los enlaces se reparten a los extremos, no se apilan al centro -->
+                <Grid Margin="0,20,0,0">
+                    <TextBlock HorizontalAlignment="Left" FontSize="12.5">
+                        <Hyperlink x:Name="lnkOlvide" Style="{StaticResource EnlaceSutil}">¿Olvidaste tu contraseña?</Hyperlink>
                     </TextBlock>
-                    <TextBlock Text="H O N D U R A S" FontSize="12.5" Foreground="#BFD4E9"
-                               HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,2,0,0"/>
-                    <TextBlock Text="Conectamos Honduras con el mundo."
-                               FontSize="12.5" FontStyle="Italic" Foreground="{StaticResource BrushAcento}"
-                               HorizontalAlignment="Center" Margin="0,16,0,0" TextAlignment="Center"/>
+                    <TextBlock HorizontalAlignment="Right" FontSize="12.5">
+                        <Run Text="¿No tienes cuenta?" Foreground="{StaticResource BrushTextoSuave}"/>
+                        <Hyperlink x:Name="lnkRegistro" Style="{StaticResource EnlaceEnfasis}">Regístrate aquí</Hyperlink>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </Border>
 
-                    <Border Background="#1A3555" CornerRadius="11" Padding="16,12" Margin="0,30,0,0">
-                        <StackPanel>
-                            <TextBlock Text="SISTEMA DE RESERVA DE VUELOS" FontSize="9.5"
-                                       Foreground="#8AA8C8" FontWeight="Bold" HorizontalAlignment="Center"/>
-                            <TextBlock x:Name="lblFechaMarca" FontSize="11" Foreground="White"
-                                       HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                        </StackPanel>
-                    </Border>
+        <!-- ══════════ TALÓN ══════════ -->
+        <Border Grid.Column="1" Grid.Row="1" Background="#F1F6FB">
+            <Grid Margin="26,26,24,20">
+                <StackPanel VerticalAlignment="Top">
+                    <TextBlock Text="FECHA" Style="{StaticResource Etiqueta}" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="lblFechaMarca" Style="{StaticResource Codigo}" FontSize="11.5"
+                               TextWrapping="Wrap"/>
+
+                    <TextBlock Text="SISTEMA" Style="{StaticResource Etiqueta}" Margin="0,18,0,4"/>
+                    <TextBlock Text="RESERVA DE VUELOS" Style="{StaticResource Codigo}" FontSize="11.5"
+                               TextWrapping="Wrap"/>
+
+                    <TextBlock Text="PUERTA" Style="{StaticResource Etiqueta}" Margin="0,18,0,4"/>
+                    <TextBlock Text="ACCESO" Style="{StaticResource Codigo}" FontSize="11.5"
+                               Foreground="{StaticResource BrushPrimario}"/>
+                </StackPanel>
+
+                <StackPanel VerticalAlignment="Bottom">
+                    <!-- Franja de barras: es decoración, no un código legible. El
+                         PDF417 de verdad, con la cadena IATA BCBP, va en el pase
+                         de abordar que se emite tras el check-in. -->
+                    <Canvas x:Name="barras" Height="52" ClipToBounds="True"/>
+
+                    <TextBlock Text="III Parcial · Alejandro Calderón" FontSize="9"
+                               Foreground="{StaticResource BrushTextoSuave}"
+                               Margin="0,12,0,0" TextWrapping="Wrap"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ===== Formulario ===== -->
-        <StackPanel x:Name="panelFormulario" Grid.Column="1" VerticalAlignment="Center" Margin="76,0">
-            <TextBlock x:Name="lblSaludo" Text="¡Bienvenido!" FontSize="26" FontWeight="Bold"
-                       Foreground="{StaticResource BrushTexto}"/>
-            <TextBlock Text="Inicia sesión para entrar al mostrador" FontSize="13"
-                       Foreground="{StaticResource BrushTextoSuave}" Margin="0,4,0,12"/>
-
-            <TextBlock Text="USUARIO" Style="{StaticResource Etiqueta}"/>
-            <TextBox x:Name="txtUsuario" Style="{StaticResource CajaTexto}" Height="42"/>
-
-            <TextBlock Text="CONTRASEÑA" Style="{StaticResource Etiqueta}"/>
-            <local:CajaClaveVisible x:Name="txtClave" Height="42"/>
-
-            <TextBlock x:Name="lblCaps" Text="⚠ Bloq Mayús está activado" FontSize="11"
-                       Foreground="#B45309" Margin="0,7,0,0" Visibility="Collapsed"/>
-
-            <TextBlock x:Name="lblError" Foreground="{StaticResource BrushPeligro}" FontSize="12"
-                       TextWrapping="Wrap" Margin="0,9,0,0" Visibility="Collapsed"/>
-
-            <Button x:Name="btnIngresar" Content="Ingresar" Style="{StaticResource BotonPrimario}"
-                    Height="44" Margin="0,18,0,0" FontSize="14"/>
-
-            <!-- Acceso con Google: solo aparece si hay credenciales configuradas -->
-            <StackPanel x:Name="pnlGoogle" Visibility="Collapsed">
-                <Grid Margin="0,16,0,0">
-                    <Border Height="1" Background="{StaticResource BrushBorde}" VerticalAlignment="Center"/>
-                    <Border Background="White" Padding="12,0" HorizontalAlignment="Center">
-                        <TextBlock Text="o" FontSize="11.5" Foreground="{StaticResource BrushTextoSuave}"/>
-                    </Border>
-                </Grid>
-
-                <Button x:Name="btnGoogle" Height="44" Margin="0,16,0,0" Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="bd" Background="White" CornerRadius="9"
-                                    BorderBrush="{StaticResource BrushBorde}" BorderThickness="1.5">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-                                    <!-- La G de Google, vectorial -->
-                                    <Canvas Width="18" Height="18" VerticalAlignment="Center">
-                                        <Path Fill="#4285F4" Data="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
-                                        <Path Fill="#34A853" Data="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/>
-                                        <Path Fill="#FBBC05" Data="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/>
-                                        <Path Fill="#EA4335" Data="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
-                                    </Canvas>
-                                    <TextBlock x:Name="txt" Text="Continuar con Google" FontSize="13.5"
-                                               FontWeight="SemiBold" Margin="12,0,0,0"
-                                               VerticalAlignment="Center"
-                                               Foreground="{StaticResource BrushTexto}"/>
-                                </StackPanel>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="bd" Property="Background" Value="#F5F8FC"/>
-                                    <Setter TargetName="bd" Property="BorderBrush" Value="#B9CADC"/>
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter TargetName="bd" Property="Opacity" Value="0.5"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-            </StackPanel>
-
-            <TextBlock HorizontalAlignment="Center" Margin="0,15,0,0" FontSize="12.5">
-                <Hyperlink x:Name="lnkOlvide" Style="{StaticResource EnlaceSutil}">¿Olvidaste tu contraseña?</Hyperlink>
-            </TextBlock>
-            <TextBlock HorizontalAlignment="Center" Margin="0,8,0,0" FontSize="12.5">
-                <Run Text="¿No tienes cuenta?" Foreground="{StaticResource BrushTextoSuave}"/>
-                <Hyperlink x:Name="lnkRegistro" Style="{StaticResource EnlaceEnfasis}">Regístrate aquí</Hyperlink>
-            </TextBlock>
-        </StackPanel>
+        <!-- ══════════ LA PERFORACIÓN ══════════ -->
+        <!-- Dos tramos porque cruza el azul de la cabecera y el blanco del cuerpo,
+             y una sola raya no puede verse bien sobre los dos -->
+        <Line Grid.Column="1" Grid.Row="0" X1="0" Y1="20" X2="0" Y2="92"
+              Stroke="#4A6D96" StrokeThickness="1.4" StrokeDashArray="3 3"
+              HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
+        <Line Grid.Column="1" Grid.Row="1" X1="0" Y1="0" X2="0" Y2="338"
+              Style="{StaticResource LineaPunteada}"
+              HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
     </Grid>
 
     <Window.Triggers>
         <EventTrigger RoutedEvent="Window.Loaded">
             <BeginStoryboard>
                 <Storyboard>
-                    <!-- El logotipo late suavemente, como una luz de navegación -->
-                    <DoubleAnimation Storyboard.TargetName="logo"
+                    <!-- El pase entra subiendo, como cuando te lo deslizan por el
+                         mostrador -->
+                    <DoubleAnimation Storyboard.TargetName="pase"
                                      Storyboard.TargetProperty="Opacity"
-                                     From="0.7" To="1" Duration="0:0:1.6"
-                                     AutoReverse="True" RepeatBehavior="Forever"/>
+                                     From="0" To="1" Duration="0:0:0.4"/>
+                    <DoubleAnimation Storyboard.TargetName="entradaPase"
+                                     Storyboard.TargetProperty="Y"
+                                     From="26" To="0" Duration="0:0:0.55">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+
+                    <!-- Las estelas de la cabecera corren despacio y sin fin -->
+                    <DoubleAnimation Storyboard.TargetName="estelaAlta"
+                                     Storyboard.TargetProperty="StrokeDashOffset"
+                                     From="0" To="-40" Duration="0:0:6"
+                                     RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="estelaBaja"
+                                     Storyboard.TargetProperty="StrokeDashOffset"
+                                     From="0" To="-30" Duration="0:0:8"
+                                     RepeatBehavior="Forever"/>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
