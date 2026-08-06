@@ -664,19 +664,44 @@ Public Class AuthService
     ''' <summary>Crea una cuenta con contraseña temporal que su dueño deberá cambiar
     ''' al primer inicio de sesión. Devuelve Nothing y la clave generada si salió
     ''' bien; si no, el mensaje de error y una clave vacía.</summary>
+    ''' <param name="idPasajero">Ficha de viajero a la que se liga la cuenta.
+    ''' Obligatoria cuando el rol es Pasajero y se ignora en los demás.</param>
     Public Shared Function CrearPorAdministrador(nombreCompleto As String, email As String,
                                                  usuario As String, rol As String,
-                                                 ByRef claveTemporal As String) As String
+                                                 ByRef claveTemporal As String,
+                                                 Optional idPasajero As String = Nothing) As String
         claveTemporal = ""
 
         If String.IsNullOrWhiteSpace(nombreCompleto) Then Return "Escribe el nombre completo."
         If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
         If Not Validador.EsUsuarioValido(usuario) Then Return "El usuario debe tener de 4 a 30 caracteres (letras, números o _)."
-        ' Se valida contra la lista del servicio y no contra dos textos escritos aquí:
+
+        ' Se valida contra la lista del servicio y no contra textos escritos aquí:
         ' así no puede pasar que la pantalla ofrezca un rol que el alta rechace
-        If Not UsuarioService.RolesDelPersonal.Contains(rol) Then
-            Return "Un Administrador solo puede crear cuentas de Administrador o de Agente."
+        If Not UsuarioService.Roles.Contains(rol) Then Return "Selecciona un rol válido."
+
+        ' Una cuenta de Pasajero se apoya entera en su ficha de viajero: sin ella no
+        ' podría comprar un boleto ni hacer check-in, y el aislamiento del portal se
+        ' calcula a partir de esa ficha. Por eso aquí se liga a una que ya exista en
+        ' vez de volver a pedir documento y fecha de nacimiento: a esa persona la
+        ' registró un agente al venderle su boleto, y lo que falta es darle acceso.
+        Dim ficha As String = Nothing
+        If rol = "Pasajero" Then
+            If String.IsNullOrWhiteSpace(idPasajero) Then
+                Return "Elige a qué viajero pertenece esta cuenta."
+            End If
+
+            ficha = idPasajero.Trim().ToUpper()
+
+            If PasajeroService.Obtener(ficha) Is Nothing Then
+                Return "No se encontró ese viajero."
+            End If
+            If Db.Contar("SELECT COUNT(*) FROM usuario WHERE idpasajero = @p",
+                         New SqlParameter("@p", ficha)) > 0 Then
+                Return "Ese viajero ya tiene una cuenta en el sistema."
+            End If
         End If
+
         If ExisteUsuario(usuario) Then Return "Ese nombre de usuario ya está registrado."
         If ExisteEmail(email) Then Return "Ese correo ya está registrado."
 
@@ -684,13 +709,14 @@ Public Class AuthService
         Dim hash = BCrypt.Net.BCrypt.HashPassword(clave, workFactor:=FACTOR_BCRYPT)
 
         Db.Ejecutar("INSERT INTO usuario (nombre_completo, email, usuario, contrasena_hash, rol,
-                                          debe_cambiar_contrasena)
-                     VALUES (@n, @e, @u, @h, @r, 1)",
+                                          debe_cambiar_contrasena, idpasajero)
+                     VALUES (@n, @e, @u, @h, @r, 1, @idp)",
                     New SqlParameter("@n", nombreCompleto.Trim()),
                     New SqlParameter("@e", email.Trim().ToLower()),
                     New SqlParameter("@u", usuario.Trim()),
                     New SqlParameter("@h", hash),
-                    New SqlParameter("@r", rol))
+                    New SqlParameter("@r", rol),
+                    New SqlParameter("@idp", Db.Opcional(ficha)))
 
         Registro.Info($"Cuenta creada por administrador: {usuario.Trim()} con rol {rol}")
         BitacoraService.Registrar(BitacoraService.CREAR, "usuario",

@@ -299,9 +299,28 @@ Public Class PortalPasajeroTests
         Assert.Contains("Pasajero", UsuarioService.Roles)
         Assert.Contains("Agente", UsuarioService.Roles)
         Assert.Contains("Administrador", UsuarioService.Roles)
+    End Sub
 
-        ' Pero de alta solo se crean cuentas del personal
-        Assert.DoesNotContain("Pasajero", UsuarioService.RolesDelPersonal)
+    ''' <summary>Una cuenta de Pasajero se apoya entera en su ficha de viajero, así
+    ''' que el alta la exige. Sin esto quedaría una cuenta que no puede comprar un
+    ''' boleto y para la que el aislamiento del portal no tiene de dónde calcularse.</summary>
+    <Fact>
+    Public Sub CrearUnPasajeroExigeSuFichaDeViajero()
+        If Not HayBaseDeDatos Then Return
+
+        Dim clave As String = ""
+        Dim sinFicha = AuthService.CrearPorAdministrador(
+            "Viajero De Prueba", "sinficha@prueba.hn", "sinficha_prueba", "Pasajero", clave)
+
+        Assert.Contains("viajero", sinFicha, StringComparison.OrdinalIgnoreCase)
+        Assert.Equal("", clave)
+
+        ' Y una ficha que no existe tampoco vale
+        Dim inventada = AuthService.CrearPorAdministrador(
+            "Viajero De Prueba", "sinficha@prueba.hn", "sinficha_prueba", "Pasajero", clave, "P9999999")
+
+        Assert.Contains("No se encontró", inventada)
+        Assert.Equal("", clave)
     End Sub
 
     <Fact>

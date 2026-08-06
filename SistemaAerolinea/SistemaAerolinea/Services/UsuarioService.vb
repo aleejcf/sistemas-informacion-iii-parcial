@@ -15,12 +15,6 @@ Public Class UsuarioService
     ''' y CambiarRol rechazaba devolverle el suyo a quien se hubiera promovido.</summary>
     Public Shared ReadOnly Roles As String() = {"Administrador", "Agente", "Pasajero"}
 
-    ''' <summary>Los roles que un Administrador puede DAR DE ALTA desde la pantalla
-    ''' de usuarios. Pasajero no está a propósito: una cuenta de pasajero necesita su
-    ''' ficha de viajero —documento y fecha de nacimiento— para poder comprar un
-    ''' boleto, y eso se pide en el registro, no aquí.</summary>
-    Public Shared ReadOnly RolesDelPersonal As String() = {"Administrador", "Agente"}
-
     Public Shared Function Listar(Optional filtro As String = "") As DataTable
         Return Db.Consultar(
             "SELECT usuario_id, nombre_completo, usuario, email, rol,

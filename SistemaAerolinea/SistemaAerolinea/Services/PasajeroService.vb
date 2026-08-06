@@ -55,6 +55,26 @@ Public Class PasajeroService
             New SqlParameter("@like", "%" & If(filtro, "").Trim() & "%"))
     End Function
 
+    ''' <summary>Viajeros que todavía NO tienen cuenta en el sistema.
+    '''
+    ''' Es lo que se ofrece cuando un Administrador crea una cuenta de Pasajero:
+    ''' esa persona casi siempre ya está en el sistema —la registró un agente al
+    ''' venderle un boleto— y lo que falta es darle acceso al portal, no volver a
+    ''' teclear su documento y su fecha de nacimiento. A quien ya tiene cuenta se
+    ''' le deja fuera de la lista para no crearle una segunda.</summary>
+    Public Shared Function SinCuenta(Optional filtro As String = "") As DataTable
+        Return Db.Consultar(
+            "SELECT TOP 200 p.idpasajero,
+                    p.nombre_p + ' ' + p.apaterno + ' · ' + p.num_documento AS etiqueta
+             FROM pasajero p
+             WHERE NOT EXISTS (SELECT 1 FROM usuario u WHERE u.idpasajero = p.idpasajero)
+               AND (@f = '' OR p.nombre_p LIKE @like OR p.apaterno LIKE @like
+                    OR p.num_documento LIKE @like OR p.idpasajero LIKE @like)
+             ORDER BY p.apaterno, p.nombre_p",
+            New SqlParameter("@f", If(filtro, "").Trim()),
+            New SqlParameter("@like", "%" & If(filtro, "").Trim() & "%"))
+    End Function
+
     Public Shared Function Obtener(idPasajero As String) As DataRow
         Return Db.ConsultarFila("SELECT * FROM pasajero WHERE idpasajero = @p",
                                 New SqlParameter("@p", idPasajero.Trim().ToUpper()))

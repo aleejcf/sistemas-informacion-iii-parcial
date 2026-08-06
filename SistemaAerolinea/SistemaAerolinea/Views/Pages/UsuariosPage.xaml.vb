@@ -10,10 +10,8 @@ Public Class UsuariosPage
 
     Private Sub UsuariosPage_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         If cboRolNuevo.ItemsSource Is Nothing Then
-            ' Dar de alta solo crea personal; el combo de cambiar rol sí lista los
-            ' tres, o al seleccionar a un pasajero se quedaría en blanco
-            cboRolNuevo.ItemsSource = UsuarioService.RolesDelPersonal
-            cboRolNuevo.SelectedIndex = 1
+            cboRolNuevo.ItemsSource = UsuarioService.Roles
+            cboRolNuevo.SelectedIndex = 1          ' Agente, que es el alta más común
             cboRolSel.ItemsSource = UsuarioService.Roles
         End If
     End Sub
@@ -36,6 +34,33 @@ Public Class UsuariosPage
 
     Private Sub txtBuscar_TextChanged(sender As Object, e As TextChangedEventArgs) Handles txtBuscar.TextChanged
         Cargar()
+    End Sub
+
+    ''' <summary>La ficha de viajero solo hace falta para el rol Pasajero. Se carga
+    ''' al elegirlo y no al abrir la pantalla: la mayoría de las altas son de
+    ''' personal y no tiene sentido consultar el listado para nada.</summary>
+    Private Sub cboRolNuevo_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) _
+        Handles cboRolNuevo.SelectionChanged
+
+        Dim esPasajero = cboRolNuevo.SelectedItem IsNot Nothing AndAlso
+                         cboRolNuevo.SelectedItem.ToString() = "Pasajero"
+
+        pnlPasajeroNuevo.Visibility = If(esPasajero, Visibility.Visible, Visibility.Collapsed)
+        If Not esPasajero Then Return
+
+        Try
+            Dim viajeros = PasajeroService.SinCuenta()
+            cboPasajeroNuevo.ItemsSource = viajeros.DefaultView
+
+            ' Sin viajeros libres no hay a quién ligar la cuenta: se dice en vez de
+            ' dejar una lista vacía sin explicación
+            Dim hay = viajeros.Rows.Count > 0
+            cboPasajeroNuevo.Visibility = If(hay, Visibility.Visible, Visibility.Collapsed)
+            lblSinViajeros.Visibility = If(hay, Visibility.Collapsed, Visibility.Visible)
+
+        Catch ex As Exception
+            Avisar("Cargar los viajeros sin cuenta", ex)
+        End Try
     End Sub
 
     ' ---------- Selección ----------
@@ -119,13 +144,16 @@ Public Class UsuariosPage
             Dim email = txtEmail.Text
             Dim usuario = txtUsuario.Text
             Dim rol = cboRolNuevo.SelectedItem.ToString()
+            Dim ficha = If(cboPasajeroNuevo.SelectedValue Is Nothing, Nothing,
+                           cboPasajeroNuevo.SelectedValue.ToString())
             Dim clave As String = ""
 
             ' El hash BCrypt tarda a propósito: se calcula fuera del hilo de la interfaz
             Dim resultado = Await Task.Run(
                 Function()
                     Dim temporal As String = ""
-                    Dim problema = AuthService.CrearPorAdministrador(nombre, email, usuario, rol, temporal)
+                    Dim problema = AuthService.CrearPorAdministrador(nombre, email, usuario, rol,
+                                                                     temporal, ficha)
                     Return Tuple.Create(problema, temporal)
                 End Function)
 

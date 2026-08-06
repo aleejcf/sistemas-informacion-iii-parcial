@@ -147,6 +147,20 @@
                     <TextBlock Text="ROL" Style="{StaticResource Etiqueta}"/>
                     <ComboBox x:Name="cboRolNuevo" Tag="Elige el rol"/>
 
+                    <!-- Solo para el rol Pasajero: a qué viajero pertenece la cuenta.
+                         No se vuelven a pedir documento y fecha de nacimiento porque
+                         esa persona ya está en el sistema —la registró un agente al
+                         venderle su boleto— y lo que falta es darle acceso al portal. -->
+                    <StackPanel x:Name="pnlPasajeroNuevo" Visibility="Collapsed">
+                        <TextBlock Text="VIAJERO" Style="{StaticResource Etiqueta}"/>
+                        <ComboBox x:Name="cboPasajeroNuevo" IsEditable="False"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idpasajero"/>
+                        <TextBlock x:Name="lblSinViajeros" Visibility="Collapsed"
+                                   FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Foreground="{StaticResource BrushAdvertencia}"
+                                   Text="Todos los viajeros registrados ya tienen cuenta. Da de alta al viajero primero desde la pantalla de Pasajeros."/>
+                    </StackPanel>
+
                     <Button x:Name="btnCrear" Content="➕ Crear cuenta"
                             Style="{StaticResource BotonExito}" Height="40" Margin="0,18,0,0"/>
 
