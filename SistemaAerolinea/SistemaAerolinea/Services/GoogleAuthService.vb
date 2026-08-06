@@ -43,6 +43,11 @@ Public Class GoogleAuthService
         Public Property Identidad As IdentidadGoogle
         Public Property Mensaje As String
 
+        ''' <summary>True cuando fue la propia persona quien canceló. No es un
+        ''' error y la pantalla no debe enseñarlo en rojo: sabe perfectamente lo
+        ''' que hizo, y regañarla por ello sobra.</summary>
+        Public Property Cancelado As Boolean
+
         Public ReadOnly Property Exitoso As Boolean
             Get
                 Return Identidad IsNot Nothing
@@ -89,9 +94,18 @@ Public Class GoogleAuthService
 
             ' --- Se espera la vuelta de Google ---
             Dim respuesta = Await EsperarRespuestaAsync(escucha, cancelar)
+
             If respuesta Is Nothing Then
+                ' Se distingue quién cortó: si fue la persona, no hay nada que
+                ' explicarle; si fue el plazo, sí, porque no sabe por qué se paró
+                If cancelar.IsCancellationRequested Then
+                    Registro.Info("El acceso con Google se canceló desde la aplicación")
+                    Return New ResultadoGoogle With {.Cancelado = True}
+                End If
+
                 Return New ResultadoGoogle With {
-                    .Mensaje = "No se recibió respuesta de Google. Puede que se haya cerrado el navegador."
+                    .Mensaje = "No se recibió respuesta de Google. Si cerraste la pestaña del " &
+                               "navegador, vuelve a intentarlo."
                 }
             End If
 
@@ -221,6 +235,11 @@ Public Class GoogleAuthService
         Dim aceptar = escucha.AcceptTcpClientAsync()
         Dim limite = Task.Delay(TimeSpan.FromSeconds(TIEMPO_LIMITE_SEGUNDOS), cancelar)
 
+        ' Esta espera termina por tres motivos: llegó el navegador, se agotó el
+        ' plazo, o se canceló desde la aplicación. El tercero funciona porque
+        ' WhenAny NO lanza cuando una de sus tareas se cancela: devuelve esa misma
+        ' tarea, así que `limite` gana igual que si hubiera vencido el plazo, y
+        ' quien llama distingue los dos casos mirando el token.
         If Await Task.WhenAny(aceptar, limite) Is limite Then Return Nothing
 
         Using cliente = Await aceptar

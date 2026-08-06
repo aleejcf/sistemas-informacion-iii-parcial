@@ -136,7 +136,10 @@
                             Style="{StaticResource BotonPrimario}" Height="46" FontSize="14"/>
 
                     <StackPanel x:Name="pnlGoogle" Grid.Column="1" Visibility="Collapsed">
-                        <Button x:Name="btnGoogle" Height="46" Margin="12,0,0,0" Cursor="Hand">
+                        <!-- El texto sale del Content para que el código pueda
+                             cambiarlo a "Cancelar" mientras espera al navegador -->
+                        <Button x:Name="btnGoogle" Height="46" Margin="12,0,0,0" Cursor="Hand"
+                                Content="Google">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border x:Name="bd" Background="White" CornerRadius="9"
@@ -151,7 +154,7 @@
                                                 <Path Fill="#FBBC05" Data="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/>
                                                 <Path Fill="#EA4335" Data="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
                                             </Canvas>
-                                            <TextBlock Text="Google" FontSize="13.5"
+                                            <TextBlock Text="{TemplateBinding Content}" FontSize="13.5"
                                                        FontWeight="SemiBold" Margin="10,0,0,0"
                                                        VerticalAlignment="Center"
                                                        Foreground="{StaticResource BrushTexto}"/>

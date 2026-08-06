@@ -1,3 +1,4 @@
+Imports System.Threading
 Imports System.Windows.Threading
 
 ''' <summary>Inicio de sesión. La autenticación corre en segundo plano para que
@@ -164,16 +165,36 @@ Public Class LoginWindow
 
     ' ---------- Acceso con Google ----------
 
+    ''' <summary>Mientras espera al navegador, el mismo botón sirve para cancelar.
+    ''' Vale Nothing cuando no hay ningún acceso con Google en curso.</summary>
+    Private cancelarGoogle As CancellationTokenSource
+
     Private Async Sub btnGoogle_Click(sender As Object, e As RoutedEventArgs) Handles btnGoogle.Click
+        ' Segundo clic mientras espera: cancela. Antes no había forma de salir de
+        ' aquí, y cerrar la pestaña del navegador dejaba la pantalla inservible los
+        ' tres minutos que tardaba en agotarse el plazo.
+        If cancelarGoogle IsNot Nothing Then
+            cancelarGoogle.Cancel()
+            Return
+        End If
+
         OcultarError()
 
-        btnGoogle.IsEnabled = False
-        btnIngresar.IsEnabled = False
+        ' btnIngresar NO se apaga: que Google esté esperando no es motivo para
+        ' impedir entrar con la contraseña de siempre. Son dos caminos distintos.
+        cancelarGoogle = New CancellationTokenSource()
+        btnGoogle.Content = "Cancelar"
 
         Try
-            MostrarAviso("Te abrimos el navegador para que entres con Google…")
+            MostrarAviso("Te abrimos el navegador para que entres con Google. " &
+                         "Si cierras la pestaña, pulsa Cancelar.")
 
-            Dim resultado = Await GoogleAuthService.IniciarSesionAsync()
+            Dim resultado = Await GoogleAuthService.IniciarSesionAsync(cancelarGoogle.Token)
+
+            If resultado.Cancelado Then
+                OcultarError()
+                Return
+            End If
 
             If Not resultado.Exitoso Then
                 MostrarError(resultado.Mensaje)
@@ -199,9 +220,18 @@ Public Class LoginWindow
         Catch ex As Exception
             MostrarError(MensajeError.Traducir("Inicio de sesión con Google", ex))
         Finally
-            btnGoogle.IsEnabled = True
-            btnIngresar.IsEnabled = segundosBloqueo <= 0
+            cancelarGoogle?.Dispose()
+            cancelarGoogle = Nothing
+            btnGoogle.Content = "Google"
         End Try
+    End Sub
+
+    ''' <summary>Si la ventana se va —porque entró con su contraseña mientras Google
+    ''' seguía esperando, o porque cerró— hay que cortar esa espera: si no, el
+    ''' servidor local se queda escuchando y la continuación despierta sobre una
+    ''' ventana que ya no existe.</summary>
+    Private Sub LoginWindow_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        cancelarGoogle?.Cancel()
     End Sub
 
     ''' <summary>Google confirma quién es la persona, pero no sabe su número de
