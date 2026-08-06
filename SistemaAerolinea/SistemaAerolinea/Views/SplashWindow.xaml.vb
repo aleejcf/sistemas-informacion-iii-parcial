@@ -57,6 +57,11 @@ Public Class SplashWindow
         LatirDestino()
 
         Task.Run(Sub()
+                     ' Deja el archivo de correo listo para rellenar la primera vez.
+                     ' No configurarlo no rompe nada: la recuperación por correo
+                     ' simplemente no se ofrece y quedan las otras dos vías.
+                     CorreoService.CrearPlantillaSiFalta()
+
                      bdConError = Not Db.HayConexion()
                      bdLista = True
                  End Sub)

@@ -34,6 +34,29 @@ Public Class Formato
         Return MinutosADuracionConverter.Formatear(minutos)
     End Function
 
+    ''' <summary>Tapa un correo dejando solo lo justo para reconocerlo:
+    ''' `alejandro@gmail.com` queda como `a•••••••o@gmail.com`.
+    '''
+    ''' Se usa al recuperar una cuenta. Hay que enseñar a dónde va a llegar el
+    ''' código para que su dueño sepa dónde buscarlo, pero enseñarlo entero
+    ''' convertiría la pantalla en un buscador de correos ajenos: bastaría con
+    ''' probar nombres de usuario para ir cosechando direcciones.</summary>
+    Public Shared Function CorreoOculto(correo As String) As String
+        If String.IsNullOrWhiteSpace(correo) Then Return ""
+
+        Dim arroba = correo.IndexOf("@"c)
+        If arroba <= 0 Then Return "•••"
+
+        Dim usuario = correo.Substring(0, arroba)
+        Dim dominio = correo.Substring(arroba)
+
+        ' Con uno o dos caracteres no hay nada que tapar sin borrarlo entero
+        If usuario.Length <= 2 Then Return New String("•"c, 3) & dominio
+
+        Return usuario(0) & New String("•"c, Math.Min(usuario.Length - 2, 8)) &
+               usuario(usuario.Length - 1) & dominio
+    End Function
+
     ''' <summary>Saludo según la hora del día, para la pantalla de inicio de sesión.</summary>
     Public Shared Function Saludo() As String
         Dim hora = DateTime.Now.Hour

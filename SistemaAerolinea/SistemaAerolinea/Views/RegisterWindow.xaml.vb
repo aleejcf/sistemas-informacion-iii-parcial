@@ -194,6 +194,15 @@ Public Class RegisterWindow
                    $"¡Listo! Tu cuenta quedó ligada a Google. Ya puedes reservar tus vuelos.",
                    $"La cuenta '{usuario.Trim()}' se creó correctamente. Ya puedes iniciar sesión."),
                 "Cuenta creada con éxito", MessageBoxButton.OK, MessageBoxImage.Information)
+
+            ' Los códigos de respaldo son lo que sostiene la cuenta si su dueño
+            ' olvida la contraseña. Hacen falta SIEMPRE, pero sobre todo con Google:
+            ' esa cuenta no elige contraseña ni pregunta de seguridad, así que sin
+            ' códigos, perder el acceso a Google era perder la cuenta para siempre.
+            Dim cuenta = usuario.Trim()
+            Dim codigos = Await Task.Run(Function() RecuperacionService.GenerarPara(cuenta))
+            CodigosRespaldoWindow.Entregar(codigos, cuenta, Me)
+
             Me.Close()
 
         Catch ex As Exception

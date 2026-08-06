@@ -1,0 +1,71 @@
+<Window x:Class="CodigosRespaldoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SistemaAerolinea"
+        Title="Tus códigos de respaldo — ALAS Honduras" Icon="{StaticResource IconoApp}"
+        Height="620" Width="480" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BrushFondo}" FontFamily="Segoe UI">
+
+    <!-- Esta ventana enseña los códigos UNA vez y no vuelve a poder hacerlo: en la
+         base solo queda su hash. Por eso cerrarla exige marcar que ya se guardaron
+         —el estorbo es deliberado— y por eso ofrece copiarlos y guardarlos en un
+         archivo, que es lo que la gente va a querer hacer de todas formas. -->
+    <Grid Margin="26,22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <local:LogoAlas Tamano="34"/>
+            <TextBlock Text="Guarda tus códigos de respaldo" Style="{StaticResource TituloPagina}"
+                       Margin="11,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="{StaticResource BrushAdvSuave}" CornerRadius="10"
+                Padding="14,12" Margin="0,16,0,0">
+            <StackPanel>
+                <TextBlock Text="Es la única vez que vas a verlos" FontSize="12.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource BrushAdvertencia}" TextWrapping="Wrap"/>
+                <TextBlock Margin="0,6,0,0" FontSize="11.5" TextWrapping="Wrap"
+                           Foreground="{StaticResource BrushTextoSuave}"
+                           Text="El sistema no los guarda legibles, solo su huella, así que nadie —ni un Administrador— puede volver a enseñártelos. Sirven para entrar si olvidas tu contraseña o pierdes el acceso a Google. Cada uno funciona una sola vez."/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Background="White" CornerRadius="12" Margin="0,16,0,0"
+                BorderBrush="{StaticResource BrushBorde}" BorderThickness="1" Padding="18,16">
+            <ItemsControl x:Name="lstCodigos">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="2"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Style="{StaticResource Codigo}"
+                                   FontSize="15" Margin="0,7" HorizontalAlignment="Center"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+        <StackPanel Grid.Row="3">
+            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                <Button x:Name="btnCopiar" Content="Copiar todos"
+                        Style="{StaticResource BotonContorno}" Height="40" Width="150"/>
+                <Button x:Name="btnGuardar" Content="Guardar en un archivo"
+                        Style="{StaticResource BotonContorno}" Height="40" Width="190" Margin="10,0,0,0"/>
+            </StackPanel>
+
+            <CheckBox x:Name="chkGuardados" Margin="0,18,0,0"
+                      Content="Ya los guardé en un lugar seguro"/>
+
+            <Button x:Name="btnListo" Content="Continuar" Style="{StaticResource BotonPrimario}"
+                    Height="42" Margin="0,14,0,0" IsEnabled="False"/>
+        </StackPanel>
+    </Grid>
+</Window>
