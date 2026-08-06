@@ -207,10 +207,6 @@
                          PDF417 de verdad, con la cadena IATA BCBP, va en el pase
                          de abordar que se emite tras el check-in. -->
                     <Canvas x:Name="barras" Height="52" ClipToBounds="True"/>
-
-                    <TextBlock Text="III Parcial · Alejandro Calderón" FontSize="9"
-                               Foreground="{StaticResource BrushTextoSuave}"
-                               Margin="0,12,0,0" TextWrapping="Wrap"/>
                 </StackPanel>
             </Grid>
         </Border>

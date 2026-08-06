@@ -25,6 +25,21 @@ Public Class Sesion
         End Get
     End Property
 
+    ''' <summary>¿Esta sesión hay que limitarla a un pasajero?
+    '''
+    ''' Existe aparte de IdPasajero porque los servicios preguntaban
+    ''' `IdPasajero IsNot Nothing` para decidirlo, y eso falla abriendo: una cuenta
+    ''' con rol Pasajero pero sin ficha devuelve Nothing y se colaba por la rama del
+    ''' personal, viendo TODAS las reservas del sistema. Aquí lo que manda es el rol,
+    ''' así que sin ficha se sigue limitando —y como el filtro se hace con un
+    ''' identificador vacío, no le cuadra ninguna fila y no ve nada. Falla cerrando,
+    ''' que es como tiene que fallar un permiso.</summary>
+    Public Shared ReadOnly Property EsSesionDePasajero As Boolean
+        Get
+            Return UsuarioActual IsNot Nothing AndAlso UsuarioActual.EsPasajero
+        End Get
+    End Property
+
     Public Shared Sub Cerrar()
         UsuarioActual = Nothing
     End Sub

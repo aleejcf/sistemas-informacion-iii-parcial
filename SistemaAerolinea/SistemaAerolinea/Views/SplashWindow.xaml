@@ -127,7 +127,7 @@
                            Foreground="#8AA8C8" FontSize="11" FontWeight="SemiBold"
                            Margin="2,26,0,0"/>
 
-                <TextBlock Text="Sistema de Reserva de Vuelos · III Parcial · Alejandro Calderón"
+                <TextBlock Text="Sistema de Reserva de Vuelos"
                            Foreground="#54718F" FontSize="9.5" Margin="2,10,0,0" TextWrapping="Wrap"/>
             </StackPanel>
 

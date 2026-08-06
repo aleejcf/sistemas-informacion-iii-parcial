@@ -7,7 +7,19 @@ Imports Microsoft.Data.SqlClient
 ''' alguien se desactive o se degrade a sí mismo.</summary>
 Public Class UsuarioService
 
-    Public Shared ReadOnly Roles As String() = {"Administrador", "Agente"}
+    ''' <summary>Los tres roles que existen. Se usa para MOSTRAR y para cambiar el
+    ''' rol de una cuenta que ya existe.
+    '''
+    ''' Antes esta lista no incluía Pasajero, y por eso al seleccionar a un pasajero
+    ''' el combo de la pantalla salía en blanco —su rol no estaba entre las opciones—
+    ''' y CambiarRol rechazaba devolverle el suyo a quien se hubiera promovido.</summary>
+    Public Shared ReadOnly Roles As String() = {"Administrador", "Agente", "Pasajero"}
+
+    ''' <summary>Los roles que un Administrador puede DAR DE ALTA desde la pantalla
+    ''' de usuarios. Pasajero no está a propósito: una cuenta de pasajero necesita su
+    ''' ficha de viajero —documento y fecha de nacimiento— para poder comprar un
+    ''' boleto, y eso se pide en el registro, no aquí.</summary>
+    Public Shared ReadOnly RolesDelPersonal As String() = {"Administrador", "Agente"}
 
     Public Shared Function Listar(Optional filtro As String = "") As DataTable
         Return Db.Consultar(
@@ -74,6 +86,14 @@ Public Class UsuarioService
         If fila("rol").ToString() = "Administrador" AndAlso rol <> "Administrador" AndAlso
            AdministradoresActivos(usuarioId) = 0 Then
             Return "No se puede cambiar: es el único Administrador activo del sistema."
+        End If
+
+        ' Un Pasajero sin ficha de viajero no puede existir: no podría comprar un
+        ' boleto ni hacer check-in, y además todo el aislamiento del portal se apoya
+        ' en esa ficha. Sin ella la cuenta quedaría en tierra de nadie.
+        If rol = "Pasajero" AndAlso IsDBNull(fila("idpasajero")) Then
+            Return "Esa cuenta no tiene ficha de viajero, así que no puede ser de Pasajero. " &
+                   "Regístrala desde la pantalla de acceso para que se le cree su ficha."
         End If
 
         Db.Ejecutar("UPDATE usuario SET rol = @r WHERE usuario_id = @i",

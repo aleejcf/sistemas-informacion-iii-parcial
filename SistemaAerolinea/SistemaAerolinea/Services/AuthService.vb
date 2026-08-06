@@ -672,7 +672,11 @@ Public Class AuthService
         If String.IsNullOrWhiteSpace(nombreCompleto) Then Return "Escribe el nombre completo."
         If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
         If Not Validador.EsUsuarioValido(usuario) Then Return "El usuario debe tener de 4 a 30 caracteres (letras, números o _)."
-        If rol <> "Administrador" AndAlso rol <> "Agente" Then Return "Selecciona un rol válido."
+        ' Se valida contra la lista del servicio y no contra dos textos escritos aquí:
+        ' así no puede pasar que la pantalla ofrezca un rol que el alta rechace
+        If Not UsuarioService.RolesDelPersonal.Contains(rol) Then
+            Return "Un Administrador solo puede crear cuentas de Administrador o de Agente."
+        End If
         If ExisteUsuario(usuario) Then Return "Ese nombre de usuario ya está registrado."
         If ExisteEmail(email) Then Return "Ese correo ya está registrado."
 

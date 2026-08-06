@@ -239,8 +239,10 @@ Public Class ReservaService
     Public Shared Function Listar(Optional filtro As String = "",
                                   Optional estado As String = Nothing) As DataTable
 
-        ' Un pasajero solo ve lo suyo, y lo decide el servicio, no la vista
-        If Sesion.IdPasajero IsNot Nothing Then
+        ' Un pasajero solo ve lo suyo, y lo decide el servicio, no la vista.
+        ' Se pregunta por el ROL y no por la ficha: si se preguntara por la ficha,
+        ' un pasajero sin ella se colaría por la rama de abajo y las vería todas.
+        If Sesion.EsSesionDePasajero Then
             Return DelPasajero(Sesion.IdPasajero, filtro, estado)
         End If
 
@@ -261,6 +263,11 @@ Public Class ReservaService
     Public Shared Function DelPasajero(idPasajero As String,
                                        Optional filtro As String = "",
                                        Optional estado As String = Nothing) As DataTable
+        ' Sin ficha no hay reservas que devolver, y hay que atajarlo antes de llegar
+        ' a SQL: un parámetro en Nothing no llega a viajar y el procedimiento se
+        ' queja de que le falta, con lo que la pantalla reventaría en vez de salir vacía.
+        If String.IsNullOrWhiteSpace(idPasajero) Then Return New DataTable()
+
         Dim datos = Db.Consultar("EXEC dbo.sp_reservas_del_pasajero @idpasajero = @p",
                                  New SqlParameter("@p", idPasajero))
 
@@ -299,6 +306,8 @@ Public Class ReservaService
 
     ''' <summary>Próximos vuelos del pasajero, para el encabezado de "Mis vuelos".</summary>
     Public Shared Function ProximosVuelosDe(idPasajero As String) As DataTable
+        If String.IsNullOrWhiteSpace(idPasajero) Then Return New DataTable()
+
         Return Db.Consultar("EXEC dbo.sp_proximos_vuelos_del_pasajero @idpasajero = @p",
                             New SqlParameter("@p", idPasajero))
     End Function
@@ -308,8 +317,11 @@ Public Class ReservaService
     ''' identificador de una reserva es un número, y probar números ajenos es la
     ''' forma más simple de espiar los datos de otro.</summary>
     Public Shared Function EsDelPasajeroActual(idReserva As Integer) As Boolean
-        Dim idPasajero = Sesion.IdPasajero
-        If idPasajero Is Nothing Then Return True   ' el personal ve todas
+        If Not Sesion.EsSesionDePasajero Then Return True   ' el personal ve todas
+
+        ' Un pasajero sin ficha no tiene reservas que le pertenezcan: el parámetro
+        ' va vacío, no le cuadra ninguna fila y no se le abre nada
+        Dim idPasajero = If(Sesion.IdPasajero, "")
 
         Return Db.Contar("SELECT COUNT(*) FROM reserva r
                           WHERE r.idreserva = @r

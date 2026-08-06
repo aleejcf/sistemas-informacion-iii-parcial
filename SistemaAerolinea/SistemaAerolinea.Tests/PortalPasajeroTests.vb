@@ -267,6 +267,43 @@ Public Class PortalPasajeroTests
         Assert.Equal("P0000001", visibles.Rows(0)("idpasajero").ToString().Trim())
     End Sub
 
+    ''' <summary>Un pasajero sin ficha de viajero no puede ver NADA.
+    '''
+    ''' El aislamiento se decidía con `Sesion.IdPasajero IsNot Nothing`, así que una
+    ''' cuenta con rol Pasajero pero sin ficha devolvía Nothing y se colaba por la
+    ''' rama del personal: veía todas las reservas del sistema y el directorio
+    ''' entero de pasajeros. Un permiso tiene que fallar cerrando, no abriendo.</summary>
+    <Fact>
+    Public Sub UnPasajeroSinFichaNoVeNada()
+        If Not HayBaseDeDatos Then Return
+
+        Sesion.Cerrar()
+        Dim todas = ReservaService.Listar().Rows.Count
+        If todas = 0 Then Return
+
+        Sesion.UsuarioActual = CuentaDe("Pasajero", Nothing)
+
+        Assert.True(Permisos.EsPasajero)
+        Assert.True(Sesion.EsSesionDePasajero, "El rol manda aunque no haya ficha.")
+        Assert.Null(Sesion.IdPasajero)
+
+        Assert.Empty(ReservaService.Listar().Rows)
+        Assert.Empty(PasajeroService.ParaCombo().Rows)
+        Assert.Empty(PagoService.SaldosDelPasajero().Rows)
+    End Sub
+
+    ''' <summary>El combo de la pantalla se llena con UsuarioService.Roles; si
+    ''' Pasajero faltara ahí, al seleccionar a un pasajero saldría en blanco.</summary>
+    <Fact>
+    Public Sub LosTresRolesExistenParaElSistema()
+        Assert.Contains("Pasajero", UsuarioService.Roles)
+        Assert.Contains("Agente", UsuarioService.Roles)
+        Assert.Contains("Administrador", UsuarioService.Roles)
+
+        ' Pero de alta solo se crean cuentas del personal
+        Assert.DoesNotContain("Pasajero", UsuarioService.RolesDelPersonal)
+    End Sub
+
     <Fact>
     Public Sub ElPersonalSigueViendoTodo()
         If Not HayBaseDeDatos Then Return

@@ -10,7 +10,9 @@ Public Class UsuariosPage
 
     Private Sub UsuariosPage_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         If cboRolNuevo.ItemsSource Is Nothing Then
-            cboRolNuevo.ItemsSource = UsuarioService.Roles
+            ' Dar de alta solo crea personal; el combo de cambiar rol sí lista los
+            ' tres, o al seleccionar a un pasajero se quedaría en blanco
+            cboRolNuevo.ItemsSource = UsuarioService.RolesDelPersonal
             cboRolNuevo.SelectedIndex = 1
             cboRolSel.ItemsSource = UsuarioService.Roles
         End If

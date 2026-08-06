@@ -34,11 +34,14 @@ Public Class PasajeroService
     ''' desde el portal. Para viajar acompañado registra a su acompañante con el
     ''' botón de pasajero nuevo.</summary>
     Public Shared Function ParaCombo(Optional filtro As String = "") As DataTable
-        If Sesion.IdPasajero IsNot Nothing Then
+        ' Se pregunta por el ROL y no por la ficha: preguntando por la ficha, un
+        ' pasajero sin ella caía por la rama del personal y se le devolvía el
+        ' directorio entero. Sin ficha, el parámetro va vacío y no le cuadra nadie.
+        If Sesion.EsSesionDePasajero Then
             Return Db.Consultar(
                 "SELECT idpasajero, nombre_p + ' ' + apaterno + ' · ' + num_documento AS etiqueta
                  FROM pasajero WHERE idpasajero = @p",
-                New SqlParameter("@p", Sesion.IdPasajero))
+                New SqlParameter("@p", If(Sesion.IdPasajero, "")))
         End If
 
         Return Db.Consultar(
