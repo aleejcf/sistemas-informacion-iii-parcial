@@ -37,3 +37,6 @@ desktop.ini
 # ---- Temporales ----
 *.tmp
 *~
+
+# Credenciales de OAuth de Google: nunca se suben al repositorio
+google-oauth.json
