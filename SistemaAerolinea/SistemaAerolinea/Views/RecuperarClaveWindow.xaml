@@ -57,8 +57,8 @@
                     <TextBlock Text="Elige cómo quieres verificar que la cuenta es tuya."
                                Style="{StaticResource Subtitulo}" TextWrapping="Wrap"/>
 
-                    <Button x:Name="btnViaPregunta" Style="{StaticResource TarjetaClicable}"
-                            Margin="0,14,0,0" HorizontalContentAlignment="Stretch">
+                    <Button x:Name="btnViaPregunta" Style="{StaticResource TarjetaBoton}"
+                            Margin="0,14,0,0">
                         <StackPanel>
                             <TextBlock Text="Pregunta de seguridad" FontSize="13.5" FontWeight="SemiBold"
                                        Foreground="{StaticResource BrushTexto}"/>
@@ -67,8 +67,8 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnViaRespaldo" Style="{StaticResource TarjetaClicable}"
-                            Margin="0,10,0,0" HorizontalContentAlignment="Stretch">
+                    <Button x:Name="btnViaRespaldo" Style="{StaticResource TarjetaBoton}"
+                            Margin="0,10,0,0">
                         <StackPanel>
                             <TextBlock Text="Código de respaldo" FontSize="13.5" FontWeight="SemiBold"
                                        Foreground="{StaticResource BrushTexto}"/>
@@ -77,8 +77,8 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Name="btnViaCorreo" Style="{StaticResource TarjetaClicable}"
-                            Margin="0,10,0,0" HorizontalContentAlignment="Stretch">
+                    <Button x:Name="btnViaCorreo" Style="{StaticResource TarjetaBoton}"
+                            Margin="0,10,0,0">
                         <StackPanel>
                             <TextBlock Text="Código por correo" FontSize="13.5" FontWeight="SemiBold"
                                        Foreground="{StaticResource BrushTexto}"/>

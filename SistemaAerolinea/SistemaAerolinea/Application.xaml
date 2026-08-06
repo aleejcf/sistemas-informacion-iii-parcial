@@ -599,6 +599,41 @@
             </Style.Triggers>
         </Style>
 
+        <!-- La misma tarjeta clicable, pero como BOTÓN de verdad.
+             TarjetaClicable apunta a Border: aplicárselo a un Button revienta al
+             cargar la ventana con XamlParseException. Cuando lo que se necesita
+             es que se pueda pulsar —y que responda al teclado y sepa
+             deshabilitarse— hay que usar este, no aquel. -->
+        <Style x:Key="TarjetaBoton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="caja" Background="White" CornerRadius="14" Padding="18"
+                                BorderThickness="1.6" BorderBrush="Transparent">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#0B1B2B" Opacity="0.07" BlurRadius="16" ShadowDepth="2"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Stretch"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="caja" Property="BorderBrush"
+                                        Value="{StaticResource BrushPrimario}"/>
+                            </Trigger>
+                            <!-- Una opción que no se puede tomar tiene que verse
+                                 apagada, o el usuario la pulsa y no entiende nada -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="caja" Property="Opacity" Value="0.5"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Insignia de estado (Confirmada, Retrasado, Cancelado…) -->
         <Style x:Key="Insignia" TargetType="Border">
             <Setter Property="CornerRadius" Value="7"/>

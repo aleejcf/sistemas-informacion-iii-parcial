@@ -40,12 +40,19 @@ Public Class VistasTests
                     {"NuevoPasajeroWindow", Function() New NuevoPasajeroWindow()},
                     {"DialogoAlas", Function() New DialogoAlas()},
                     {"PaseAbordarWindow", Function() New PaseAbordarWindow(1)},
-                    {"PagarWindow", Function() New PagarWindow(1)}
+                    {"PagarWindow", Function() New PagarWindow(1)},
+                    {"CodigosRespaldoWindow", Function() New CodigosRespaldoWindow(
+                        {"ABCD-EFGH-JKLM", "NPQR-STUV-WXYZ"}, "prueba")}
                 }
 
                 For Each vista In vistas
                     Try
-                        Assert.NotNull(vista.Value())
+                        ' .Invoke() explícito, y NO `vista.Value()`: en VB los
+                        ' paréntesis son opcionales al leer una propiedad, así que
+                        ' `vista.Value()` devolvía el propio Func —que nunca es
+                        ' Nothing— en vez de ejecutarlo. La prueba pasaba siempre
+                        ' sin llegar a construir una sola vista.
+                        Assert.NotNull(vista.Value.Invoke())
                     Catch ex As Exception
                         fallos.Add($"{vista.Key}: {ex.GetType().Name} — {ex.Message}")
                     End Try
