@@ -1,16 +1,7 @@
 ﻿Public Class RegisterWindow
 
     Private Sub RegisterWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        Try
-            If AuthService.HayUsuarios() Then
-                lblInfoRol.Text = "Tu cuenta se creará con rol de Operador. Un Administrador puede cambiarlo después."
-            Else
-                lblInfoRol.Text = "Eres el primer usuario del sistema: tu cuenta será de Administrador."
-            End If
-        Catch
-            lblInfoRol.Text = ""
-        End Try
-
+        TransicionVentana.FundirEntrada(Me)
         cboPregunta.ItemsSource = New String() {
             "¿Cuál es el nombre de tu primera mascota?",
             "¿En qué ciudad naciste?",

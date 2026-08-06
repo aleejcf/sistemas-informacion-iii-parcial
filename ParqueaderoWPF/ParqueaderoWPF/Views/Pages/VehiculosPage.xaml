@@ -18,8 +18,24 @@
                 <DockPanel Grid.Row="0" Margin="0,0,0,12">
                     <Button x:Name="btnLimpiarBusqueda" DockPanel.Dock="Right" Content="✕"
                             Style="{StaticResource BotonGris}" Padding="10,6" Margin="6,0,0,0"/>
-                    <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}" Height="36"
-                             VerticalAlignment="Center"/>
+                    <Grid>
+                        <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}" Height="36"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Text="Buscar por placa, marca o código..." FontSize="15"
+                                   IsHitTestVisible="False" VerticalAlignment="Center" Margin="12,0,0,0"
+                                   Foreground="{StaticResource BrushTextoSuave}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
                 </DockPanel>
                 <DataGrid x:Name="dgVehiculos" Grid.Row="1">
                     <DataGrid.Columns>

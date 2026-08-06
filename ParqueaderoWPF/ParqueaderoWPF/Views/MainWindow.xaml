@@ -1,7 +1,7 @@
 <Window x:Class="MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="PARKO Honduras — Sistema de Parqueadero"
+        Title="PARKO Honduras — Sistema de Parqueadero" Icon="/Assets/logo.ico"
         Height="760" Width="1280" MinHeight="640" MinWidth="1080"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BrushFondo}" FontFamily="Segoe UI">
@@ -66,6 +66,8 @@
                     <RadioButton x:Name="rbParqueaderos" Content="🏢  Parqueaderos"       Style="{StaticResource BotonMenu}" GroupName="Nav"/>
                     <RadioButton x:Name="rbVehiculos"    Content="🚗  Vehículos"          Style="{StaticResource BotonMenu}" GroupName="Nav"/>
                     <RadioButton x:Name="rbMovimientos"  Content="⏱  Entradas y salidas" Style="{StaticResource BotonMenu}" GroupName="Nav"/>
+                    <RadioButton x:Name="rbUsuarios"     Content="🔑  Usuarios"          Style="{StaticResource BotonMenu}" GroupName="Nav" Visibility="Collapsed"/>
+                    <RadioButton x:Name="rbAuditoria"    Content="📋  Auditoría"         Style="{StaticResource BotonMenu}" GroupName="Nav" Visibility="Collapsed"/>
                 </StackPanel>
             </DockPanel>
         </Border>

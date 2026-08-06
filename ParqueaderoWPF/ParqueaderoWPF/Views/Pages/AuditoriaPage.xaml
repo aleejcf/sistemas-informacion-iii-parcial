@@ -1,0 +1,46 @@
+<UserControl x:Class="AuditoriaPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <Border Style="{StaticResource Tarjeta}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                <Button x:Name="btnLimpiarBusqueda" DockPanel.Dock="Right" Content="✕"
+                        Style="{StaticResource BotonGris}" Padding="10,6" Margin="6,0,0,0"/>
+                <Grid>
+                    <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}" Height="36"
+                             VerticalAlignment="Center"/>
+                    <TextBlock Text="Buscar por usuario..." FontSize="15"
+                               IsHitTestVisible="False" VerticalAlignment="Center" Margin="12,0,0,0"
+                               Foreground="{StaticResource BrushTextoSuave}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </DockPanel>
+
+            <DataGrid x:Name="dgAuditoria" Grid.Row="1" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Usuario" Binding="{Binding usuario}" Width="*"/>
+                    <DataGridTextColumn Header="Resultado" Binding="{Binding resultado}" Width="*"/>
+                    <DataGridTextColumn Header="Detalle" Binding="{Binding detalle}" Width="2*"/>
+                    <DataGridTextColumn Header="Equipo" Binding="{Binding equipo}" Width="*"/>
+                    <DataGridTextColumn Header="Fecha" Binding="{Binding fecha, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+</UserControl>

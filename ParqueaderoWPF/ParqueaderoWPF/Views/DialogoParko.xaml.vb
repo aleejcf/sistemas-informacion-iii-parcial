@@ -50,6 +50,8 @@ Public Class DialogoParko
             dialogo.btnSi.Content = "Sí"
         End If
 
+        Sonido.Reproducir(icono)
+
         ' Centrar sobre la ventana activa
         Dim activa = Application.Current.Windows.OfType(Of Window)().
             FirstOrDefault(Function(w) w.IsActive AndAlso w.IsLoaded)

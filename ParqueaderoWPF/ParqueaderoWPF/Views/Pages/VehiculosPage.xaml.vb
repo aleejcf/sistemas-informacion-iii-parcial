@@ -5,7 +5,7 @@ Public Class VehiculosPage
     Private editando As Boolean = False
 
     Private Sub VehiculosPage_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        If Not Sesion.EsAdministrador Then
+        If Not Permisos.PuedeEliminar Then
             btnEliminar.IsEnabled = False
             lblSoloAdmin.Visibility = Visibility.Visible
         End If

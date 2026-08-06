@@ -1,0 +1,92 @@
+<UserControl x:Class="UsuariosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="360"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Lista -->
+        <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,16,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                    <Button x:Name="btnLimpiarBusqueda" DockPanel.Dock="Right" Content="✕"
+                            Style="{StaticResource BotonGris}" Padding="10,6" Margin="6,0,0,0"/>
+                    <Grid>
+                        <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}" Height="36"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Text="Buscar por nombre, usuario o correo..." FontSize="15"
+                                   IsHitTestVisible="False" VerticalAlignment="Center" Margin="12,0,0,0"
+                                   Foreground="{StaticResource BrushTextoSuave}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </DockPanel>
+                <DataGrid x:Name="dgUsuarios" Grid.Row="1">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Usuario" Binding="{Binding usuario}" Width="Auto"/>
+                        <DataGridTextColumn Header="Nombre" Binding="{Binding nombre_completo}" Width="2*"/>
+                        <DataGridTextColumn Header="Email" Binding="{Binding email}" Width="2*"/>
+                        <DataGridTextColumn Header="Rol" Binding="{Binding rol}" Width="*"/>
+                        <DataGridCheckBoxColumn Header="Activo" Binding="{Binding esta_activo}" Width="Auto"
+                                                 IsReadOnly="True"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- Formulario -->
+        <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock x:Name="lblTituloForm" Text="Nuevo usuario" FontSize="16" FontWeight="Bold"
+                               Foreground="{StaticResource BrushTexto}"/>
+
+                    <TextBlock Text="NOMBRE COMPLETO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtNombre" Style="{StaticResource CajaTexto}" Height="36" MaxLength="80"/>
+
+                    <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtEmail" Style="{StaticResource CajaTexto}" Height="36" MaxLength="80"/>
+
+                    <TextBlock Text="NOMBRE DE USUARIO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtUsuario" Style="{StaticResource CajaTexto}" Height="36" MaxLength="30"/>
+
+                    <TextBlock Text="ROL" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox x:Name="cboRol" Height="36" FontSize="14"/>
+
+                    <TextBlock x:Name="lblAyuda" TextWrapping="Wrap" FontSize="11" Margin="0,10,0,0"
+                               Foreground="{StaticResource BrushTextoSuave}"
+                               Text="El sistema genera una contraseña temporal. El usuario deberá cambiarla al iniciar sesión por primera vez."/>
+
+                    <Button x:Name="btnCrear" Content="➕ Crear usuario" Style="{StaticResource BotonExito}"
+                            Height="38" Margin="0,14,0,0"/>
+
+                    <UniformGrid Columns="2" Margin="0,10,0,0">
+                        <Button x:Name="btnGuardarRol" Content="💾 Guardar rol" Style="{StaticResource BotonPrimario}"
+                                Margin="0,0,4,0" Height="38" Visibility="Collapsed"/>
+                        <Button x:Name="btnActivarDesactivar" Content="Desactivar" Style="{StaticResource BotonPeligro}"
+                                Margin="4,0,0,0" Height="38" Visibility="Collapsed"/>
+                    </UniformGrid>
+
+                    <Button x:Name="btnNuevo" Content="➕ Nuevo usuario" Style="{StaticResource BotonGris}"
+                            Height="34" Margin="0,10,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

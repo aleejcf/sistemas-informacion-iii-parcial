@@ -1,3 +1,4 @@
+Imports System.IO
 Imports System.Windows.Media.Animation
 Imports System.Windows.Threading
 
@@ -8,6 +9,8 @@ Public Class LoginWindow
     Private WithEvents temporizador As New DispatcherTimer With {.Interval = TimeSpan.FromSeconds(1)}
 
     Private Sub LoginWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
+        TransicionVentana.FundirEntrada(Me)
+        IniciarVideoDeFondo()
         SaludoSegunLaHora()
         AnimarEntradaDelFormulario()
         txtUsuario.Focus()
@@ -16,6 +19,28 @@ Public Class LoginWindow
         AddHandler txtClave.PreviewKeyUp, Sub() RevisarMayusculas()
         AddHandler txtClave.GotKeyboardFocus, Sub() RevisarMayusculas()
         AddHandler txtClave.LostKeyboardFocus, Sub() lblCaps.Visibility = Visibility.Collapsed
+    End Sub
+
+    ' ---------- Video de fondo del panel de marca ----------
+
+    ''' <summary>Reproduce Resources\video_fondo.mp4 en loop, silenciado. Si el archivo
+    ''' no existe o falla al cargar, no pasa nada: queda el navy sólido (BrushLateral) de fondo.</summary>
+    Private Sub IniciarVideoDeFondo()
+        Try
+            Dim ruta = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "video_fondo.mp4")
+            If Not File.Exists(ruta) Then Return
+
+            videoFondo.Source = New Uri(ruta, UriKind.Absolute)
+            videoFondo.Play()
+        Catch ex As Exception
+            Registro.Advertencia($"No se pudo reproducir el video de fondo: {ex.Message}")
+        End Try
+    End Sub
+
+    ''' <summary>MediaElement no tiene loop nativo: al terminar, se rebobina y se reproduce de nuevo.</summary>
+    Private Sub videoFondo_MediaEnded(sender As Object, e As RoutedEventArgs) Handles videoFondo.MediaEnded
+        videoFondo.Position = TimeSpan.Zero
+        videoFondo.Play()
     End Sub
 
     ' ---------- Microinteracciones ----------
@@ -116,8 +141,19 @@ Public Class LoginWindow
                 Return
             End If
 
-            ' Sesión iniciada: abrir la ventana principal
             Sesion.UsuarioActual = usuario
+
+            ' Cuentas creadas por un Administrador traen una contraseña temporal que hay que reemplazar
+            If usuario.DebeCambiarContrasena Then
+                Dim cambio As New CambiarContrasenaObligatoriaWindow With {.Owner = Me}
+                cambio.ShowDialog()
+                If Sesion.UsuarioActual Is Nothing Then
+                    ' Cerró la ventana sin cambiar la contraseña: no se le deja entrar
+                    Return
+                End If
+            End If
+
+            ' Sesión iniciada: abrir la ventana principal
             Dim principal As New MainWindow()
             principal.Show()
             Me.Close()

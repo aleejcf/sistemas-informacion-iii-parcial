@@ -29,13 +29,25 @@
     <None Update="fotos\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\*.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- musica_fondo.mp3 no viene incluido: colócalo aquí (Resources\musica_fondo.mp3) para activar la música de fondo -->
+    <None Update="Resources\*.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\*.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Assets\logo.png" />
     <None Remove="Assets\parko_full.png" />
+    <None Remove="Assets\logo.ico" />
     <Resource Include="Assets\logo.png" />
     <Resource Include="Assets\parko_full.png" />
+    <Resource Include="Assets\logo.ico" />
   </ItemGroup>
 
 </Project>

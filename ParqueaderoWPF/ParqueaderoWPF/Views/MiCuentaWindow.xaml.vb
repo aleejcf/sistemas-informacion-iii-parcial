@@ -3,6 +3,7 @@
 Public Class MiCuentaWindow
 
     Private Sub MiCuentaWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
+        TransicionVentana.FundirEntrada(Me)
         Dim usuario = Sesion.UsuarioActual
         If usuario Is Nothing Then
             Me.Close()

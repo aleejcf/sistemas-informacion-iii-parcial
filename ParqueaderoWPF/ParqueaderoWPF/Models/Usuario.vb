@@ -4,6 +4,7 @@ Public Class Usuario
     Public Property Email As String
     Public Property NombreUsuario As String
     Public Property Rol As String
+    Public Property DebeCambiarContrasena As Boolean
 
     Public ReadOnly Property EsAdministrador As Boolean
         Get

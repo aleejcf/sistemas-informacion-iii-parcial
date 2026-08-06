@@ -8,8 +8,11 @@ Public Class MainWindow
     Private paginaParqueaderos As ParqueaderosPage
     Private paginaVehiculos As VehiculosPage
     Private paginaMovimientos As MovimientosPage
+    Private paginaUsuarios As UsuariosPage
+    Private paginaAuditoria As AuditoriaPage
 
     Private Sub MainWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
+        TransicionVentana.FundirEntrada(Me)
         If Sesion.UsuarioActual Is Nothing Then
             Me.Close()
             Return
@@ -17,6 +20,8 @@ Public Class MainWindow
 
         lblNombreUsuario.Text = Sesion.UsuarioActual.NombreCompleto
         lblRol.Text = Sesion.UsuarioActual.Rol.ToUpper()
+        rbUsuarios.Visibility = If(Permisos.PuedeGestionarUsuarios, Visibility.Visible, Visibility.Collapsed)
+        rbAuditoria.Visibility = If(Permisos.PuedeVerAuditoria, Visibility.Visible, Visibility.Collapsed)
 
         Dim cultura = New CultureInfo("es-HN")
         lblFecha.Text = DateTime.Now.ToString("dddd, dd 'de' MMMM 'de' yyyy", cultura)
@@ -67,9 +72,20 @@ Public Class MainWindow
         MostrarPagina(paginaMovimientos, "Entradas y salidas")
     End Sub
 
+    Private Sub rbUsuarios_Checked(sender As Object, e As RoutedEventArgs) Handles rbUsuarios.Checked
+        If paginaUsuarios Is Nothing Then paginaUsuarios = New UsuariosPage()
+        MostrarPagina(paginaUsuarios, "Usuarios")
+    End Sub
+
+    Private Sub rbAuditoria_Checked(sender As Object, e As RoutedEventArgs) Handles rbAuditoria.Checked
+        If paginaAuditoria Is Nothing Then paginaAuditoria = New AuditoriaPage()
+        MostrarPagina(paginaAuditoria, "Auditoría de inicios de sesión")
+    End Sub
+
     Private Sub MostrarPagina(pagina As UserControl, titulo As String)
         Contenido.Content = pagina
         lblTituloPagina.Text = titulo
+        TransicionVentana.FundirEntrada(Contenido)
     End Sub
 
     Private Sub btnCerrarSesion_Click(sender As Object, e As RoutedEventArgs) Handles btnCerrarSesion.Click

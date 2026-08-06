@@ -13,7 +13,7 @@ Public Class ParqueaderosPage
     End Property
 
     Private Sub ParqueaderosPage_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
-        If Not Sesion.EsAdministrador Then
+        If Not Permisos.PuedeEliminar Then
             btnEliminar.IsEnabled = False
             lblSoloAdmin.Visibility = Visibility.Visible
         End If
