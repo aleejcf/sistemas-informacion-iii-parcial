@@ -38,8 +38,53 @@ El pasajero entra al **mismo sistema** con su propia cuenta y ve un menú distin
 
 Entra con usuario y contraseña o **con su cuenta de Google**.
 
-**Transversal:** inicio de sesión con BCrypt, recuperación de contraseña por dos caminos, tres
+**Transversal:** inicio de sesión con BCrypt, recuperación de cuenta por tres caminos, tres
 roles (Administrador, Agente y Pasajero), pase de abordar en PDF y diálogos propios del sistema.
+
+---
+
+## Recuperar una cuenta sin regalarla
+
+La recuperación es el punto por donde se pierden las cuentas, porque es la única puerta pensada
+para dejar entrar a alguien que **no** sabe la contraseña. Aquí hay tres caminos y los tres
+comprueban algo que solo el dueño puede tener.
+
+**Códigos de respaldo.** Diez códigos de un solo uso que se entregan al registrarse y se enseñan
+una única vez. Se guardan con **hash BCrypt**, igual que las contraseñas: ni leyendo la base de
+datos se pueden recuperar. Es lo que hacen Google, GitHub y Auth0, y lo que recomienda la
+[guía de OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html).
+Funcionan sin internet y sin servidor de correo. Son doce caracteres en tres grupos, sin `I`, `O`,
+`0` ni `1`, porque acaban copiados a mano desde un papel. Generar un lote nuevo anula el anterior.
+
+**Pregunta de seguridad**, comparada contra su hash.
+
+**Código por correo**, que sale de verdad hacia el buzón registrado en la cuenta —ver abajo cómo
+configurarlo.
+
+> **La regla que sostiene todo esto:** si no hay servidor de correo configurado, esa vía **no se
+> ofrece**. Antes existía un "modo de respaldo" que enseñaba el código en pantalla cuando el envío
+> no estaba disponible, y eso no era recuperar una cuenta: con saber el correo de alguien,
+> cualquiera pedía su código, lo leía en su propia pantalla y le cambiaba la contraseña. Un código
+> que no llega a su dueño no verifica nada.
+
+El correo tampoco se teclea: se manda al que la cuenta tiene registrado y en pantalla se enseña
+tapado (`a••••••••n@gmail.com`). Si se pudiera escribir, se podría pedir el código de una cuenta
+ajena a un buzón propio.
+
+Las dos primeras vías se pueden intentar a ciegas, así que la cuenta lleva su **propio contador de
+intentos de recuperación**, aparte del de inicio de sesión: fallar recuperando no deja a nadie sin
+poder entrar con su contraseña.
+
+### Configurar el envío de correo
+
+La primera vez que arranca, el sistema deja una plantilla en
+`%APPDATA%\AlasHonduras\correo.config` con las instrucciones dentro. Solo hay que rellenar dos
+líneas: `remitente` y `clave`. Para Gmail, `clave` es una **contraseña de aplicación**
+(<https://myaccount.google.com/apppasswords>), no la del correo, y hace falta tener activada la
+verificación en dos pasos.
+
+El archivo vive en la carpeta del usuario y **no** se entrega con el proyecto: la credencial no
+viaja en el repositorio.
 
 ---
 
@@ -131,6 +176,10 @@ sqlcmd -S "ALECALDE\SQLEXPRESS" -E -C -I -i "Scripts/07_pagos_portal_y_google.sq
 sqlcmd -S "ALECALDE\SQLEXPRESS" -E -C -I -i "Scripts/08_bloqueo_de_intentos.sql"
 ```
 
+```bash
+sqlcmd -S "ALECALDE\SQLEXPRESS" -E -C -I -i "Scripts/09_recuperacion_segura.sql"
+```
+
 Los scripts son **idempotentes**: se pueden volver a ejecutar sin error.
 
 **2. Abrir y ejecutar.** Abre `SistemaAerolinea.slnx` en Visual Studio y presiona F5.
@@ -154,7 +203,7 @@ Si tu servidor tiene otro nombre, cambia la cadena de conexión en
 dotnet test SistemaAerolinea.Tests/SistemaAerolinea.Tests.vbproj
 ```
 
-**140 pruebas** cubren cinco frentes:
+**152 pruebas** cubren seis frentes:
 
 - **Lógica pura** — validaciones, totales de una reserva, localizadores, comprobantes, formatos y
   la cadena IATA BCBP campo por campo.
