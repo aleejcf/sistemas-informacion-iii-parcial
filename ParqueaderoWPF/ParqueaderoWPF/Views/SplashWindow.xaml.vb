@@ -10,6 +10,10 @@ Public Class SplashWindow
     Private Sub SplashWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         ' Mientras corre la animación, se prueba la conexión real a la base de datos
         Task.Run(Sub()
+                     ' Deja el archivo de correo listo para rellenar la primera vez.
+                     ' La credencial ya no vive en el código: se lee de aquí.
+                     EmailService.CrearPlantillaSiFalta()
+
                      Try
                          Db.Escalar("SELECT 1")
                      Catch
