@@ -56,6 +56,9 @@ Public Class UsuariosPage
         lblUsuarioSel.Text = $"@{fila("usuario")} · {fila("rol")} · {fila("estado")}"
         cboRolSel.SelectedItem = fila("rol").ToString()
 
+        DescribirRecuperacion(CBool(CInt(fila("tiene_pregunta"))),
+                              CInt(fila("codigos_respaldo")))
+
         ' Sobre la propia cuenta hay acciones que el servicio va a rechazar:
         ' avisarlo antes evita que el administrador se lleve la sorpresa.
         Dim esPropia = Sesion.UsuarioActual IsNot Nothing AndAlso
@@ -64,14 +67,40 @@ Public Class UsuariosPage
 
         btnActivar.Content = If(activoSel, "Desactivar cuenta", "Activar cuenta")
 
-        lblSinSeleccion.Visibility = Visibility.Collapsed
+        pnlCrear.Visibility = Visibility.Collapsed
         pnlAcciones.Visibility = Visibility.Visible
+    End Sub
+
+    ''' <summary>Dice con qué cuenta esta persona podría volver a entrar si se
+    ''' queda fuera. Una cuenta sin pregunta y sin códigos depende por completo de
+    ''' que un Administrador le restablezca la contraseña, y eso hay que verlo
+    ''' ANTES de que toque la puerta, no cuando ya está fuera.</summary>
+    Private Sub DescribirRecuperacion(tienePregunta As Boolean, codigos As Integer)
+        Dim partes As New List(Of String)()
+        If tienePregunta Then partes.Add("pregunta de seguridad")
+        If codigos > 0 Then partes.Add($"{codigos} código(s) de respaldo")
+
+        If partes.Count = 0 Then
+            lblRecuperacion.Text = "Nada. Solo podrá volver a entrar si le restableces la contraseña desde aquí."
+            lblRecuperacion.Foreground = TryFindResource("BrushAdvertencia")
+            cajaRecuperacion.Background = TryFindResource("BrushAdvSuave")
+        Else
+            lblRecuperacion.Text = String.Join(" · ", partes)
+            lblRecuperacion.Foreground = TryFindResource("BrushGris")
+            cajaRecuperacion.Background = TryFindResource("BrushFondo")
+        End If
     End Sub
 
     Private Sub LimpiarSeleccion()
         idUsuarioSel = 0
         pnlAcciones.Visibility = Visibility.Collapsed
-        lblSinSeleccion.Visibility = Visibility.Visible
+        pnlCrear.Visibility = Visibility.Visible
+    End Sub
+
+    ''' <summary>Vuelve al modo de alta soltando la selección de la lista.</summary>
+    Private Sub btnNuevaCuenta_Click(sender As Object, e As RoutedEventArgs) Handles btnNuevaCuenta.Click
+        dgUsuarios.SelectedItem = Nothing
+        LimpiarSeleccion()
     End Sub
 
     ' ---------- Alta ----------

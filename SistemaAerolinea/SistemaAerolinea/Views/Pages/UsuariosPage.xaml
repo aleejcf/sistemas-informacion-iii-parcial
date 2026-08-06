@@ -33,8 +33,13 @@
                 <Grid Grid.Row="1">
                     <DataGrid x:Name="dgUsuarios">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Nombre completo" Binding="{Binding nombre_completo}" Width="*"/>
-                            <DataGridTemplateColumn Header="Usuario" Width="140">
+                            <!-- Los anchos van en proporciones con un mínimo, no en
+                                 píxeles fijos: con seis columnas fijas no quedaba
+                                 sitio para el nombre ni el correo y se cortaban
+                                 en "Nombr" y "josealejar". -->
+                            <DataGridTextColumn Header="Nombre completo" Binding="{Binding nombre_completo}"
+                                                Width="1.6*" MinWidth="150"/>
+                            <DataGridTemplateColumn Header="Usuario" Width="1.1*" MinWidth="115">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource Codigo}" FontSize="12.5"
@@ -44,17 +49,24 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Correo" Binding="{Binding email}" Width="1.3*"/>
-                            <DataGridTemplateColumn Header="Rol" Width="130">
+                            <DataGridTextColumn Header="Correo" Binding="{Binding email}"
+                                                Width="1.7*" MinWidth="150"/>
+                            <DataGridTemplateColumn Header="Rol" Width="112">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border>
                                             <Border.Style>
                                                 <Style TargetType="Border" BasedOn="{StaticResource Insignia}">
+                                                    <!-- El Agente queda en gris, que es lo más
+                                                         común; el Administrador y el Pasajero se
+                                                         distinguen porque son los dos extremos -->
                                                     <Setter Property="Background" Value="#EEF2F7"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding rol}" Value="Administrador">
                                                             <Setter Property="Background" Value="{StaticResource BrushPrimarioSuave}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding rol}" Value="Pasajero">
+                                                            <Setter Property="Background" Value="{StaticResource BrushAdvSuave}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -67,6 +79,9 @@
                                                             <DataTrigger Binding="{Binding rol}" Value="Administrador">
                                                                 <Setter Property="Foreground" Value="{StaticResource BrushPrimario}"/>
                                                             </DataTrigger>
+                                                            <DataTrigger Binding="{Binding rol}" Value="Pasajero">
+                                                                <Setter Property="Foreground" Value="{StaticResource BrushAdvertencia}"/>
+                                                            </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </TextBlock.Style>
@@ -75,7 +90,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Estado" Width="110">
+                            <DataGridTemplateColumn Header="Estado" Width="96">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource Insignia}"
@@ -86,9 +101,12 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Seguridad" Binding="{Binding seguridad}" Width="130"/>
-                            <DataGridTextColumn Header="Último acceso" Width="150"
-                                                Binding="{Binding ultimo_acceso, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"/>
+                            <!-- La columna "Seguridad" se fue al panel de la derecha:
+                                 es un dato de UNA cuenta, no algo que se necesite
+                                 comparar de un vistazo entre todas, y estaba
+                                 robándole 130 px al nombre y al correo. -->
+                            <DataGridTextColumn Header="Último acceso" Width="132"
+                                                Binding="{Binding ultimo_acceso, StringFormat='{}{0:dd/MM/yy HH:mm}'}"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -101,78 +119,97 @@
             </Grid>
         </Border>
 
-        <!-- ═══════════ ACCIONES ═══════════ -->
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
+        <!-- ═══════════ PANEL DE LA DERECHA ═══════════ -->
+        <!-- UNA sola tarjeta que cambia de modo, no dos apiladas. Antes se
+             enseñaban a la vez el formulario de alta y las acciones de la cuenta,
+             y entre las dos no cabían: la de acciones quedaba fuera de la pantalla
+             y el botón de eliminar aparecía cortado por abajo.
 
-                <!-- Alta de cuentas -->
-                <Border Style="{StaticResource Tarjeta}">
-                    <StackPanel>
-                        <TextBlock Text="Crear cuenta" Style="{StaticResource TituloTarjeta}"/>
-                        <TextBlock Style="{StaticResource Subtitulo}" Margin="0,4,0,0" TextWrapping="Wrap"
-                                   Text="Se genera una contraseña temporal que su dueño deberá cambiar al entrar."/>
+             Además son dos trabajos distintos —crear una cuenta nueva y
+             administrar una que ya existe— y nunca se hacen a la vez. -->
+        <Border Grid.Column="1" Style="{StaticResource Tarjeta}">
+            <Grid>
+                <!-- ── Modo 1: alta de cuentas (el de partida) ── -->
+                <StackPanel x:Name="pnlCrear">
+                    <TextBlock Text="Crear cuenta" Style="{StaticResource TituloTarjeta}"/>
+                    <TextBlock Style="{StaticResource Subtitulo}" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Text="Se genera una contraseña temporal que su dueño deberá cambiar al entrar."/>
 
-                        <TextBlock Text="NOMBRE COMPLETO" Style="{StaticResource Etiqueta}"/>
-                        <TextBox x:Name="txtNombre" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+                    <TextBlock Text="NOMBRE COMPLETO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtNombre" Style="{StaticResource CajaTexto}" MaxLength="80"/>
 
-                        <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
-                        <TextBox x:Name="txtEmail" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+                    <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtEmail" Style="{StaticResource CajaTexto}" MaxLength="80"/>
 
-                        <TextBlock Text="USUARIO" Style="{StaticResource Etiqueta}"/>
-                        <TextBox x:Name="txtUsuario" Style="{StaticResource CajaTexto}" MaxLength="30"/>
+                    <TextBlock Text="USUARIO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtUsuario" Style="{StaticResource CajaTexto}" MaxLength="30"/>
 
-                        <TextBlock Text="ROL" Style="{StaticResource Etiqueta}"/>
-                        <ComboBox x:Name="cboRolNuevo" Tag="Elige el rol"/>
+                    <TextBlock Text="ROL" Style="{StaticResource Etiqueta}"/>
+                    <ComboBox x:Name="cboRolNuevo" Tag="Elige el rol"/>
 
-                        <Button x:Name="btnCrear" Content="➕ Crear cuenta"
-                                Style="{StaticResource BotonExito}" Height="40" Margin="0,18,0,0"/>
-                    </StackPanel>
-                </Border>
+                    <Button x:Name="btnCrear" Content="➕ Crear cuenta"
+                            Style="{StaticResource BotonExito}" Height="40" Margin="0,18,0,0"/>
 
-                <!-- Acciones sobre la cuenta seleccionada -->
-                <Border Style="{StaticResource Tarjeta}" Margin="0,16,0,0">
-                    <StackPanel>
-                        <TextBlock Text="Cuenta seleccionada" Style="{StaticResource TituloTarjeta}"/>
-
-                        <TextBlock x:Name="lblSinSeleccion" Style="{StaticResource Subtitulo}"
-                                   Margin="0,10,0,0" TextWrapping="Wrap"
+                    <Border Background="{StaticResource BrushFondo}" CornerRadius="10"
+                            Padding="13,11" Margin="0,20,0,0">
+                        <TextBlock Style="{StaticResource Subtitulo}" FontSize="11.5" TextWrapping="Wrap"
                                    Text="Selecciona una cuenta de la lista para administrarla."/>
+                    </Border>
+                </StackPanel>
 
-                        <StackPanel x:Name="pnlAcciones" Visibility="Collapsed">
-                            <Border Background="{StaticResource BrushFondo}" CornerRadius="10"
-                                    Padding="14,12" Margin="0,12,0,0">
-                                <StackPanel>
-                                    <TextBlock x:Name="lblNombreSel" FontSize="14.5" FontWeight="Bold"
-                                               TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock x:Name="lblUsuarioSel" Style="{StaticResource Subtitulo}"
-                                               Margin="0,3,0,0"/>
-                                    <TextBlock x:Name="lblEsTuCuenta" Text="Esta es tu propia cuenta."
-                                               FontSize="11" Margin="0,6,0,0" Visibility="Collapsed"
-                                               Foreground="{StaticResource BrushAdvertencia}"/>
-                                </StackPanel>
-                            </Border>
+                <!-- ── Modo 2: la cuenta seleccionada ── -->
+                <StackPanel x:Name="pnlAcciones" Visibility="Collapsed">
+                    <DockPanel>
+                        <Button x:Name="btnNuevaCuenta" DockPanel.Dock="Right" Content="✕"
+                                Style="{StaticResource BotonPlano}" VerticalAlignment="Top"
+                                ToolTip="Volver a crear cuentas"/>
+                        <TextBlock Text="Cuenta seleccionada" Style="{StaticResource TituloTarjeta}"/>
+                    </DockPanel>
 
-                            <TextBlock Text="CAMBIAR ROL" Style="{StaticResource Etiqueta}"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <ComboBox x:Name="cboRolSel" Grid.Column="0"/>
-                                <Button x:Name="btnCambiarRol" Grid.Column="1" Content="Aplicar"
-                                        Style="{StaticResource BotonContorno}" Margin="8,0,0,0" Height="38"/>
-                            </Grid>
-
-                            <Button x:Name="btnActivar" Content="Activar / Desactivar"
-                                    Style="{StaticResource BotonPrimario}" Height="40" Margin="0,16,0,0"/>
-                            <Button x:Name="btnRestablecer" Content="🔑  Restablecer contraseña"
-                                    Style="{StaticResource BotonAcento}" Height="40" Margin="0,8,0,0"/>
-                            <Button x:Name="btnEliminar" Content="🗑  Eliminar cuenta"
-                                    Style="{StaticResource BotonPeligro}" Height="40" Margin="0,8,0,0"/>
+                    <Border Background="{StaticResource BrushFondo}" CornerRadius="10"
+                            Padding="14,12" Margin="0,12,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="lblNombreSel" FontSize="14.5" FontWeight="Bold"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock x:Name="lblUsuarioSel" Style="{StaticResource Subtitulo}"
+                                       Margin="0,3,0,0" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="lblEsTuCuenta" Text="Esta es tu propia cuenta."
+                                       FontSize="11" Margin="0,6,0,0" Visibility="Collapsed"
+                                       Foreground="{StaticResource BrushAdvertencia}"/>
                         </StackPanel>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
+                    </Border>
+
+                    <!-- Cómo puede recuperarse esta cuenta si su dueño se queda
+                         fuera. Es lo primero que un Administrador necesita saber
+                         antes de que alguien le toque la puerta sin poder entrar. -->
+                    <Border x:Name="cajaRecuperacion" CornerRadius="10" Padding="13,11" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Text="CÓMO PUEDE RECUPERARSE" FontSize="10" FontWeight="SemiBold"
+                                       Foreground="{StaticResource BrushTextoSuave}"/>
+                            <TextBlock x:Name="lblRecuperacion" FontSize="11.5" TextWrapping="Wrap"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="CAMBIAR ROL" Style="{StaticResource Etiqueta}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="cboRolSel" Grid.Column="0"/>
+                        <Button x:Name="btnCambiarRol" Grid.Column="1" Content="Aplicar"
+                                Style="{StaticResource BotonContorno}" Margin="8,0,0,0" Height="38"/>
+                    </Grid>
+
+                    <Button x:Name="btnActivar" Content="Activar / Desactivar"
+                            Style="{StaticResource BotonPrimario}" Height="40" Margin="0,16,0,0"/>
+                    <Button x:Name="btnRestablecer" Content="🔑  Restablecer contraseña"
+                            Style="{StaticResource BotonAcento}" Height="40" Margin="0,8,0,0"/>
+                    <Button x:Name="btnEliminar" Content="🗑  Eliminar cuenta"
+                            Style="{StaticResource BotonPeligro}" Height="40" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

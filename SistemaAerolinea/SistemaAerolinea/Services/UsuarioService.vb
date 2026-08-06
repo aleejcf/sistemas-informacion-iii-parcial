@@ -25,9 +25,11 @@ Public Class UsuarioService
         Return Db.Consultar(
             "SELECT usuario_id, nombre_completo, usuario, email, rol,
                     esta_activo, debe_cambiar_contrasena, ultimo_acceso, fecha_creacion,
+                    idpasajero,
                     CASE WHEN esta_activo = 1 THEN 'Activo' ELSE 'Inactivo' END AS estado,
                     CASE WHEN pregunta_seguridad IS NULL OR respuesta_seguridad IS NULL
-                         THEN 'Sin configurar' ELSE 'Configurada' END AS seguridad
+                         THEN 0 ELSE 1 END AS tiene_pregunta,
+                    dbo.fn_codigos_disponibles(usuario_id) AS codigos_respaldo
              FROM usuario
              WHERE @f = '' OR nombre_completo LIKE @like OR usuario LIKE @like OR email LIKE @like
              ORDER BY rol, nombre_completo",
