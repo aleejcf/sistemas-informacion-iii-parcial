@@ -1,0 +1,90 @@
+<UserControl x:Class="BitacoraPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaBiblioteca"
+             FontFamily="Segoe UI">
+    <Border Style="{StaticResource Tarjeta}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0">
+                <TextBlock x:Name="lblConteo" DockPanel.Dock="Right" Style="{StaticResource Subtitulo}"
+                           VerticalAlignment="Bottom"/>
+                <StackPanel>
+                    <TextBlock Text="Bitácora del sistema" Style="{StaticResource TituloTarjeta}"/>
+                    <TextBlock Text="Quién hizo qué y cuándo. Los intentos fallidos de inicio de sesión también quedan aquí."
+                               Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Grid Grid.Row="1" Margin="0,14,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <ComboBox x:Name="cboUsuario" Grid.Column="0" Margin="0,0,8,0" Tag="Todos los usuarios"
+                          DisplayMemberPath="usuario" SelectedValuePath="usuario"/>
+                <ComboBox x:Name="cboAccion" Grid.Column="1" Margin="0,0,8,0" Tag="Todas las acciones"
+                          DisplayMemberPath="accion" SelectedValuePath="accion"/>
+                <DatePicker x:Name="dtpDesde" Grid.Column="2" Margin="0,0,8,0"
+                            ToolTip="Mostrar solo lo ocurrido desde esta fecha"/>
+                <Button x:Name="btnLimpiar" Grid.Column="3" Content="Limpiar"
+                        Style="{StaticResource BotonPlano}"/>
+                <Button x:Name="btnActualizar" Grid.Column="4" Content="🔄  Actualizar"
+                        Style="{StaticResource BotonContorno}" HorizontalAlignment="Right"
+                        Padding="14,8"/>
+            </Grid>
+
+            <Grid Grid.Row="2">
+                <DataGrid x:Name="dgBitacora">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Fecha y hora" Width="140"
+                                            Binding="{Binding fecha, StringFormat='{}{0:dd/MM/yyyy HH:mm:ss}'}"/>
+                        <DataGridTemplateColumn Header="Usuario" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding usuario}" Style="{StaticResource Codigo}"
+                                               FontSize="12" FontWeight="Normal"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Acción" Binding="{Binding accion}" Width="170"/>
+                        <DataGridTextColumn Header="Entidad" Binding="{Binding entidad}" Width="110"/>
+                        <DataGridTextColumn Header="Detalle" Binding="{Binding detalle}"
+                                            Width="*" MinWidth="200"/>
+                        <DataGridTextColumn Header="Equipo" Binding="{Binding equipo}" Width="130"/>
+                        <DataGridTemplateColumn Header="Resultado" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Insignia}"
+                                            Background="{Binding resultado,
+                                                        Converter={StaticResource EstadoAColorFondo}}">
+                                        <TextBlock Text="{Binding resultado}"
+                                                   Style="{StaticResource TextoInsignia}"
+                                                   Foreground="{Binding resultado,
+                                                               Converter={StaticResource EstadoAColor}}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel x:Name="pnlVacio" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Visibility="Collapsed" Background="White" Margin="1,40,1,1">
+                    <TextBlock Text="📜" FontSize="34" HorizontalAlignment="Center" Opacity="0.35"/>
+                    <TextBlock Text="No hay registros que coincidan con los filtros."
+                               Style="{StaticResource Subtitulo}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

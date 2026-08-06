@@ -1,0 +1,206 @@
+<Window x:Class="MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SistemaBiblioteca"
+        Title="Biblioteca Alejandría — Sistema de Gestión Bibliotecaria" Icon="{StaticResource IconoApp}"
+        Height="810" Width="1380" MinHeight="700" MinWidth="1080"
+        WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        Background="{StaticResource BrushFondo}" FontFamily="Segoe UI">
+
+    <!-- Dos capas de navegación que no compiten por el mismo espacio:
+         el RIEL de la izquierda lleva a dónde ir (secciones del sistema) y la
+         BARRA de arriba lleva las herramientas globales (buscador, mora, reloj
+         y la cuenta conectada). El riel arranca plegado a puros iconos y se
+         despliega con el botón de abajo. -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══════════════ RIEL DE NAVEGACIÓN ═══════════════ -->
+        <Border x:Name="riel" Grid.Column="0" Width="76" Background="{StaticResource BrushLateral}">
+            <DockPanel>
+
+                <!-- Marca -->
+                <Border DockPanel.Dock="Top" Height="72">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                        <local:LogoBiblioteca Tamano="44"/>
+                        <StackPanel Margin="12,0,0,0" VerticalAlignment="Center"
+                                    Visibility="{Binding MenuExpandido, RelativeSource={RelativeSource AncestorType=Window},
+                                                 Converter={StaticResource BooleanoAVisible}}">
+                            <TextBlock FontSize="16" FontWeight="Bold"
+                                       FontFamily="Georgia, Cambria, Times New Roman">
+                                <Run Text="ALEJAN" Foreground="White"/><Run Text="DRÍA" Foreground="{StaticResource BrushAcento}"/>
+                            </TextBlock>
+                            <TextBlock Text="Biblioteca" Foreground="#9DBBAA" FontSize="9.5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Plegar / desplegar, al pie del riel -->
+                <Button x:Name="btnMenu" DockPanel.Dock="Bottom" Style="{StaticResource BotonIcono}"
+                        Width="Auto" Height="42" Margin="10,6,10,12" Foreground="#9DBBAA"
+                        HorizontalContentAlignment="Left" ToolTip="Mostrar u ocultar los nombres">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="lblIconoMenu" Text="☰" FontSize="16" Width="52"
+                                   TextAlignment="Center"/>
+                        <TextBlock Text="Ocultar menú" VerticalAlignment="Center" FontSize="12.5"
+                                   Visibility="{Binding MenuExpandido, RelativeSource={RelativeSource AncestorType=Window},
+                                                Converter={StaticResource BooleanoAVisible}}"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Secciones -->
+                <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,6,0,10">
+                        <TextBlock Text="CIRCULACIÓN" Style="{StaticResource RotuloRiel}"/>
+                        <RadioButton x:Name="rbPanel"     Tag="📊" Content="Panel de control"    Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                        <RadioButton x:Name="rbPrestar"   Tag="📖" Content="Prestar libros"      Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                        <RadioButton x:Name="rbPrestamos" Tag="🔄" Content="Préstamos"           Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                        <RadioButton x:Name="rbMultas"    Tag="💰" Content="Multas"              Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+
+                        <TextBlock Text="ACERVO" Style="{StaticResource RotuloRiel}"/>
+                        <RadioButton x:Name="rbCatalogo"  Tag="🔍" Content="Catálogo"            Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                        <RadioButton x:Name="rbLibros"    Tag="📚" Content="Libros y ejemplares" Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                        <RadioButton x:Name="rbCatalogos" Tag="🗂" Content="Autores y categorías" Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+
+                        <TextBlock Text="SOCIOS" Style="{StaticResource RotuloRiel}"/>
+                        <RadioButton x:Name="rbSocios"    Tag="👤" Content="Socios"              Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                        <RadioButton x:Name="rbReservas"  Tag="🔖" Content="Reservas"            Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+
+                        <!-- La sección de administración se muestra u oculta entera
+                             según el rol. El rótulo va DENTRO del panel y no se toca
+                             desde el código: si se le asignara Visibility ahí, ese
+                             valor local le ganaría al del estilo y el rótulo se
+                             quedaría visible aun con el riel plegado. -->
+                        <StackPanel x:Name="pnlAdmin" Visibility="Collapsed">
+                            <TextBlock Text="ADMINISTRACIÓN" Style="{StaticResource RotuloRiel}"/>
+                            <RadioButton x:Name="rbUsuarios"  Tag="🔑" Content="Usuarios"  Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                            <RadioButton x:Name="rbBitacora"  Tag="📜" Content="Bitácora"  Style="{StaticResource BotonRiel}" GroupName="Nav"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- ═══════════════ ÁREA DE TRABAJO ═══════════════ -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ───── Barra global ───── -->
+            <Border Grid.Row="0" Background="White" Height="64"
+                    BorderBrush="{StaticResource BrushBorde}" BorderThickness="0,0,0,1">
+                <Grid Margin="22,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MaxWidth="440"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Buscador global: escribe un título, un folio PR-, un código
+                         L00001 o U00001 y te lleva a la pantalla que corresponde -->
+                    <Grid Grid.Column="0" VerticalAlignment="Center">
+                        <TextBox x:Name="txtBuscarGlobal" Style="{StaticResource CajaBusquedaGlobal}"/>
+                        <TextBlock Text="🔍" FontSize="13" IsHitTestVisible="False"
+                                   VerticalAlignment="Center" Margin="14,0,0,0" Opacity="0.5"/>
+                        <TextBlock Text="Buscar un libro, un socio o un folio…" FontSize="13"
+                                   IsHitTestVisible="False" VerticalAlignment="Center" Margin="38,0,0,0"
+                                   Foreground="{StaticResource BrushTextoSuave}"
+                                   Visibility="{Binding Text, ElementName=txtBuscarGlobal,
+                                                Converter={StaticResource VacioAVisible}}"/>
+                    </Grid>
+
+                    <!-- Aviso de mora, siempre visible desde cualquier pantalla -->
+                    <Border x:Name="pnlAvisoVencidos" Grid.Column="2" Style="{StaticResource Insignia}"
+                            Background="{StaticResource BrushPeligroSuave}" Visibility="Collapsed"
+                            Margin="0,0,18,0" Padding="13,7" Cursor="Hand"
+                            ToolTip="Ir a la lista de préstamos vencidos">
+                        <TextBlock x:Name="lblAvisoVencidos" Style="{StaticResource TextoInsignia}"
+                                   FontSize="11.5" Foreground="{StaticResource BrushPeligro}"/>
+                    </Border>
+
+                    <!-- Reloj y fecha -->
+                    <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,18,0">
+                        <TextBlock x:Name="lblReloj" FontSize="15" FontWeight="Bold"
+                                   HorizontalAlignment="Right"
+                                   Foreground="{StaticResource BrushTexto}"/>
+                        <TextBlock x:Name="lblFecha" FontSize="10.5" HorizontalAlignment="Right"
+                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                    </StackPanel>
+
+                    <!-- Chip de la cuenta conectada -->
+                    <Button x:Name="btnCuenta" Grid.Column="4" Style="{StaticResource ChipUsuario}"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="34" Height="34">
+                                <Ellipse Fill="{StaticResource BrushPrimario}"/>
+                                <TextBlock x:Name="lblIniciales" Foreground="White" FontSize="12.5"
+                                           FontWeight="Bold" HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock x:Name="lblNombreUsuario" FontSize="12.5" FontWeight="SemiBold"
+                                           MaxWidth="150" TextTrimming="CharacterEllipsis"
+                                           Foreground="{StaticResource BrushTexto}"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="lblRol" FontSize="10"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                    <TextBlock x:Name="lblAvisoSeguridad" Text="  ⚠" FontSize="10"
+                                               Foreground="{StaticResource BrushAdvertencia}"
+                                               Visibility="Collapsed"
+                                               ToolTip="Aún no configuras tu pregunta de seguridad"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <TextBlock Text="⌄" FontSize="13" Margin="9,-4,0,0" VerticalAlignment="Center"
+                                       Foreground="{StaticResource BrushTextoSuave}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Menú de la cuenta -->
+                    <Popup x:Name="menuCuenta" PlacementTarget="{Binding ElementName=btnCuenta}"
+                           Placement="Bottom" HorizontalOffset="-40" VerticalOffset="6"
+                           StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
+                        <Border Background="White" CornerRadius="12" Padding="6" MinWidth="220"
+                                BorderBrush="{StaticResource BrushBorde}" BorderThickness="1">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#14231C" Opacity="0.2" BlurRadius="18" ShadowDepth="4"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <StackPanel Margin="12,8,12,10">
+                                    <TextBlock x:Name="lblMenuNombre" FontSize="13" FontWeight="SemiBold"
+                                               Foreground="{StaticResource BrushTexto}"/>
+                                    <TextBlock x:Name="lblMenuEmail" FontSize="11"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                </StackPanel>
+                                <Separator Background="{StaticResource BrushBorde}" Margin="6,0"/>
+                                <Button x:Name="btnMiCuenta" Content="⚙   Mi cuenta"
+                                        Style="{StaticResource OpcionCuenta}"/>
+                                <Button x:Name="btnCerrarSesion" Content="⟵   Cerrar sesión"
+                                        Style="{StaticResource OpcionCuenta}"
+                                        Foreground="{StaticResource BrushPeligro}"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </Border>
+
+            <!-- ───── Título de la sección, sobre el papel y no en una barra ───── -->
+            <StackPanel Grid.Row="1" Margin="26,20,26,0">
+                <TextBlock x:Name="lblTituloPagina" Text="Panel de control"
+                           Style="{StaticResource TituloPagina}" FontSize="25"/>
+                <TextBlock x:Name="lblSubtituloPagina" Style="{StaticResource Subtitulo}"
+                           Margin="0,3,0,0"/>
+            </StackPanel>
+
+            <!-- ───── Página activa ───── -->
+            <ContentControl x:Name="Contenido" Grid.Row="2" Margin="26,16,26,22"/>
+        </Grid>
+    </Grid>
+</Window>

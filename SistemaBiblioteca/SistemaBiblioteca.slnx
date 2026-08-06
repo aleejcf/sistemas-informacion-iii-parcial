@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SistemaBiblioteca/SistemaBiblioteca.vbproj" />
+  <Project Path="SistemaBiblioteca.Tests/SistemaBiblioteca.Tests.vbproj" />
+</Solution>

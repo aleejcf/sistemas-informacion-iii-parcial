@@ -1,0 +1,279 @@
+<UserControl x:Class="CatalogoPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaBiblioteca"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="450"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ================= BÚSQUEDA ================= -->
+        <Border Grid.Column="0" Style="{StaticResource Tarjeta}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0">
+                    <TextBlock x:Name="lblResultados" DockPanel.Dock="Right" Style="{StaticResource Subtitulo}"
+                               VerticalAlignment="Bottom"/>
+                    <StackPanel>
+                        <TextBlock Text="Buscar en el acervo" Style="{StaticResource TituloTarjeta}"/>
+                        <TextBlock Text="Por título, autor, editorial, ISBN o código"
+                                   Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </DockPanel>
+
+                <Grid Grid.Row="1" Margin="0,14,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Margin="0,0,8,0">
+                        <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}" Height="42"/>
+                        <TextBlock Text="¿Qué libro estás buscando?" FontSize="14"
+                                   IsHitTestVisible="False" VerticalAlignment="Center" Margin="14,0,0,0"
+                                   Foreground="{StaticResource BrushTextoSuave}"
+                                   Visibility="{Binding Text, ElementName=txtBuscar,
+                                                Converter={StaticResource VacioAVisible}}"/>
+                    </Grid>
+
+                    <ComboBox x:Name="cboCategoria" Grid.Column="1" Height="42" Margin="0,0,8,0"
+                              Tag="Todas las categorías"
+                              DisplayMemberPath="etiqueta" SelectedValuePath="idcategoria"/>
+
+                    <CheckBox x:Name="chkDisponibles" Grid.Column="2" Content="Solo disponibles"
+                              VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <Button x:Name="btnLimpiar" Grid.Column="3" Content="Limpiar"
+                            Style="{StaticResource BotonPlano}"/>
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <DataGrid x:Name="dgLibros">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Título" Width="*" MinWidth="220">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding titulo}"
+                                                       Style="{StaticResource TituloLibro}" FontSize="13"/>
+                                            <TextBlock FontSize="11" Margin="0,1,0,0"
+                                                       Foreground="{StaticResource BrushTextoSuave}">
+                                                <Run Text="{Binding autor, Mode=OneWay}"/><Run Text="  ·  "/><Run Text="{Binding editorial, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Categoría" Binding="{Binding categoria}" Width="140"/>
+                            <DataGridTextColumn Header="Año" Binding="{Binding anio_publicacion}" Width="60"/>
+
+                            <DataGridTemplateColumn Header="Acervo" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <ProgressBar Style="{StaticResource BarraAcervo}"
+                                                         Value="{Binding porcentaje_prestado, Mode=OneWay}"/>
+                                            <TextBlock FontSize="11" Margin="0,4,0,0"
+                                                       Foreground="{StaticResource BrushTextoSuave}">
+                                                <Run Text="{Binding disponibles, Mode=OneWay}"/><Run Text=" libres · "/><Run Text="{Binding prestados, Mode=OneWay}"/><Run Text=" prestados"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Estado" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource Insignia}"
+                                                Background="{Binding disponibilidad,
+                                                            Converter={StaticResource EstadoAColorFondo}}">
+                                            <TextBlock Text="{Binding disponibilidad}"
+                                                       Style="{StaticResource TextoInsignia}"
+                                                       Foreground="{Binding disponibilidad,
+                                                                   Converter={StaticResource EstadoAColor}}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel x:Name="pnlVacio" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                Visibility="Collapsed" Background="White" Margin="1,40,1,1">
+                        <TextBlock Text="🔍" FontSize="34" HorizontalAlignment="Center" Opacity="0.35"/>
+                        <TextBlock Text="Ningún título coincide con la búsqueda."
+                                   Style="{StaticResource Subtitulo}" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ================= FICHA ================= -->
+        <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="16,0,0,0">
+            <Grid>
+                <StackPanel x:Name="pnlSinSeleccion" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="📚" FontSize="34" HorizontalAlignment="Center" Opacity="0.35"/>
+                    <TextBlock Text="Selecciona un título para ver su ficha y sus copias."
+                               Style="{StaticResource Subtitulo}" Margin="0,10,0,0"
+                               TextAlignment="Center" TextWrapping="Wrap" MaxWidth="240"/>
+                </StackPanel>
+
+                <Grid x:Name="pnlFicha" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Ficha bibliográfica -->
+                    <StackPanel Grid.Row="0">
+                        <TextBlock x:Name="lblTitulo" Style="{StaticResource TituloLibro}" FontSize="19"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock x:Name="lblAutor" Style="{StaticResource Subtitulo}" FontSize="13"
+                                   Margin="0,4,0,0"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Border x:Name="pnlDisponibilidad" Style="{StaticResource Insignia}">
+                                <TextBlock x:Name="lblDisponibilidad" Style="{StaticResource TextoInsignia}"/>
+                            </Border>
+                            <Border Style="{StaticResource Insignia}" Margin="7,0,0,0"
+                                    Background="{StaticResource BrushPrimarioSuave}">
+                                <TextBlock x:Name="lblDewey" Style="{StaticResource TextoInsignia}"
+                                           Foreground="{StaticResource BrushPrimario}"/>
+                            </Border>
+                            <Border x:Name="pnlReservas" Style="{StaticResource Insignia}" Margin="7,0,0,0"
+                                    Background="{StaticResource BrushAcentoSuave}" Visibility="Collapsed">
+                                <TextBlock x:Name="lblReservas" Style="{StaticResource TextoInsignia}"
+                                           Foreground="#8A6D0B"/>
+                            </Border>
+                        </StackPanel>
+
+                        <Border Background="#F7F5EC" CornerRadius="11" Padding="14,12" Margin="0,14,0,0"
+                                BorderBrush="{StaticResource BrushBorde}" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0">
+                                    <TextBlock Text="CÓDIGO" Style="{StaticResource Etiqueta}" Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="lblCodigo" Style="{StaticResource Codigo}" FontSize="13"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="0" Grid.Column="1">
+                                    <TextBlock Text="ISBN" Style="{StaticResource Etiqueta}" Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="lblIsbn" Style="{StaticResource Codigo}" FontSize="12"
+                                               FontWeight="Normal"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,10,0,0">
+                                    <TextBlock Text="EDITORIAL" Style="{StaticResource Etiqueta}" Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="lblEditorial" FontSize="12.5"
+                                               Foreground="{StaticResource BrushTexto}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0">
+                                    <TextBlock Text="EDICIÓN Y AÑO" Style="{StaticResource Etiqueta}" Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="lblEdicion" FontSize="12.5"
+                                               Foreground="{StaticResource BrushTexto}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,10,0,0">
+                                    <TextBlock Text="CATEGORÍA" Style="{StaticResource Etiqueta}" Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="lblCategoria" FontSize="12.5"
+                                               Foreground="{StaticResource BrushTexto}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,10,0,0">
+                                    <TextBlock Text="IDIOMA" Style="{StaticResource Etiqueta}" Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="lblIdioma" FontSize="12.5"
+                                               Foreground="{StaticResource BrushTexto}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock x:Name="lblSinopsis" FontSize="12" TextWrapping="Wrap" Margin="0,12,0,0"
+                                   FontStyle="Italic" Foreground="{StaticResource BrushTextoSuave}"/>
+                    </StackPanel>
+
+                    <!-- Copias físicas -->
+                    <Grid Grid.Row="1" Margin="0,16,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="lblTituloCopias" Grid.Row="0" Text="COPIAS FÍSICAS"
+                                   Style="{StaticResource Etiqueta}" Margin="0,0,0,6"/>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="listaEjemplares">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="White" CornerRadius="10" Padding="12,10"
+                                                Margin="0,0,0,7" BorderBrush="{StaticResource BrushBorde}"
+                                                BorderThickness="1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding codigo_barras}"
+                                                               Style="{StaticResource Codigo}" FontSize="12.5"/>
+                                                    <TextBlock FontSize="10.5" Margin="0,2,0,0"
+                                                               Foreground="{StaticResource BrushTextoSuave}">
+                                                        <Run Text="{Binding ubicacion, Mode=OneWay}"/><Run Text="  ·  "/><Run Text="{Binding condicion, Mode=OneWay}"/>
+                                                    </TextBlock>
+                                                    <TextBlock FontSize="10.5" Margin="0,3,0,0"
+                                                               Foreground="{StaticResource BrushPeligro}"
+                                                               Visibility="{Binding socio_actual,
+                                                                   Converter={StaticResource VacioAVisible},
+                                                                   ConverterParameter=Invertir}">
+                                                        <Run Text="Con "/><Run Text="{Binding socio_actual, Mode=OneWay}"/><Run Text=" · vence "/><Run Text="{Binding fecha_vencimiento, Mode=OneWay, StringFormat='{}{0:dd/MM/yyyy}'}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <Border Grid.Column="1" Style="{StaticResource Insignia}"
+                                                        Background="{Binding estado,
+                                                                    Converter={StaticResource EstadoAColorFondo}}">
+                                                    <TextBlock Text="{Binding estado}"
+                                                               Style="{StaticResource TextoInsignia}"
+                                                               Foreground="{Binding estado,
+                                                                           Converter={StaticResource EstadoAColor}}"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- Acciones -->
+                    <StackPanel Grid.Row="2" Margin="0,14,0,0">
+                        <Button x:Name="btnPrestar" Content="📖  Prestar este título"
+                                Style="{StaticResource BotonPrimario}" Height="42"/>
+                        <Button x:Name="btnReservar" Content="🔖  Apartar para un socio"
+                                Style="{StaticResource BotonContorno}" Height="38" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

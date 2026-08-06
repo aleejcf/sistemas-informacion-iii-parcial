@@ -1,0 +1,274 @@
+<UserControl x:Class="LibrosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaBiblioteca"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="420"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ================= LISTA + EJEMPLARES ================= -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="270"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource Tarjeta}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0">
+                        <TextBlock x:Name="lblResumen" DockPanel.Dock="Right"
+                                   Style="{StaticResource Subtitulo}" VerticalAlignment="Bottom"/>
+                        <TextBlock Text="Títulos catalogados" Style="{StaticResource TituloTarjeta}"/>
+                    </DockPanel>
+
+                    <Grid Grid.Row="1" Margin="0,14,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" Margin="0,0,8,0">
+                            <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}"/>
+                            <TextBlock Text="Título, autor, ISBN o código…" FontSize="13.5"
+                                       IsHitTestVisible="False" VerticalAlignment="Center" Margin="13,0,0,0"
+                                       Foreground="{StaticResource BrushTextoSuave}"
+                                       Visibility="{Binding Text, ElementName=txtBuscar,
+                                                    Converter={StaticResource VacioAVisible}}"/>
+                        </Grid>
+                        <ComboBox x:Name="cboFiltroCategoria" Grid.Column="1" Margin="0,0,8,0"
+                                  Tag="Todas las categorías"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idcategoria"/>
+                        <Button x:Name="btnLimpiar" Grid.Column="2" Content="Limpiar"
+                                Style="{StaticResource BotonPlano}"/>
+                    </Grid>
+
+                    <Grid Grid.Row="2">
+                        <DataGrid x:Name="dgLibros">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Código" Width="76">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding idlibro}" Style="{StaticResource Codigo}"
+                                                       FontSize="12"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Título" Binding="{Binding titulo}"
+                                                    Width="*" MinWidth="170"/>
+                                <DataGridTextColumn Header="Autor" Binding="{Binding autor}" Width="150"/>
+                                <DataGridTextColumn Header="Categoría" Binding="{Binding categoria}" Width="130"/>
+                                <DataGridTextColumn Header="Copias" Width="65"
+                                                    Binding="{Binding total_ejemplares}"/>
+                                <DataGridTextColumn Header="Libres" Width="65" Binding="{Binding disponibles}"/>
+                                <DataGridTemplateColumn Header="Estado" Width="115">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource Insignia}"
+                                                    Background="{Binding disponibilidad,
+                                                                Converter={StaticResource EstadoAColorFondo}}">
+                                                <TextBlock Text="{Binding disponibilidad}"
+                                                           Style="{StaticResource TextoInsignia}"
+                                                           Foreground="{Binding disponibilidad,
+                                                                       Converter={StaticResource EstadoAColor}}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel x:Name="pnlVacio" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    Visibility="Collapsed" Background="White" Margin="1,40,1,1">
+                            <TextBlock Text="📚" FontSize="34" HorizontalAlignment="Center" Opacity="0.35"/>
+                            <TextBlock Text="Ningún título coincide con la búsqueda."
+                                       Style="{StaticResource Subtitulo}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Copias físicas del título seleccionado -->
+            <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Margin="0,16,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <TextBox x:Name="txtCantidad" Style="{StaticResource CajaTexto}" Width="58"
+                                     Height="34" Text="1" MaxLength="2" TextAlignment="Center"
+                                     ToolTip="Cuántas copias agregar"/>
+                            <TextBox x:Name="txtUbicacion" Style="{StaticResource CajaTexto}" Width="130"
+                                     Height="34" Margin="6,0" MaxLength="30"
+                                     ToolTip="Ubicación en la estantería"/>
+                            <Button x:Name="btnAgregarEjemplares" Content="➕  Agregar copias"
+                                    Style="{StaticResource BotonContorno}" Padding="12,6" FontSize="12"/>
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="lblTituloCopias" Text="Copias físicas"
+                                       Style="{StaticResource TituloTarjeta}"/>
+                            <TextBlock x:Name="lblSubtituloCopias" Style="{StaticResource Subtitulo}"
+                                       Margin="0,2,0,0" Text="Selecciona un título de la lista"/>
+                        </StackPanel>
+                    </DockPanel>
+
+                    <DataGrid x:Name="dgEjemplares" Grid.Row="1" Margin="0,12,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Código de barras" Width="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding codigo_barras}"
+                                                   Style="{StaticResource Codigo}" FontSize="12.5"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Ubicación" Binding="{Binding ubicacion}" Width="140"/>
+                            <DataGridTextColumn Header="Condición" Binding="{Binding condicion}" Width="110"/>
+                            <DataGridTextColumn Header="Prestado a" Binding="{Binding socio_actual}"
+                                                Width="*" MinWidth="140"/>
+                            <DataGridTextColumn Header="Vence" Width="90"
+                                                Binding="{Binding fecha_vencimiento, StringFormat='{}{0:dd/MM/yyyy}'}"/>
+                            <DataGridTemplateColumn Header="Estado" Width="115">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource Insignia}"
+                                                Background="{Binding estado,
+                                                            Converter={StaticResource EstadoAColorFondo}}">
+                                            <TextBlock Text="{Binding estado}"
+                                                       Style="{StaticResource TextoInsignia}"
+                                                       Foreground="{Binding estado,
+                                                                   Converter={StaticResource EstadoAColor}}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="" Width="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="🔧 Reparación" Style="{StaticResource BotonPlano}"
+                                                    FontSize="10.5" Padding="7,4"
+                                                    Click="EnviarAReparacion_Click" Tag="{Binding}"/>
+                                            <Button Content="✅ Disponible" Style="{StaticResource BotonPlano}"
+                                                    FontSize="10.5" Padding="7,4"
+                                                    Click="VolverADisponible_Click" Tag="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ================= FORMULARIO ================= -->
+        <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="16,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                    <TextBlock x:Name="lblTituloFormulario" Text="Catalogar un título"
+                               Style="{StaticResource TituloTarjeta}"/>
+                    <TextBlock x:Name="lblSubtituloFormulario" Text="Ficha bibliográfica de la obra"
+                               Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10,4,0">
+                    <StackPanel Margin="0,0,6,0">
+                        <TextBlock Text="CÓDIGO DEL LIBRO" Style="{StaticResource Etiqueta}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="txtCodigo" Grid.Column="0" Style="{StaticResource CajaTexto}"
+                                     MaxLength="6" CharacterCasing="Upper"/>
+                            <Button x:Name="btnSugerir" Grid.Column="1" Content="Sugerir"
+                                    Style="{StaticResource BotonContorno}" Margin="8,0,0,0"
+                                    Padding="12,7" FontSize="12"
+                                    ToolTip="Propone el siguiente código libre del catálogo"/>
+                        </Grid>
+
+                        <TextBlock Text="TÍTULO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtTitulo" Style="{StaticResource CajaTexto}" MaxLength="120"/>
+
+                        <TextBlock Text="ISBN (OPCIONAL)" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtIsbn" Style="{StaticResource CajaTexto}" MaxLength="17"
+                                 ToolTip="Se verifica el dígito de control: un ISBN mal tecleado se rechaza"/>
+                        <TextBlock x:Name="lblIsbnAviso" FontSize="10.5" Margin="0,5,0,0"
+                                   Foreground="{StaticResource BrushTextoSuave}"
+                                   Text="Se acepta ISBN de 10 o 13 dígitos, con o sin guiones."/>
+
+                        <TextBlock Text="AUTOR" Style="{StaticResource Etiqueta}"/>
+                        <ComboBox x:Name="cboAutor" Tag="Elige el autor"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idautor"/>
+
+                        <TextBlock Text="EDITORIAL" Style="{StaticResource Etiqueta}"/>
+                        <ComboBox x:Name="cboEditorial" Tag="Elige la editorial"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="ideditorial"/>
+
+                        <TextBlock Text="CATEGORÍA" Style="{StaticResource Etiqueta}"/>
+                        <ComboBox x:Name="cboCategoria" Tag="Elige la categoría"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idcategoria"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="AÑO" Style="{StaticResource Etiqueta}"/>
+                                <TextBox x:Name="txtAnio" Style="{StaticResource CajaTexto}" MaxLength="4"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="EDICIÓN" Style="{StaticResource Etiqueta}"/>
+                                <TextBox x:Name="txtEdicion" Style="{StaticResource CajaTexto}" MaxLength="20"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="IDIOMA" Style="{StaticResource Etiqueta}"/>
+                        <ComboBox x:Name="cboIdioma" IsEditable="True" Tag="Español"/>
+
+                        <TextBlock Text="SINOPSIS" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtSinopsis" Style="{StaticResource CajaTextoLarga}" MaxLength="600"/>
+
+                        <TextBlock x:Name="lblSinPermiso" Style="{StaticResource Subtitulo}"
+                                   Text="Solo un administrador puede eliminar títulos y ejemplares."
+                                   TextWrapping="Wrap" Margin="0,14,0,0" Visibility="Collapsed"
+                                   Foreground="{StaticResource BrushAdvertencia}"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Grid Grid.Row="2" Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnNuevo" Grid.Column="0" Content="➕ Nuevo"
+                            Style="{StaticResource BotonGris}" Height="40" Margin="0,0,4,0"/>
+                    <Button x:Name="btnGuardar" Grid.Column="1" Content="💾 Guardar"
+                            Style="{StaticResource BotonExito}" Height="40" Margin="4,0"/>
+                    <Button x:Name="btnEliminar" Grid.Column="2" Content="🗑 Eliminar"
+                            Style="{StaticResource BotonPeligro}" Height="40" Margin="4,0,0,0"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

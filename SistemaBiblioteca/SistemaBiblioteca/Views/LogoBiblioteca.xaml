@@ -1,0 +1,21 @@
+<UserControl x:Class="LogoBiblioteca"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- El logotipo es vectorial: no depende de ningún archivo de imagen y se ve
+         nítido en cualquier tamaño. La propiedad Tamano lo escala completo. -->
+    <Viewbox x:Name="caja" Width="44" Height="44" Stretch="Uniform">
+        <Grid Width="24" Height="24">
+            <Ellipse x:Name="halo" Width="24" Height="24"
+                     Fill="{StaticResource BrushPrimario}" Opacity="0.16"/>
+            <Grid Width="17" Height="17" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!-- Libro abierto -->
+                <Path x:Name="libro" Data="{StaticResource GeoLibro}"
+                      Fill="{StaticResource BrushAcento}" Stretch="Uniform"/>
+                <!-- El lomo: la línea del centro que separa las dos páginas -->
+                <Path x:Name="lomo" Data="{StaticResource GeoLomo}"
+                      Stroke="{StaticResource BrushLateral}" StrokeThickness="1.3"
+                      Stretch="Uniform" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+            </Grid>
+        </Grid>
+    </Viewbox>
+</UserControl>

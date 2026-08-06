@@ -1,0 +1,126 @@
+<Window x:Class="SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SistemaBiblioteca"
+        Title="Biblioteca Alejandría" Icon="{StaticResource IconoApp}"
+        Height="340" Width="760"
+        WindowStartupLocation="CenterScreen" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" FontFamily="Segoe UI"
+        RenderTransformOrigin="0.5,0.5">
+
+    <Window.RenderTransform>
+        <ScaleTransform x:Name="escalaVentana"/>
+    </Window.RenderTransform>
+
+    <!-- La marca va a la izquierda y la estantería a la derecha: composición
+         asimétrica, sin barra de progreso aparte. El progreso son los lomos,
+         que se van encendiendo de izquierda a derecha conforme carga. -->
+    <Border CornerRadius="22" ClipToBounds="True" Background="{StaticResource BrushCuero}">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.5" BlurRadius="34" ShadowDepth="7"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="340"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Halo dorado detrás de la estantería -->
+            <Ellipse Grid.Column="1" Width="420" Height="420" Opacity="0.10"
+                     Fill="{StaticResource BrushDorado}"
+                     HorizontalAlignment="Right" VerticalAlignment="Top"
+                     Margin="0,-150,-110,0"/>
+
+            <!-- ══════════ MARCA ══════════ -->
+            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="42,0,0,0">
+                <local:LogoBiblioteca x:Name="logo" Tamano="62" HorizontalAlignment="Left"/>
+
+                <TextBlock Margin="0,18,0,0">
+                    <Run Text="ALEJANDRÍA" FontSize="34" Foreground="White" FontWeight="Bold"
+                         FontFamily="Georgia, Cambria, Times New Roman"/>
+                </TextBlock>
+                <TextBlock Text="B I B L I O T E C A" FontSize="11.5" Foreground="#9DBBAA"
+                           FontWeight="SemiBold" Margin="1,2,0,0"/>
+
+                <Rectangle Height="2" Width="46" HorizontalAlignment="Left" Margin="1,18,0,0"
+                           Fill="{StaticResource BrushAcento}"/>
+
+                <TextBlock Text="El saber al alcance de todos."
+                           FontSize="12.5" FontStyle="Italic" Foreground="{StaticResource BrushAcento}"
+                           Margin="1,16,0,0"/>
+
+                <TextBlock x:Name="lblEstado" Text="Abriendo la sala de lectura…"
+                           Foreground="#7FA791" FontSize="11" Margin="1,26,0,0"/>
+            </StackPanel>
+
+            <!-- ══════════ ESTANTERÍA = PROGRESO ══════════ -->
+            <Grid Grid.Column="1" Margin="16,0,44,0">
+                <StackPanel VerticalAlignment="Center">
+
+                    <!-- Repisa de arriba -->
+                    <Grid Height="118">
+                        <StackPanel x:Name="repisaAlta" Orientation="Horizontal"
+                                    VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                            <Rectangle Width="27" Height="82"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="20" Height="66"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="32" Height="96"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="23" Height="74"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="29" Height="88"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="18" Height="60"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="34" Height="102" Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="22" Height="70"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="30" Height="92"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="25" Height="78"  RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                        </StackPanel>
+                    </Grid>
+                    <Rectangle Height="3" Fill="White" Opacity="0.30" RadiusX="1.5" RadiusY="1.5"/>
+
+                    <!-- Repisa de abajo -->
+                    <Grid Height="118" Margin="0,14,0,0">
+                        <StackPanel x:Name="repisaBaja" Orientation="Horizontal"
+                                    VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                            <Rectangle Width="22" Height="72"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="30" Height="94"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="18" Height="58"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="34" Height="100" Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="23" Height="76"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="29" Height="86"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="20" Height="64"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="32" Height="90"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="25" Height="80"  Margin="0,0,6,0" RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                            <Rectangle Width="27" Height="68"  RadiusX="2" RadiusY="2" Fill="White" Opacity="0.13"/>
+                        </StackPanel>
+                    </Grid>
+                    <Rectangle Height="3" Fill="White" Opacity="0.30" RadiusX="1.5" RadiusY="1.5"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1" Duration="0:0:0.35"/>
+                    <DoubleAnimation Storyboard.TargetName="escalaVentana"
+                                     Storyboard.TargetProperty="ScaleX"
+                                     From="0.95" To="1" Duration="0:0:0.5">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase EasingMode="EaseOut" Amplitude="0.35"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="escalaVentana"
+                                     Storyboard.TargetProperty="ScaleY"
+                                     From="0.95" To="1" Duration="0:0:0.5">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase EasingMode="EaseOut" Amplitude="0.35"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+</Window>

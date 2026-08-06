@@ -1,0 +1,317 @@
+<UserControl x:Class="SociosPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SistemaBiblioteca"
+             FontFamily="Segoe UI">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ================= INDICADORES ================= -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Tarjeta}" Margin="0,0,6,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndTotal" Text="0" Style="{StaticResource Cifra}"/>
+                    <TextBlock Text="Socios en la lista" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="6,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndAlDia" Text="0" Style="{StaticResource Cifra}"
+                               Foreground="{StaticResource BrushExito}"/>
+                    <TextBlock Text="Pueden llevarse libros" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource Tarjeta}" Margin="6,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndBloqueados" Text="0" Style="{StaticResource Cifra}"
+                               Foreground="{StaticResource BrushPeligro}"/>
+                    <TextBlock Text="Con bloqueo" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="3" Style="{StaticResource Tarjeta}" Margin="6,0,0,0" Padding="16,13">
+                <StackPanel>
+                    <TextBlock x:Name="lblIndDeuda" Text="L 0.00" Style="{StaticResource Cifra}"
+                               FontSize="22" Foreground="{StaticResource BrushAcento}"/>
+                    <TextBlock Text="Deuda acumulada" Style="{StaticResource Subtitulo}" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ================= LISTA ================= -->
+            <Border Grid.Column="0" Style="{StaticResource Tarjeta}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Socios de la biblioteca"
+                               Style="{StaticResource TituloTarjeta}"/>
+
+                    <Grid Grid.Row="1" Margin="0,14,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" Margin="0,0,8,0">
+                            <TextBox x:Name="txtBuscar" Style="{StaticResource CajaTexto}"/>
+                            <TextBlock Text="Nombre, código, identidad, correo o teléfono…" FontSize="13.5"
+                                       IsHitTestVisible="False" VerticalAlignment="Center" Margin="13,0,0,0"
+                                       Foreground="{StaticResource BrushTextoSuave}"
+                                       Visibility="{Binding Text, ElementName=txtBuscar,
+                                                    Converter={StaticResource VacioAVisible}}"/>
+                        </Grid>
+                        <ComboBox x:Name="cboTipo" Grid.Column="1" Margin="0,0,8,0" Tag="Todos los tipos"
+                                  DisplayMemberPath="etiqueta" SelectedValuePath="idtipo"/>
+                        <CheckBox x:Name="chkConDeuda" Grid.Column="2" Content="Solo con deuda o mora"
+                                  VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <Button x:Name="btnLimpiar" Grid.Column="3" Content="Limpiar"
+                                Style="{StaticResource BotonPlano}"/>
+                    </Grid>
+
+                    <Grid Grid.Row="2">
+                        <DataGrid x:Name="dgSocios">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Código" Width="76">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding idsocio}" Style="{StaticResource Codigo}"
+                                                       FontSize="12"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Socio" Binding="{Binding nombre_completo}"
+                                                    Width="*" MinWidth="150"/>
+                                <DataGridTextColumn Header="Tipo" Binding="{Binding tipo_socio}" Width="110"/>
+                                <DataGridTextColumn Header="Correo" Binding="{Binding email}" Width="160"/>
+                                <DataGridTextColumn Header="Afuera" Width="65"
+                                                    Binding="{Binding ejemplares_afuera}"/>
+                                <DataGridTextColumn Header="Vencidos" Width="75"
+                                                    Binding="{Binding prestamos_vencidos}"/>
+                                <DataGridTextColumn Header="Debe" Width="90"
+                                                    Binding="{Binding monto_adeudado, StringFormat='L {0:N2}'}"/>
+                                <DataGridTemplateColumn Header="Situación" Width="115">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource Insignia}"
+                                                    Background="{Binding situacion,
+                                                                Converter={StaticResource EstadoAColorFondo}}">
+                                                <TextBlock Text="{Binding situacion}"
+                                                           Style="{StaticResource TextoInsignia}"
+                                                           Foreground="{Binding situacion,
+                                                                       Converter={StaticResource EstadoAColor}}"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel x:Name="pnlVacio" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    Visibility="Collapsed" Background="White" Margin="1,40,1,1">
+                            <TextBlock Text="👤" FontSize="34" HorizontalAlignment="Center" Opacity="0.35"/>
+                            <TextBlock Text="Ningún socio coincide con la búsqueda."
+                                       Style="{StaticResource Subtitulo}" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Estado de cuenta del socio seleccionado -->
+                    <Border Grid.Row="3" x:Name="pnlEstadoCuenta" Visibility="Collapsed" Margin="0,14,0,0"
+                            Background="#F7F5EC" CornerRadius="11" Padding="14,12"
+                            BorderBrush="{StaticResource BrushBorde}" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                <TextBlock Text="EJEMPLARES QUE TIENE AFUERA" Style="{StaticResource Etiqueta}"
+                                           Margin="0,0,0,6"/>
+                                <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl x:Name="listaAfuera">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding titulo}" FontSize="12"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Foreground="{StaticResource BrushTexto}"/>
+                                                        <TextBlock Text="{Binding codigo_barras}" FontSize="10"
+                                                                   FontFamily="Consolas, Courier New"
+                                                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" FontSize="11" FontWeight="SemiBold"
+                                                               VerticalAlignment="Center"
+                                                               Text="{Binding fecha_vencimiento,
+                                                                      StringFormat='{}{0:dd/MM/yyyy}'}"
+                                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <TextBlock x:Name="lblSinAfuera" Text="No tiene ejemplares fuera."
+                                           Style="{StaticResource Subtitulo}" Visibility="Collapsed"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="MULTAS PENDIENTES" Style="{StaticResource Etiqueta}"
+                                           Margin="0,0,0,6"/>
+                                <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl x:Name="listaDeudas">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                        <TextBlock FontSize="12"
+                                                                   Foreground="{StaticResource BrushTexto}">
+                                                            <Run Text="{Binding motivo, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding codigo, Mode=OneWay}"/>
+                                                        </TextBlock>
+                                                        <TextBlock Text="{Binding fecha_generada,
+                                                                          StringFormat='{}{0:dd/MM/yyyy}'}"
+                                                                   FontSize="10"
+                                                                   Foreground="{StaticResource BrushTextoSuave}"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" FontSize="12.5" FontWeight="Bold"
+                                                               VerticalAlignment="Center"
+                                                               Text="{Binding monto, StringFormat='L {0:N2}'}"
+                                                               Foreground="{StaticResource BrushPeligro}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <TextBlock x:Name="lblSinDeudas" Text="No debe nada."
+                                           Style="{StaticResource Subtitulo}" Visibility="Collapsed"/>
+
+                                <Button x:Name="btnCobrarTodo" Content="💰  Cobrar todas las multas"
+                                        Style="{StaticResource BotonAcento}" Height="34" FontSize="12"
+                                        Margin="0,8,0,0" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- ================= FORMULARIO ================= -->
+            <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Margin="16,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock x:Name="lblTituloFormulario" Text="Nuevo socio"
+                                   Style="{StaticResource TituloTarjeta}"/>
+                        <TextBlock x:Name="lblSubtituloFormulario" Text="Registra a quien se llevará libros"
+                                   Style="{StaticResource Subtitulo}" Margin="0,3,0,0"/>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10,4,0">
+                        <StackPanel Margin="0,0,6,0">
+                            <TextBlock Text="CÓDIGO DE SOCIO" Style="{StaticResource Etiqueta}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="txtCodigo" Grid.Column="0" Style="{StaticResource CajaTexto}"
+                                         MaxLength="6" CharacterCasing="Upper"/>
+                                <Button x:Name="btnSugerir" Grid.Column="1" Content="Sugerir"
+                                        Style="{StaticResource BotonContorno}" Margin="8,0,0,0"
+                                        Padding="12,7" FontSize="12"/>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                    <TextBlock Text="NOMBRE" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtNombre" Style="{StaticResource CajaTexto}" MaxLength="40"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                    <TextBlock Text="APELLIDO" Style="{StaticResource Etiqueta}"/>
+                                    <TextBox x:Name="txtApellido" Style="{StaticResource CajaTexto}" MaxLength="40"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Text="IDENTIDAD" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtIdentidad" Style="{StaticResource CajaTexto}" MaxLength="15"
+                                     ToolTip="13 dígitos, con o sin guiones"/>
+
+                            <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtEmail" Style="{StaticResource CajaTexto}" MaxLength="60"/>
+
+                            <TextBlock Text="TELÉFONO" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtTelefono" Style="{StaticResource CajaTexto}" MaxLength="15"/>
+
+                            <TextBlock Text="DIRECCIÓN" Style="{StaticResource Etiqueta}"/>
+                            <TextBox x:Name="txtDireccion" Style="{StaticResource CajaTexto}" MaxLength="100"/>
+
+                            <TextBlock Text="TIPO DE SOCIO" Style="{StaticResource Etiqueta}"/>
+                            <ComboBox x:Name="cboTipoSocio" Tag="Elige el tipo"
+                                      DisplayMemberPath="etiqueta" SelectedValuePath="idtipo"/>
+                            <TextBlock x:Name="lblReglasTipo" FontSize="10.5" Margin="0,6,0,0"
+                                       TextWrapping="Wrap" Foreground="{StaticResource BrushTextoSuave}"/>
+
+                            <CheckBox x:Name="chkActivo" Content="Socio activo" IsChecked="True"
+                                      Margin="0,16,0,0"/>
+
+                            <TextBlock x:Name="lblSinPermiso" Style="{StaticResource Subtitulo}"
+                                       Text="Solo un administrador puede eliminar socios."
+                                       TextWrapping="Wrap" Margin="0,14,0,0" Visibility="Collapsed"
+                                       Foreground="{StaticResource BrushAdvertencia}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="btnNuevo" Grid.Column="0" Content="➕ Nuevo"
+                                Style="{StaticResource BotonGris}" Height="40" Margin="0,0,4,0"/>
+                        <Button x:Name="btnGuardar" Grid.Column="1" Content="💾 Guardar"
+                                Style="{StaticResource BotonExito}" Height="40" Margin="4,0"/>
+                        <Button x:Name="btnEliminar" Grid.Column="2" Content="🗑 Eliminar"
+                                Style="{StaticResource BotonPeligro}" Height="40" Margin="4,0,0,0"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
