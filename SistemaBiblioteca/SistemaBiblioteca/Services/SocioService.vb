@@ -170,7 +170,8 @@ Public Class SocioService
                                     telefono As String, email As String) As String
         If String.IsNullOrWhiteSpace(nombre) Then Return "Escribe el nombre del socio."
         If String.IsNullOrWhiteSpace(apellido) Then Return "Escribe el apellido del socio."
-        If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
+        Dim problemaEmail = Validador.ProblemaDelEmail(email)
+        If problemaEmail IsNot Nothing Then Return problemaEmail
         If Not String.IsNullOrWhiteSpace(identidad) AndAlso Not Validador.EsIdentidadValida(identidad) Then
             Return "El número de identidad debe tener 13 dígitos."
         End If

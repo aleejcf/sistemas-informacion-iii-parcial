@@ -50,7 +50,8 @@ Public Class AuthService
                                      Optional pregunta As String = Nothing,
                                      Optional respuesta As String = Nothing) As String
         If String.IsNullOrWhiteSpace(nombreCompleto) Then Return "Escribe tu nombre completo."
-        If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
+        Dim problemaEmail = Validador.ProblemaDelEmail(email)
+        If problemaEmail IsNot Nothing Then Return problemaEmail
         If Not Validador.EsUsuarioValido(usuario) Then Return "El usuario debe tener de 4 a 30 caracteres (letras, números o _)."
 
         Dim errorClave = Validador.ValidarContrasena(clave)
@@ -364,7 +365,8 @@ Public Class AuthService
     ''' da al dueño la oportunidad de reaccionar a tiempo.</summary>
     Public Shared Function CambiarEmail(usuario As String, claveActual As String,
                                         nuevoEmail As String) As String
-        If Not Validador.EsEmailValido(nuevoEmail) Then Return "El correo electrónico no es válido."
+        Dim problemaEmail = Validador.ProblemaDelEmail(nuevoEmail)
+        If problemaEmail IsNot Nothing Then Return problemaEmail
 
         Dim nombre = If(usuario, "").Trim()
         Dim limpio = nuevoEmail.Trim().ToLower()
@@ -433,7 +435,8 @@ Public Class AuthService
         claveTemporal = ""
 
         If String.IsNullOrWhiteSpace(nombreCompleto) Then Return "Escribe el nombre completo."
-        If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
+        Dim problemaEmail = Validador.ProblemaDelEmail(email)
+        If problemaEmail IsNot Nothing Then Return problemaEmail
         If Not Validador.EsUsuarioValido(usuario) Then Return "El usuario debe tener de 4 a 30 caracteres (letras, números o _)."
         If Not Roles.Contains(rol) Then Return "Selecciona un rol válido."
         If ExisteUsuario(usuario) Then Return "Ese nombre de usuario ya está registrado."

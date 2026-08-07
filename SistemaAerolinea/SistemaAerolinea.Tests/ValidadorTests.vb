@@ -4,6 +4,48 @@ Imports Xunit
 ''' la base de datos ni la interfaz, por eso se pueden probar sin montar nada.</summary>
 Public Class ValidadorTests
 
+    ''' <summary>Un dominio mal tecleado pasa cualquier validación de formato
+    ''' —`gmail.con` tiene arroba y punto— pero no existe, así que el código de
+    ''' recuperación no llega nunca y su dueño se queda fuera sin entender por qué.
+    ''' Pasó de verdad con una cuenta.</summary>
+    <Theory>
+    <InlineData("alguien@gmail.con", "gmail.com")>
+    <InlineData("alguien@gmail.cm", "gmail.com")>
+    <InlineData("alguien@gmial.com", "gmail.com")>
+    <InlineData("alguien@gamil.com", "gmail.com")>
+    <InlineData("alguien@hotmail.con", "hotmail.com")>
+    <InlineData("alguien@outlook.con", "outlook.com")>
+    <InlineData("alguien@yahoo.con", "yahoo.com")>
+    Public Sub UnDominioMalEscritoSeRechazaYSeSugiereElBueno(malo As String, esperado As String)
+        Dim problema = Validador.ProblemaDelEmail(malo)
+
+        Assert.NotNull(problema)
+        Assert.Contains("no existe", problema)
+        ' Lo importante no es rechazarlo, es decirle cuál quería escribir
+        Assert.Contains(esperado, problema)
+        Assert.False(Validador.EsEmailValido(malo))
+    End Sub
+
+    <Theory>
+    <InlineData("alguien@gmail.com")>
+    <InlineData("alguien@hotmail.com")>
+    <InlineData("alguien@alas.hn")>
+    <InlineData("nombre.apellido@empresa.com.hn")>
+    Public Sub UnCorreoBuenoSigueSiendoBueno(bueno As String)
+        Assert.Null(Validador.ProblemaDelEmail(bueno))
+        Assert.True(Validador.EsEmailValido(bueno))
+    End Sub
+
+    <Theory>
+    <InlineData("")>
+    <InlineData("sin-arroba.com")>
+    <InlineData("dos@@arrobas.com")>
+    <InlineData("con espacio@gmail.com")>
+    <InlineData("alguien@dominio.c")>
+    Public Sub LoQueNiSiquieraTieneFormaDeCorreoSeRechaza(malo As String)
+        Assert.NotNull(Validador.ProblemaDelEmail(malo))
+    End Sub
+
     ' ---------- Correo ----------
 
     <Theory>

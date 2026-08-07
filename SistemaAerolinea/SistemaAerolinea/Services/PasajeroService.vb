@@ -111,7 +111,8 @@ Public Class PasajeroService
         If String.IsNullOrWhiteSpace(tipoDocumento) Then Return "Selecciona el tipo de documento."
         If String.IsNullOrWhiteSpace(numDocumento) Then Return "Escribe el número de documento."
         If String.IsNullOrWhiteSpace(idPais) Then Return "Selecciona el país del pasajero."
-        If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
+        Dim problemaEmail = Validador.ProblemaDelEmail(email)
+        If problemaEmail IsNot Nothing Then Return problemaEmail
 
         Dim errorFecha = Validador.ValidarFechaNacimiento(fechaNacimiento)
         If errorFecha IsNot Nothing Then Return errorFecha

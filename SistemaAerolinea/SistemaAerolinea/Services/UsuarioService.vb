@@ -113,7 +113,8 @@ Public Class UsuarioService
     Public Shared Function CorregirDatos(usuarioId As Integer, nombreCompleto As String,
                                          email As String) As String
         If String.IsNullOrWhiteSpace(nombreCompleto) Then Return "Escribe el nombre completo."
-        If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
+        Dim problemaEmail = Validador.ProblemaDelEmail(email)
+        If problemaEmail IsNot Nothing Then Return problemaEmail
 
         Dim fila = Obtener(usuarioId)
         If fila Is Nothing Then Return "No se encontró la cuenta."
