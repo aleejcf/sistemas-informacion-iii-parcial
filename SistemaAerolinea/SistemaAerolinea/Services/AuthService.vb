@@ -641,7 +641,13 @@ Public Class AuthService
     End Function
 
     ''' <summary>Cambia la contraseña. Cualquier cambio (recuperación, autoservicio
-    ''' o clave temporal) cierra la obligación de cambiarla.</summary>
+    ''' o clave temporal) cierra la obligación de cambiarla.
+    '''
+    ''' Al terminar avisa por correo al dueño de la cuenta. Es lo que le permite
+    ''' enterarse si el cambio no lo hizo él: quien se apodera de una cuenta lo
+    ''' primero que cambia es la contraseña. Si el aviso no sale —porque no hay
+    ''' correo configurado— NO se deshace el cambio: la contraseña ya cambió, y
+    ''' quedarse sin avisar es un mal menor frente a dejar la cuenta a medias.</summary>
     Public Shared Function CambiarContrasena(usuario As String, nuevaClave As String) As String
         Dim errorClave = Validador.ValidarContrasena(nuevaClave)
         If errorClave IsNot Nothing Then Return errorClave
@@ -656,6 +662,109 @@ Public Class AuthService
         Registro.Info($"Contraseña cambiada para: {usuario.Trim()}")
         BitacoraService.Registrar(BitacoraService.CAMBIO_CLAVE, "usuario", Nothing,
                                   usuario:=usuario.Trim())
+
+        AvisarAlDuenoDeLaCuenta(usuario, "Se cambió la contraseña de tu cuenta",
+            "La contraseña de tu cuenta en ALAS Honduras acaba de cambiarse. " &
+            "Si fuiste tú, ya está: entra con la nueva.")
+        Return Nothing
+    End Function
+
+    ''' <summary>Manda un aviso al correo registrado de una cuenta, sin dejar que
+    ''' un fallo del correo tumbe la operación que lo provocó.</summary>
+    Private Shared Sub AvisarAlDuenoDeLaCuenta(usuario As String, titulo As String, detalle As String)
+        Try
+            If Not CorreoService.EstaDisponible() Then Return
+
+            Dim fila = Db.ConsultarFila("SELECT email, nombre_completo FROM usuario WHERE usuario = @u",
+                                        New SqlParameter("@u", If(usuario, "").Trim()))
+            If fila Is Nothing OrElse IsDBNull(fila("email")) Then Return
+
+            AvisarA(fila("email").ToString(), fila("nombre_completo").ToString(), titulo, detalle)
+
+        Catch ex As Exception
+            Registro.Advertencia($"No se pudo avisar del cambio: {ex.Message}")
+        End Try
+    End Sub
+
+    ''' <summary>Envía el aviso en segundo plano. Mandar un correo tarda segundos y
+    ''' quien cambió su contraseña no tiene por qué esperarlos mirando una ventana
+    ''' congelada.</summary>
+    Private Shared Sub AvisarA(destino As String, nombre As String, titulo As String, detalle As String)
+        Task.Run(Sub()
+                     Try
+                         CorreoService.EnviarAviso(destino, nombre, titulo, detalle)
+                     Catch ex As Exception
+                         Registro.Advertencia($"Falló el aviso a {destino}: {ex.Message}")
+                     End Try
+                 End Sub)
+    End Sub
+
+    ''' <summary>Cambia el correo de la CUENTA —el que recibe los códigos de
+    ''' recuperación— y, si esa cuenta es de un pasajero, también el de su ficha de
+    ''' viajero, que para una persona que se registró sola son el mismo correo.
+    '''
+    ''' Exige la contraseña actual porque esto decide a dónde llegan los códigos de
+    ''' recuperación: quien pueda cambiarlo a ciegas se lleva la cuenta. Y avisa a
+    ''' la dirección VIEJA, no a la nueva —la nueva ya sería la del atacante—, que
+    ''' es lo que le da al dueño la oportunidad de reaccionar a tiempo.</summary>
+    Public Shared Function CambiarEmail(usuario As String, claveActual As String,
+                                        nuevoEmail As String) As String
+        If Not Validador.EsEmailValido(nuevoEmail) Then Return "El correo electrónico no es válido."
+
+        Dim nombre = If(usuario, "").Trim()
+        Dim limpio = nuevoEmail.Trim().ToLower()
+
+        Dim fila = Db.ConsultarFila("SELECT contrasena_hash, email, nombre_completo, idpasajero
+                                     FROM usuario WHERE usuario = @u AND esta_activo = 1",
+                                    New SqlParameter("@u", nombre))
+        If fila Is Nothing Then Return "No se encontró la cuenta."
+
+        If String.IsNullOrWhiteSpace(claveActual) OrElse
+           Not VerificarHash(claveActual, fila("contrasena_hash").ToString()) Then
+            Return "La contraseña actual no es correcta."
+        End If
+
+        Dim anterior = If(IsDBNull(fila("email")), "", fila("email").ToString())
+        If String.Equals(anterior, limpio, StringComparison.OrdinalIgnoreCase) Then
+            Return "Ese ya es el correo de tu cuenta."
+        End If
+
+        If Db.Contar("SELECT COUNT(*) FROM usuario WHERE email = @e AND usuario <> @u",
+                     New SqlParameter("@e", limpio),
+                     New SqlParameter("@u", nombre)) > 0 Then
+            Return "Ese correo ya está registrado en otra cuenta."
+        End If
+
+        Dim ficha = If(IsDBNull(fila("idpasajero")), Nothing, fila("idpasajero").ToString())
+
+        Db.EnTransaccion(
+            Sub(cn, tx)
+                Db.EjecutarEn(cn, tx, "UPDATE usuario SET email = @e WHERE usuario = @u",
+                              New SqlParameter("@e", limpio),
+                              New SqlParameter("@u", nombre))
+
+                ' La ficha de viajero lleva su propio correo. Para quien se registró
+                ' solo son la misma persona y el mismo buzón, y tenerlos distintos
+                ' es justo lo que hacía que cambiar uno no sirviera de nada.
+                If ficha IsNot Nothing Then
+                    Db.EjecutarEn(cn, tx, "UPDATE pasajero SET email = @e WHERE idpasajero = @p",
+                                  New SqlParameter("@e", limpio),
+                                  New SqlParameter("@p", ficha))
+                End If
+            End Sub)
+
+        Registro.Info($"Correo de la cuenta {nombre} cambiado")
+        BitacoraService.Registrar(BitacoraService.EDITAR, "usuario",
+                                  "Correo de la cuenta cambiado", usuario:=nombre)
+
+        ' Al VIEJO, que es el único que todavía controla su dueño legítimo
+        If anterior.Length > 0 Then
+            AvisarA(anterior, fila("nombre_completo").ToString(),
+                    "Se cambió el correo de tu cuenta",
+                    $"El correo de tu cuenta en ALAS Honduras se cambió a {Formato.CorreoOculto(limpio)}. " &
+                    "Desde ahora los códigos de recuperación llegarán ahí y no a esta dirección.")
+        End If
+
         Return Nothing
     End Function
 

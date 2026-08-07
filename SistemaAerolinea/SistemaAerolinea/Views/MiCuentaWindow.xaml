@@ -38,6 +38,37 @@
 
         <TabControl Grid.Row="1" Margin="0,16,0,0">
 
+            <!-- ===== Correo de la cuenta ===== -->
+            <!-- Va aquí y no en "Mi perfil" a propósito: en el perfil está el correo
+                 de la FICHA DE VIAJERO, que es otro campo. Tenerlos juntos hacía
+                 creer que cambiando aquel se cambiaba a dónde llegan los códigos de
+                 recuperación, y no era así. -->
+            <TabItem Header="Correo">
+                <Border Style="{StaticResource Tarjeta}" Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Es la dirección a la que llegan los códigos para recuperar tu cuenta. Si pierdes el acceso a ella, cámbiala antes de quedarte fuera."
+                                   Style="{StaticResource Subtitulo}" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="CORREO ACTUAL" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtEmailActual" Style="{StaticResource CajaTexto}"
+                                 IsReadOnly="True" IsTabStop="False"/>
+
+                        <TextBlock Text="CORREO NUEVO" Style="{StaticResource Etiqueta}"/>
+                        <TextBox x:Name="txtEmailNuevo" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+
+                        <TextBlock Text="TU CONTRASEÑA" Style="{StaticResource Etiqueta}"/>
+                        <local:CajaClaveVisible x:Name="txtClaveEmail" Height="38"/>
+
+                        <TextBlock Text="Se pide tu contraseña porque esto decide a dónde llegan los códigos de recuperación. Avisaremos a tu correo anterior del cambio."
+                                   FontSize="11" Foreground="{StaticResource BrushTextoSuave}"
+                                   Margin="0,7,0,0" TextWrapping="Wrap"/>
+
+                        <Button x:Name="btnCambiarEmail" Content="Cambiar correo"
+                                Style="{StaticResource BotonPrimario}" Height="40" Margin="0,20,0,0"/>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+
             <!-- ===== Pregunta de seguridad ===== -->
             <TabItem Header="Pregunta de seguridad">
                 <Border Style="{StaticResource Tarjeta}" Margin="0,10,0,0">

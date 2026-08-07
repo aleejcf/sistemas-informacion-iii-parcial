@@ -63,8 +63,15 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
-                            <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
+                            <TextBlock Text="CORREO DE CONTACTO DEL VIAJE" Style="{StaticResource Etiqueta}"/>
                             <TextBox x:Name="txtCorreo" Style="{StaticResource CajaTexto}" MaxLength="50"/>
+                            <!-- Decía solo "CORREO ELECTRÓNICO" y ahí estaba la trampa:
+                                 este es el de la ficha de viajero, no el de la cuenta.
+                                 Quien lo cambiaba creía haber cambiado a dónde llegan
+                                 los códigos de recuperación, y seguían yendo al viejo. -->
+                            <TextBlock FontSize="11" Margin="0,7,0,0" TextWrapping="Wrap"
+                                       Foreground="{StaticResource BrushTextoSuave}"
+                                       Text="Para los avisos de tus vuelos. El correo con el que entras y recuperas tu cuenta se cambia en «Contraseña y seguridad»."/>
                         </StackPanel>
                     </Grid>
 

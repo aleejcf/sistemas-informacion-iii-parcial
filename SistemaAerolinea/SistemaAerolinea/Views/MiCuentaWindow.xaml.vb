@@ -2,6 +2,50 @@
 ''' cambiar la contraseña sin depender de un administrador.</summary>
 Public Class MiCuentaWindow
 
+    ''' <summary>Cambia el correo de la cuenta: el que recibe los códigos de
+    ''' recuperación. El servicio exige la contraseña y avisa al correo anterior.</summary>
+    Private Async Sub btnCambiarEmail_Click(sender As Object, e As RoutedEventArgs) _
+        Handles btnCambiarEmail.Click
+
+        If Sesion.UsuarioActual Is Nothing Then Return
+
+        btnCambiarEmail.IsEnabled = False
+        btnCambiarEmail.Content = "Cambiando…"
+
+        Try
+            Dim usuario = Sesion.UsuarioActual.NombreUsuario
+            Dim nuevo = txtEmailNuevo.Text
+            Dim clave = txtClaveEmail.Password
+
+            Dim problema = Await Task.Run(Function() AuthService.CambiarEmail(usuario, clave, nuevo))
+
+            If problema IsNot Nothing Then
+                DialogoAlas.Show(problema, "No se pudo cambiar el correo",
+                                 MessageBoxButton.OK, MessageBoxImage.Warning)
+                Return
+            End If
+
+            ' La sesión abierta lleva el correo viejo: si no se refresca, la pantalla
+            ' seguiría enseñando el anterior hasta volver a entrar
+            Sesion.UsuarioActual.Email = nuevo.Trim().ToLower()
+            txtEmailActual.Text = Sesion.UsuarioActual.Email
+            txtEmailNuevo.Clear()
+            txtClaveEmail.Clear()
+
+            DialogoAlas.Show(
+                "Listo. Desde ahora los códigos de recuperación llegarán a tu correo nuevo." & vbCrLf & vbCrLf &
+                "Le avisamos del cambio a tu dirección anterior.",
+                "Correo actualizado con éxito", MessageBoxButton.OK, MessageBoxImage.Information)
+
+        Catch ex As Exception
+            DialogoAlas.Show(MensajeError.Traducir("Cambiar el correo", ex),
+                             "No se pudo cambiar el correo", MessageBoxButton.OK, MessageBoxImage.Error)
+        Finally
+            btnCambiarEmail.IsEnabled = True
+            btnCambiarEmail.Content = "Cambiar correo"
+        End Try
+    End Sub
+
     Private Sub MiCuentaWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         TransicionVentana.FundirEntrada(Me)
 
@@ -11,6 +55,7 @@ Public Class MiCuentaWindow
         End If
 
         Dim u = Sesion.UsuarioActual
+        txtEmailActual.Text = u.Email
         lblNombre.Text = u.NombreCompleto
         lblEmail.Text = u.Email
         lblRol.Text = u.Rol.ToUpper()

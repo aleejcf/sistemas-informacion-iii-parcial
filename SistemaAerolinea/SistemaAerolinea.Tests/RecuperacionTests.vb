@@ -180,6 +180,58 @@ Public Class RecuperacionTests
     End Sub
 
     ' ================================================================
+    '  CAMBIO DEL CORREO DE LA CUENTA
+    ' ================================================================
+
+    ''' <summary>El correo de la cuenta decide a dónde llegan los códigos de
+    ''' recuperación, así que cambiarlo sin la contraseña equivaldría a regalar la
+    ''' cuenta a quien pillara una sesión abierta.</summary>
+    <Fact>
+    Public Sub CambiarElCorreoExigeLaContrasena()
+        If Not HayBaseDeDatos Then Return
+
+        Dim usuario = CrearCuenta()
+
+        Assert.Contains("contraseña actual",
+            AuthService.CambiarEmail(usuario, "clave-que-no-es", "nuevo@prueba.hn"))
+        Assert.Contains("contraseña actual",
+            AuthService.CambiarEmail(usuario, "", "nuevo@prueba.hn"))
+
+        ' Y el correo no se movió
+        Assert.Equal(nombreDePrueba & "@prueba.hn",
+            Db.Escalar("SELECT email FROM usuario WHERE usuario_id = @u",
+                       New SqlParameter("@u", cuentaDePrueba)).ToString())
+    End Sub
+
+    <Fact>
+    Public Sub ConLaContrasenaCorrectaElCorreoSiCambia()
+        If Not HayBaseDeDatos Then Return
+
+        Dim usuario = CrearCuenta()
+        Dim nuevo = "cambiado_" & Guid.NewGuid().ToString("N").Substring(0, 8) & "@prueba.hn"
+
+        Assert.Null(AuthService.CambiarEmail(usuario, "Prueba123", nuevo))
+
+        Assert.Equal(nuevo, Db.Escalar("SELECT email FROM usuario WHERE usuario_id = @u",
+                                       New SqlParameter("@u", cuentaDePrueba)).ToString())
+    End Sub
+
+    <Fact>
+    Public Sub NoSePuedeRobarElCorreoDeOtraCuenta()
+        If Not HayBaseDeDatos Then Return
+
+        ' Si se pudiera, dos cuentas compartirían buzón de recuperación
+        Dim ajeno = Db.Escalar("SELECT TOP 1 email FROM usuario WHERE email IS NOT NULL")
+        If ajeno Is Nothing Then Return
+
+        Dim usuario = CrearCuenta()
+        Dim problema = AuthService.CambiarEmail(usuario, "Prueba123", ajeno.ToString())
+
+        Assert.NotNull(problema)
+        Assert.Contains("ya está registrado", problema)
+    End Sub
+
+    ' ================================================================
     '  EL CORREO NUNCA ENSEÑA EL CÓDIGO
     ' ================================================================
 
