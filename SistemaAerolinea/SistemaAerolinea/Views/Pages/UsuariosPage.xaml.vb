@@ -81,6 +81,9 @@ Public Class UsuariosPage
         lblUsuarioSel.Text = $"@{fila("usuario")} · {fila("rol")} · {fila("estado")}"
         cboRolSel.SelectedItem = fila("rol").ToString()
 
+        txtNombreSel.Text = fila("nombre_completo").ToString()
+        txtEmailSel.Text = If(IsDBNull(fila("email")), "", fila("email").ToString())
+
         DescribirRecuperacion(CBool(CInt(fila("tiene_pregunta"))),
                               CInt(fila("codigos_respaldo")))
 
@@ -120,6 +123,51 @@ Public Class UsuariosPage
         idUsuarioSel = 0
         pnlAcciones.Visibility = Visibility.Collapsed
         pnlCrear.Visibility = Visibility.Visible
+    End Sub
+
+    ''' <summary>Corrige nombre y correo de la cuenta seleccionada. Es la salida de
+    ''' emergencia para quien perdió su buzón: sin esto se queda fuera para siempre.</summary>
+    Private Async Sub btnCorregir_Click(sender As Object, e As RoutedEventArgs) Handles btnCorregir.Click
+        If idUsuarioSel = 0 Then Return
+
+        btnCorregir.IsEnabled = False
+        Try
+            Dim id = idUsuarioSel
+            Dim nombre = txtNombreSel.Text
+            Dim email = txtEmailSel.Text
+
+            Dim problema = Await Task.Run(Function() UsuarioService.CorregirDatos(id, nombre, email))
+
+            If problema IsNot Nothing Then
+                DialogoAlas.Show(problema, "No se pudo guardar",
+                                 MessageBoxButton.OK, MessageBoxImage.Warning)
+                Return
+            End If
+
+            DialogoAlas.Show("Los datos de la cuenta quedaron corregidos.",
+                             "Guardado con éxito", MessageBoxButton.OK, MessageBoxImage.Information)
+
+            ' Recargar suelta la selección; se vuelve a marcar la misma fila para no
+            ' echar al administrador de la cuenta que estaba corrigiendo
+            Cargar()
+            VolverASeleccionar(id)
+
+        Catch ex As Exception
+            Avisar("Corregir los datos de la cuenta", ex)
+        Finally
+            btnCorregir.IsEnabled = True
+        End Try
+    End Sub
+
+    ''' <summary>Vuelve a marcar una fila por su identificador. Marcarla dispara el
+    ''' evento de selección, que es quien rellena el panel del detalle.</summary>
+    Private Sub VolverASeleccionar(usuarioId As Integer)
+        For Each elemento As DataRowView In dgUsuarios.Items
+            If CInt(elemento("usuario_id")) = usuarioId Then
+                dgUsuarios.SelectedItem = elemento
+                Return
+            End If
+        Next
     End Sub
 
     ''' <summary>Vuelve al modo de alta soltando la selección de la lista.</summary>

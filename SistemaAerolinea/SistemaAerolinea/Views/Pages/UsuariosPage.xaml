@@ -205,6 +205,17 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- Corregir los datos: la salida de emergencia para quien
+                         perdió el buzón y ya no puede cambiarlo por sí mismo -->
+                    <TextBlock Text="NOMBRE COMPLETO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtNombreSel" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+
+                    <TextBlock Text="CORREO ELECTRÓNICO" Style="{StaticResource Etiqueta}"/>
+                    <TextBox x:Name="txtEmailSel" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+
+                    <Button x:Name="btnCorregir" Content="Guardar datos"
+                            Style="{StaticResource BotonContorno}" Height="38" Margin="0,10,0,0"/>
+
                     <TextBlock Text="CAMBIAR ROL" Style="{StaticResource Etiqueta}"/>
                     <Grid>
                         <Grid.ColumnDefinitions>

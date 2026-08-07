@@ -42,6 +42,34 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,14,0,0">
             <StackPanel x:Name="panelFormulario" Margin="0,0,8,0">
 
+                <!-- ===== Correo de la cuenta ===== -->
+                <!-- Sin esto, perder el acceso al buzón era perder la cuenta: es la
+                     dirección a la que llegan los códigos de recuperación y no se
+                     podía cambiar desde ninguna pantalla. -->
+                <TextBlock Text="CORREO DE LA CUENTA" Style="{StaticResource TituloTarjeta}"
+                           FontSize="14" Margin="0,0,0,2"/>
+                <TextBlock Text="Es la dirección a la que llegan los códigos para recuperar tu cuenta. Si perdés el acceso a ella, cambiala antes de quedarte fuera."
+                           Style="{StaticResource Subtitulo}" TextWrapping="Wrap"/>
+
+                <TextBlock Text="CORREO ACTUAL" Style="{StaticResource Etiqueta}"/>
+                <TextBox x:Name="txtEmailActual" Style="{StaticResource CajaTexto}"
+                         IsReadOnly="True" IsTabStop="False"/>
+
+                <TextBlock Text="CORREO NUEVO" Style="{StaticResource Etiqueta}"/>
+                <TextBox x:Name="txtEmailNuevo" Style="{StaticResource CajaTexto}" MaxLength="80"/>
+
+                <TextBlock Text="TU CONTRASEÑA" Style="{StaticResource Etiqueta}"/>
+                <local:CajaClaveVisible x:Name="txtClaveEmail" Height="38"/>
+
+                <TextBlock Text="Se pide tu contraseña porque esto decide a dónde llegan los códigos de recuperación. Avisaremos a tu correo anterior del cambio."
+                           FontSize="11" Foreground="{StaticResource BrushTextoSuave}"
+                           Margin="0,7,0,0" TextWrapping="Wrap"/>
+
+                <Button x:Name="btnCambiarEmail" Content="Cambiar correo"
+                        Style="{StaticResource BotonPrimario}" Height="38" Margin="0,14,0,0"/>
+
+                <Separator Margin="0,22,0,4" Background="{StaticResource BrushBorde}"/>
+
                 <!-- ===== Pregunta de seguridad ===== -->
                 <TextBlock Text="PREGUNTA DE SEGURIDAD" Style="{StaticResource TituloTarjeta}"
                            FontSize="14" Margin="0,0,0,2"/>

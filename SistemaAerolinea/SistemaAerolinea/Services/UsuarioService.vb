@@ -101,6 +101,53 @@ Public Class UsuarioService
         Return Nothing
     End Function
 
+    ''' <summary>Corrige el nombre y el correo de una cuenta desde la pantalla de
+    ''' Usuarios.
+    '''
+    ''' Es la salida de emergencia para quien perdió el buzón y ya no puede
+    ''' confirmar nada por sí mismo: sin esto, esa persona se queda fuera para
+    ''' siempre. Por eso NO se le pide su contraseña —no la tiene a mano, o no
+    ''' podría pedir ayuda— y por eso queda en la bitácora con el antes y el
+    ''' después: cambiar el correo de una cuenta ajena es poder apoderarse de ella,
+    ''' y un poder así tiene que dejar rastro.</summary>
+    Public Shared Function CorregirDatos(usuarioId As Integer, nombreCompleto As String,
+                                         email As String) As String
+        If String.IsNullOrWhiteSpace(nombreCompleto) Then Return "Escribe el nombre completo."
+        If Not Validador.EsEmailValido(email) Then Return "El correo electrónico no es válido."
+
+        Dim fila = Obtener(usuarioId)
+        If fila Is Nothing Then Return "No se encontró la cuenta."
+
+        Dim limpio = email.Trim().ToLower()
+
+        If Db.Contar("SELECT COUNT(*) FROM usuario WHERE email = @e AND usuario_id <> @i",
+                     New SqlParameter("@e", limpio),
+                     New SqlParameter("@i", usuarioId)) > 0 Then
+            Return "Ese correo ya está registrado en otra cuenta."
+        End If
+
+        Dim antes = If(IsDBNull(fila("email")), "", fila("email").ToString())
+        Dim cuenta = fila("usuario").ToString()
+
+        Db.Ejecutar("UPDATE usuario SET nombre_completo = @n, email = @e WHERE usuario_id = @i",
+                    New SqlParameter("@n", nombreCompleto.Trim()),
+                    New SqlParameter("@e", limpio),
+                    New SqlParameter("@i", usuarioId))
+
+        Registro.Info($"Un Administrador corrigió los datos de {cuenta}")
+
+        ' El antes y el después, para que la bitácora sirva de algo si alguien
+        ' pregunta por qué esa cuenta cambió de dueño
+        If Not String.Equals(antes, limpio, StringComparison.OrdinalIgnoreCase) Then
+            BitacoraService.Registrar(BitacoraService.EDITAR, "usuario",
+                                      $"{cuenta} · correo {antes} → {limpio}")
+        Else
+            BitacoraService.Registrar(BitacoraService.EDITAR, "usuario", $"{cuenta} · nombre corregido")
+        End If
+
+        Return Nothing
+    End Function
+
     ''' <summary>Genera una contraseña temporal y obliga a cambiarla al entrar.
     ''' Devuelve Nothing y la clave por referencia si salió bien.</summary>
     Public Shared Function RestablecerContrasena(usuarioId As Integer,

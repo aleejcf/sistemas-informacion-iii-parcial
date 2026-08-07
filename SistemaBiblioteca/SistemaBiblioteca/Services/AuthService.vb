@@ -316,7 +316,110 @@ Public Class AuthService
         Registro.Info($"Contraseña cambiada para: {usuario.Trim()}")
         BitacoraService.Registrar(BitacoraService.CAMBIO_CLAVE, "usuario", Nothing,
                                   usuario:=usuario.Trim())
+
+        AvisarAlDuenoDeLaCuenta(usuario, "Se cambió la contraseña de tu cuenta",
+            "La contraseña de tu cuenta en Biblioteca Alejandría acaba de cambiarse. " &
+            "Si fuiste vos, ya está: entrá con la nueva.")
         Return Nothing
+    End Function
+
+    ' ---------- Correo de la cuenta ----------
+
+    ''' <summary>Manda un aviso al correo registrado de una cuenta, sin dejar que
+    ''' un fallo del correo tumbe la operación que lo provocó.</summary>
+    Private Shared Sub AvisarAlDuenoDeLaCuenta(usuario As String, titulo As String, detalle As String)
+        Try
+            If Not CorreoService.HayConfiguracion() Then Return
+
+            Dim fila = Db.ConsultarFila("SELECT email, nombre_completo FROM usuario WHERE usuario = @u",
+                                        New SqlParameter("@u", If(usuario, "").Trim()))
+            If fila Is Nothing OrElse IsDBNull(fila("email")) Then Return
+
+            AvisarA(fila("email").ToString(), fila("nombre_completo").ToString(), titulo, detalle)
+
+        Catch ex As Exception
+            Registro.Advertencia($"No se pudo avisar del cambio: {ex.Message}")
+        End Try
+    End Sub
+
+    ''' <summary>Envía el aviso en segundo plano. Mandar un correo tarda segundos y
+    ''' quien cambió su contraseña no tiene por qué esperarlos mirando una ventana
+    ''' congelada.</summary>
+    Private Shared Sub AvisarA(destino As String, nombre As String, titulo As String, detalle As String)
+        Task.Run(Sub()
+                     Try
+                         CorreoService.EnviarAviso(destino, nombre, titulo, detalle)
+                     Catch ex As Exception
+                         Registro.Advertencia($"Falló el aviso a {destino}: {ex.Message}")
+                     End Try
+                 End Sub)
+    End Sub
+
+    ''' <summary>Cambia el correo de la cuenta: el que recibe los códigos de
+    ''' recuperación.
+    '''
+    ''' Exige la contraseña actual porque esto decide a dónde llegan esos códigos:
+    ''' quien pueda cambiarlo a ciegas se lleva la cuenta. Y avisa a la dirección
+    ''' VIEJA, no a la nueva —la nueva ya sería la del atacante—, que es lo que le
+    ''' da al dueño la oportunidad de reaccionar a tiempo.</summary>
+    Public Shared Function CambiarEmail(usuario As String, claveActual As String,
+                                        nuevoEmail As String) As String
+        If Not Validador.EsEmailValido(nuevoEmail) Then Return "El correo electrónico no es válido."
+
+        Dim nombre = If(usuario, "").Trim()
+        Dim limpio = nuevoEmail.Trim().ToLower()
+
+        Dim fila = Db.ConsultarFila("SELECT contrasena_hash, email, nombre_completo
+                                     FROM usuario WHERE usuario = @u AND esta_activo = 1",
+                                    New SqlParameter("@u", nombre))
+        If fila Is Nothing Then Return "No se encontró la cuenta."
+
+        If String.IsNullOrWhiteSpace(claveActual) OrElse
+           Not VerificarHash(claveActual, fila("contrasena_hash").ToString()) Then
+            Return "La contraseña actual no es correcta."
+        End If
+
+        Dim anterior = If(IsDBNull(fila("email")), "", fila("email").ToString())
+        If String.Equals(anterior, limpio, StringComparison.OrdinalIgnoreCase) Then
+            Return "Ese ya es el correo de tu cuenta."
+        End If
+
+        If Db.Contar("SELECT COUNT(*) FROM usuario WHERE email = @e AND usuario <> @u",
+                     New SqlParameter("@e", limpio),
+                     New SqlParameter("@u", nombre)) > 0 Then
+            Return "Ese correo ya está registrado en otra cuenta."
+        End If
+
+        Db.Ejecutar("UPDATE usuario SET email = @e WHERE usuario = @u",
+                    New SqlParameter("@e", limpio),
+                    New SqlParameter("@u", nombre))
+
+        Registro.Info($"Correo de la cuenta {nombre} cambiado")
+        BitacoraService.Registrar(BitacoraService.EDITAR, "usuario",
+                                  "Correo de la cuenta cambiado", usuario:=nombre)
+
+        ' Al VIEJO, que es el único que todavía controla su dueño legítimo
+        If anterior.Length > 0 Then
+            AvisarA(anterior, fila("nombre_completo").ToString(),
+                    "Se cambió el correo de tu cuenta",
+                    $"El correo de tu cuenta en Biblioteca Alejandría se cambió a {Enmascarar(limpio)}. " &
+                    "Desde ahora los códigos de recuperación llegarán ahí y no a esta dirección.")
+        End If
+
+        Return Nothing
+    End Function
+
+    ''' <summary>Tapa un correo dejando lo justo para reconocerlo.</summary>
+    Private Shared Function Enmascarar(correo As String) As String
+        Dim arroba = correo.IndexOf("@"c)
+        If arroba <= 0 Then Return "•••"
+
+        Dim parte = correo.Substring(0, arroba)
+        Dim dominio = correo.Substring(arroba)
+        If parte.Length <= 2 Then Return New String("•"c, 3) & dominio
+
+        Return parte(0) & New String("•"c, Math.Min(parte.Length - 2, 8)) &
+               parte(parte.Length - 1) & dominio
     End Function
 
     ' ---------- Alta de cuentas por un Administrador ----------

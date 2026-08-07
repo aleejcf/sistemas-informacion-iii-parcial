@@ -14,9 +14,54 @@ Public Class MiCuentaWindow
         lblNombre.Text = Sesion.UsuarioActual.NombreCompleto
         lblEmail.Text = Sesion.UsuarioActual.Email
         lblRol.Text = Sesion.UsuarioActual.Rol.ToUpper()
+        txtEmailActual.Text = Sesion.UsuarioActual.Email
         cboPregunta.ItemsSource = AuthService.PreguntasSugeridas
 
         RevisarPregunta()
+    End Sub
+
+    ''' <summary>Cambia el correo de la cuenta: el que recibe los códigos de
+    ''' recuperación. El servicio exige la contraseña y avisa al correo anterior.</summary>
+    Private Async Sub btnCambiarEmail_Click(sender As Object, e As RoutedEventArgs) _
+        Handles btnCambiarEmail.Click
+        OcultarError()
+
+        If Sesion.UsuarioActual Is Nothing Then Return
+
+        btnCambiarEmail.IsEnabled = False
+        btnCambiarEmail.Content = "Cambiando…"
+
+        Try
+            Dim usuario = Sesion.UsuarioActual.NombreUsuario
+            Dim nuevo = txtEmailNuevo.Text
+            Dim clave = txtClaveEmail.Password
+
+            Dim problema = Await Task.Run(Function() AuthService.CambiarEmail(usuario, clave, nuevo))
+
+            If problema IsNot Nothing Then
+                MostrarError(problema)
+                Return
+            End If
+
+            ' La sesión abierta lleva el correo viejo: sin refrescarla, la ventana
+            ' seguiría enseñando el anterior hasta volver a entrar
+            Sesion.UsuarioActual.Email = nuevo.Trim().ToLower()
+            txtEmailActual.Text = Sesion.UsuarioActual.Email
+            lblEmail.Text = Sesion.UsuarioActual.Email
+            txtEmailNuevo.Clear()
+            txtClaveEmail.Clear()
+
+            DialogoBiblioteca.Show(
+                "Listo. Desde ahora los códigos de recuperación llegarán a tu correo nuevo." & vbCrLf & vbCrLf &
+                "Le avisamos del cambio a tu dirección anterior.",
+                "Correo actualizado con éxito", MessageBoxButton.OK, MessageBoxImage.Information)
+
+        Catch ex As Exception
+            MostrarError(MensajeError.Traducir("Cambiar el correo", ex))
+        Finally
+            btnCambiarEmail.IsEnabled = True
+            btnCambiarEmail.Content = "Cambiar correo"
+        End Try
     End Sub
 
     Private Sub RevisarPregunta()

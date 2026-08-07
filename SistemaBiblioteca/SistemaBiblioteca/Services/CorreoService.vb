@@ -240,10 +240,61 @@ nombre    = Biblioteca Alejandría
     ''' Todo el estilo va EN LÍNEA y no en una hoja aparte: Gmail en el teléfono se
     ''' salta buena parte de lo que venga en un bloque `style`, y el correo tiene
     ''' que verse igual en el móvil, que es donde se va a leer.</summary>
-    Private Shared Function CuerpoHtml(nombre As String, codigo As String) As String
-        Dim saludo = If(String.IsNullOrWhiteSpace(nombre), "Hola", $"Hola, {nombre}")
-        Dim fecha = DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy")
+    ''' <summary>Avisa al dueño de una cuenta de que algo cambió en ella: su
+    ''' contraseña o su correo.
+    '''
+    ''' No es cortesía, es seguridad. Quien se apodera de una cuenta lo primero que
+    ''' hace es cambiar la contraseña y el correo para dejar fuera al dueño. Este
+    ''' aviso es lo que le da la oportunidad de enterarse a tiempo, y por eso el de
+    ''' cambio de correo se manda a la dirección VIEJA: la nueva ya sería la del
+    ''' atacante.</summary>
+    Public Shared Function EnviarAviso(destinatario As String, nombreDestinatario As String,
+                                       titulo As String, detalle As String) As String
+        Dim config = Leer()
+        If Not config.EstaCompleta Then
+            Return "El envío de correo no está configurado."
+        End If
 
+        Try
+            Using mensaje As New MailMessage()
+                mensaje.From = New MailAddress(config.Remitente, config.Nombre)
+                mensaje.To.Add(New MailAddress(destinatario))
+                mensaje.Subject = titulo
+                mensaje.SubjectEncoding = Text.Encoding.UTF8
+
+                Dim vista = AlternateView.CreateAlternateViewFromString(
+                    CuerpoAviso(nombreDestinatario, titulo, detalle), Text.Encoding.UTF8, "text/html")
+                vista.LinkedResources.Add(LogoVinculado())
+                mensaje.AlternateViews.Add(vista)
+
+                Using cliente As New SmtpClient(config.Servidor, config.Puerto)
+                    cliente.EnableSsl = True
+                    cliente.DeliveryMethod = SmtpDeliveryMethod.Network
+                    cliente.UseDefaultCredentials = False
+                    cliente.Credentials = New NetworkCredential(config.Remitente, config.Clave)
+                    cliente.Timeout = 20000
+                    cliente.Send(mensaje)
+                End Using
+            End Using
+
+            Registro.Info($"Aviso de seguridad enviado a {destinatario}: {titulo}")
+            Return Nothing
+
+        Catch ex As Exception
+            Registro.Error_("Enviar el aviso de seguridad", ex)
+            Return "No se pudo enviar el aviso."
+        End Try
+    End Function
+
+    ' ======================= PLANTILLA =======================
+
+    ''' <summary>La envoltura común a todos los correos: el logotipo, la cabecera
+    ''' verde tinta con su filete dorado, el interior variable y el pie.
+    '''
+    ''' Habla el idioma del sistema —es una ficha de biblioteca— y todo el estilo
+    ''' va EN LÍNEA, no en una hoja aparte: Gmail en el teléfono se salta buena
+    ''' parte de lo que venga en un bloque `style`.</summary>
+    Private Shared Function Envolver(interior As String, pie As String) As String
         Return $"<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'></head>
 <body style='margin:0;padding:0;background:#F5F2EA;'>
@@ -269,6 +320,33 @@ nombre    = Biblioteca Alejandría
 
       <div style='height:3px;background:#C9A227;'></div>
 
+      {interior}
+
+      <div style='background:#F5F2EA;padding:18px 30px;border-top:1px solid #E3DED0;'>
+        <p style='font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#6E7D74;
+                  margin:0;line-height:1.6;'>{pie}</p>
+      </div>
+    </div>
+
+    <div style='padding:20px 8px 0;text-align:center;'>
+      <p style='font-size:13px;color:#8A9A90;margin:0 0 6px;font-style:italic;'>
+        El saber al alcance de todos.
+      </p>
+      <p style='font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#A8B5AC;margin:0;'>
+        Correo automático · No respondas a esta dirección
+      </p>
+    </div>
+  </div>
+</div>
+</body></html>"
+    End Function
+
+    ''' <summary>El correo del código de recuperación.</summary>
+    Private Shared Function CuerpoHtml(nombre As String, codigo As String) As String
+        Dim saludo = If(String.IsNullOrWhiteSpace(nombre), "Hola", $"Hola, {nombre}")
+        Dim fecha = DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy")
+
+        Dim interior = $"
       <div style='padding:30px;'>
         <p style='font-size:16px;color:#14231C;margin:0 0 8px;'>{saludo}:</p>
         <p style='font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#6E7D74;
@@ -297,27 +375,37 @@ nombre    = Biblioteca Alejandría
             <td style='padding:9px 0;font-size:13px;color:#14231C;border-bottom:1px solid #EFEADD;'>30 minutos, un solo uso</td>
           </tr>
         </table>
-      </div>
+      </div>"
 
-      <div style='background:#F5F2EA;padding:18px 30px;border-top:1px solid #E3DED0;'>
-        <p style='font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#6E7D74;
-                  margin:0;line-height:1.6;'>
-          Si no fuiste vos, no hace falta que hagas nada: sin este código nadie
-          puede cambiar tu contraseña.
-        </p>
-      </div>
-    </div>
+        Return Envolver(interior,
+            "Si no fuiste vos, no hace falta que hagas nada: sin este código nadie " &
+            "puede cambiar tu contraseña.")
+    End Function
 
-    <div style='padding:20px 8px 0;text-align:center;'>
-      <p style='font-size:13px;color:#8A9A90;margin:0 0 6px;font-style:italic;'>
-        El saber al alcance de todos.
-      </p>
-      <p style='font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#A8B5AC;margin:0;'>
-        Correo automático · No respondas a esta dirección
-      </p>
-    </div>
-  </div>
-</div>
-</body></html>"
+    ''' <summary>El correo que avisa de un cambio en la cuenta.</summary>
+    Private Shared Function CuerpoAviso(nombre As String, titulo As String, detalle As String) As String
+        Dim saludo = If(String.IsNullOrWhiteSpace(nombre), "Hola", $"Hola, {nombre}")
+        Dim cuando = DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy, HH:mm")
+
+        Dim interior = $"
+      <div style='padding:30px;'>
+        <p style='font-size:16px;color:#14231C;margin:0 0 8px;'>{saludo}:</p>
+        <p style='font-size:18px;color:#14231C;font-weight:bold;margin:0 0 12px;'>{titulo}</p>
+        <p style='font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#6E7D74;
+                  margin:0 0 24px;line-height:1.65;'>{detalle}</p>
+
+        <table role='presentation' cellpadding='0' cellspacing='0' border='0'
+               style='width:100%;font-family:Arial,Helvetica,sans-serif;'>
+          <tr>
+            <td style='padding:9px 0;font-size:13px;color:#6E7D74;border-bottom:1px solid #EFEADD;
+                       width:130px;'>Cuándo</td>
+            <td style='padding:9px 0;font-size:13px;color:#14231C;border-bottom:1px solid #EFEADD;'>{cuando}</td>
+          </tr>
+        </table>
+      </div>"
+
+        Return Envolver(interior,
+            "Si fuiste vos, ignorá este mensaje. Si NO fuiste vos, tu cuenta puede " &
+            "estar en riesgo: recuperala cuanto antes o avisá a la biblioteca.")
     End Function
 End Class

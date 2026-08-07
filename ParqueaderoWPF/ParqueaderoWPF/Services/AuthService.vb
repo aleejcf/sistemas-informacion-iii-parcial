@@ -228,9 +228,50 @@ Public Class AuthService
                                  WHERE usuario = @u AND esta_activo = 1",
                                 New SqlParameter("@h", hash),
                                 New SqlParameter("@u", usuario.Trim()))
-        If filas > 0 Then Registro.Info($"Contraseña recuperada para el usuario: {usuario.Trim()}")
-        Return If(filas > 0, Nothing, "No se encontró el usuario.")
+        If filas = 0 Then Return "No se encontró el usuario."
+
+        Registro.Info($"Contraseña recuperada para el usuario: {usuario.Trim()}")
+
+        AvisarAlDuenoDeLaCuenta(usuario, "Se cambió la contraseña de tu cuenta",
+            "La contraseña de tu cuenta en PARKO Honduras acaba de cambiarse. " &
+            "Si fuiste vos, ya está: entrá con la nueva.")
+        Return Nothing
     End Function
+
+    ''' <summary>Avisa por correo al dueño de la cuenta de que su contraseña
+    ''' cambió.
+    '''
+    ''' No es cortesía, es seguridad: quien se apodera de una cuenta lo primero que
+    ''' hace es cambiar la contraseña, y este aviso es lo que le da al dueño la
+    ''' oportunidad de enterarse a tiempo.
+    '''
+    ''' Va en segundo plano y no puede tumbar el cambio: mandar un correo tarda
+    ''' segundos, y si falla, la contraseña YA cambió — quedarse sin avisar es un
+    ''' mal menor frente a dejar la cuenta a medias.</summary>
+    Private Shared Sub AvisarAlDuenoDeLaCuenta(usuario As String, titulo As String, detalle As String)
+        Try
+            If Not EmailService.EstaDisponible() Then Return
+
+            ' Este Db no tiene ConsultarFila, solo Consultar
+            Dim datos = Db.Consultar("SELECT email, nombre_completo FROM usuario WHERE usuario = @u",
+                                     New SqlParameter("@u", If(usuario, "").Trim()))
+            If datos.Rows.Count = 0 OrElse IsDBNull(datos.Rows(0)("email")) Then Return
+
+            Dim destino = datos.Rows(0)("email").ToString()
+            Dim nombre = datos.Rows(0)("nombre_completo").ToString()
+
+            Task.Run(Async Function()
+                         Try
+                             Await EmailService.EnviarAviso(destino, nombre, titulo, detalle)
+                         Catch ex As Exception
+                             Registro.Advertencia($"Fallo el aviso de seguridad: {ex.Message}")
+                         End Try
+                     End Function)
+
+        Catch ex As Exception
+            Registro.Advertencia($"No se pudo avisar del cambio: {ex.Message}")
+        End Try
+    End Sub
 
     ''' <summary>Devuelve el usuario autenticado, o Nothing si las credenciales fallan.</summary>
     Public Shared Function Autenticar(usuario As String, clave As String) As Usuario

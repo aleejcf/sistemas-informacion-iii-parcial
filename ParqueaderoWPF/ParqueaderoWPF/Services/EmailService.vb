@@ -182,4 +182,61 @@ nombre    = PARKO Honduras
         ' La bitácora registra a quién se le envió, nunca la credencial ni el código
         Registro.Info($"Código de recuperación enviado por correo a {destino}")
     End Function
+
+    ''' <summary>Avisa al dueño de una cuenta de que algo cambió en ella.
+    '''
+    ''' No es cortesía, es seguridad: quien se apodera de una cuenta lo primero que
+    ''' hace es cambiar la contraseña, y este aviso es lo que le da al dueño la
+    ''' oportunidad de enterarse a tiempo.</summary>
+    Public Shared Async Function EnviarAviso(destino As String, nombreCompleto As String,
+                                             titulo As String, detalle As String) As Task
+        Dim config = Leer()
+        If Not config.EstaCompleta Then Return
+
+        Dim cuando = DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy, HH:mm")
+        Dim cuerpo = $"
+            <div style='font-family:Segoe UI,Arial,sans-serif;max-width:480px;margin:auto'>
+                <div style='background:#0A2540;padding:22px;border-radius:12px 12px 0 0;text-align:center'>
+                    <span style='color:white;font-size:22px;font-weight:bold'>PAR<span style='color:#00E676'>KO</span></span>
+                    <div style='color:#8FB0CE;font-size:11px;letter-spacing:1px'>HONDURAS</div>
+                </div>
+                <div style='background:#F8FAFC;padding:26px;border-radius:0 0 12px 12px'>
+                    <p>Hola {WebUtility.HtmlEncode(nombreCompleto)},</p>
+                    <p style='font-size:17px;font-weight:bold;color:#0A2540;margin:0 0 10px'>
+                        {WebUtility.HtmlEncode(titulo)}
+                    </p>
+                    <p style='color:#475569;line-height:1.6'>{WebUtility.HtmlEncode(detalle)}</p>
+                    <div style='background:white;border:1.5px solid #E2E8F0;border-radius:10px;
+                                padding:14px;margin:18px 0'>
+                        <div style='font-size:11px;color:#64748B;letter-spacing:1px'>CUÁNDO</div>
+                        <div style='font-size:14px;color:#0A2540;font-weight:bold;padding-top:4px'>{cuando}</div>
+                    </div>
+                    <p style='font-size:12px;color:#64748B'>
+                        Si fuiste vos, ignorá este mensaje. Si NO fuiste vos, tu cuenta puede
+                        estar en riesgo: recuperala cuanto antes.
+                    </p>
+                </div>
+            </div>"
+
+        Using mensaje As New MailMessage()
+            mensaje.From = New MailAddress(config.Remitente, config.Nombre)
+            mensaje.To.Add(New MailAddress(destino))
+            mensaje.Subject = titulo
+            mensaje.Body = cuerpo
+            mensaje.IsBodyHtml = True
+            mensaje.BodyEncoding = Encoding.UTF8
+            mensaje.SubjectEncoding = Encoding.UTF8
+
+            Using cliente As New SmtpClient(config.Servidor, config.Puerto)
+                cliente.EnableSsl = True
+                cliente.DeliveryMethod = SmtpDeliveryMethod.Network
+                cliente.UseDefaultCredentials = False
+                cliente.Credentials = New NetworkCredential(config.Remitente, config.Clave)
+                cliente.Timeout = 20000
+                Await cliente.SendMailAsync(mensaje)
+            End Using
+        End Using
+
+        Registro.Info($"Aviso de seguridad enviado a {destino}: {titulo}")
+    End Function
 End Class
