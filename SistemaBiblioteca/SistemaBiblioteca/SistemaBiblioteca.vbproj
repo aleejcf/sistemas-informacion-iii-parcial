@@ -36,4 +36,11 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Servidor y base de datos. Va PreserveNewest a propósito: si en la
+         máquina donde se entrega se edita el archivo de la carpeta de salida
+         para apuntar a otro SQL Server, una recompilación no lo pisa. -->
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

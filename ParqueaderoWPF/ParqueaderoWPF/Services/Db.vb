@@ -5,8 +5,28 @@ Imports Microsoft.Data.SqlClient
 ''' para evitar inyección SQL.</summary>
 Public Class Db
 
-    Private Const CADENA As String =
-        "Data Source=ALECALDE\SQLEXPRESS;Initial Catalog=parqueadero;Integrated Security=True;TrustServerCertificate=True"
+    ' Estos tres datos salen de appsettings.json; ver Configuracion.vb para el
+    ' porqué. Dejaron de ser Const porque una constante se resuelve al compilar,
+    ' que es justo lo que ataba el ejecutable a una sola máquina.
+    Public Shared ReadOnly Property SERVIDOR As String
+        Get
+            Return Configuracion.Servidor
+        End Get
+    End Property
+
+    Public Shared ReadOnly Property BASE_DATOS As String
+        Get
+            Return Configuracion.BaseDatos
+        End Get
+    End Property
+
+    Private Shared ReadOnly Property CADENA As String
+        Get
+            Return $"Data Source={SERVIDOR};Initial Catalog={BASE_DATOS}" &
+                   $";Integrated Security=True;TrustServerCertificate=True" &
+                   $";Connect Timeout={Configuracion.SegundosDeEspera}"
+        End Get
+    End Property
 
     Public Shared Function Conexion() As SqlConnection
         Return New SqlConnection(CADENA)
