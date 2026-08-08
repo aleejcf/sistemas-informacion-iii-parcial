@@ -30,6 +30,3 @@ jobs:
 
       - name: Correr las pruebas unitarias
         run: dotnet test ParqueaderoWPF/ParqueaderoWPF.Tests/ParqueaderoWPF.Tests.vbproj --configuration Release --verbosity normal
-
-      - name: Compilar el sistema Windows Forms
-        run: dotnet build ParkoForms/ParkoForms/ParkoForms.vbproj --configuration Release
