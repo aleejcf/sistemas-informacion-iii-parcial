@@ -95,4 +95,18 @@ Public Class Db
             Return Await cmd.ExecuteScalarAsync()
         End Using
     End Function
+
+    ' ---------- Diagnóstico ----------
+
+    ''' <summary>Prueba que el servidor responda. La usa la pantalla de bienvenida
+    ''' para avisar antes de que el usuario intente iniciar sesión a ciegas.</summary>
+    Public Shared Function HayConexion() As Boolean
+        Try
+            Escalar("SELECT 1")
+            Return True
+        Catch ex As Exception
+            Registro.Advertencia($"Sin conexión a la base de datos: {ex.Message}")
+            Return False
+        End Try
+    End Function
 End Class

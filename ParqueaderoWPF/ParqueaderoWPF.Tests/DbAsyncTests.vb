@@ -5,21 +5,12 @@ Imports Xunit
 ''' SQL Server no está disponible se dan por buenas, igual que el resto de las
 ''' pruebas que dependen de la base de datos.
 '''
-''' PARKO no tiene EnTransaccion ni HayConexion -su Db.vb solo tiene Consultar,
-''' Ejecutar y Escalar-, así que EjecutarAsync se prueba con una limpieza manual
-''' en Finally en vez del patrón de rollback que usan ALAS y Alejandría.</summary>
+''' PARKO no tiene EnTransaccion -su Db.vb solo tiene Consultar, Ejecutar y
+''' Escalar-, así que EjecutarAsync se prueba con una limpieza manual en
+''' Finally en vez del patrón de rollback que usan ALAS y Alejandría.</summary>
 Public Class DbAsyncTests
 
-    Private Shared ReadOnly HayBaseDeDatos As Boolean = Comprobar()
-
-    Private Shared Function Comprobar() As Boolean
-        Try
-            Db.Escalar("SELECT 1")
-            Return True
-        Catch
-            Return False
-        End Try
-    End Function
+    Private Shared ReadOnly HayBaseDeDatos As Boolean = Db.HayConexion()
 
     <Fact>
     Public Async Function EscalarAsync_DevuelveElMismoValorQueEscalar() As Task
