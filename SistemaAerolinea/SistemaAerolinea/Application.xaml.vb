@@ -7,6 +7,8 @@ Class Application
     ''' como "Wed 12 Aug". Esto le dice a toda la interfaz que hable español de
     ''' Honduras, la misma cultura que usa la clase Formato.</summary>
     Private Sub Application_Startup(sender As Object, e As StartupEventArgs) Handles Me.Startup
+        Registro.Configurar("alas", Function() Sesion.NombreUsuario)
+
         FrameworkElement.LanguageProperty.OverrideMetadata(
             GetType(FrameworkElement),
             New FrameworkPropertyMetadata(XmlLanguage.GetLanguage(Formato.Cultura.IetfLanguageTag)))

@@ -15,6 +15,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Registro ya no tiene una clase local en el proyecto principal (vive solo
+         en Comun), asi que las pruebas que la usan sin calificar necesitan este
+         Import igual que lo tiene SistemaBiblioteca.vbproj. -->
+    <Import Include="Comun" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SistemaBiblioteca\SistemaBiblioteca.vbproj" />
   </ItemGroup>
 
