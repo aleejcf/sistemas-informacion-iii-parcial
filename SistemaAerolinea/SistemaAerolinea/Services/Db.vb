@@ -1,4 +1,6 @@
 Imports System.Data
+Imports System.Runtime.ExceptionServices
+Imports System.Threading.Tasks
 Imports Microsoft.Data.SqlClient
 
 ''' <summary>Punto único de acceso a SQL Server. Toda consulta del sistema pasa
@@ -128,6 +130,120 @@ Public Class Db
             End Using
             Return dt
         End Using
+    End Function
+
+    ' ---------- Versiones asíncronas ----------
+    '
+    ' Cada consulta de esta clase bloquea el hilo que la llama; con SQL Server en
+    ' la misma red casi no se nota, pero es el hilo de la interfaz el que se
+    ' congela mientras tanto. Estas son la misma operación sin bloquear, para
+    ' pantallas nuevas o que se vayan actualizando: las síncronas de arriba
+    ' siguen ahí y no las usa nadie menos porque estas existan.
+
+    Public Shared Async Function ConsultarAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of DataTable)
+        Using cn As SqlConnection = Conexion(), cmd As New SqlCommand(sql, cn)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Await cn.OpenAsync()
+            Dim dt As New DataTable()
+            Using lector = Await cmd.ExecuteReaderAsync()
+                dt.Load(lector)
+            End Using
+            Return dt
+        End Using
+    End Function
+
+    Public Shared Async Function ConsultarFilaAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of DataRow)
+        Dim dt = Await ConsultarAsync(sql, parametros)
+        Return If(dt.Rows.Count > 0, dt.Rows(0), Nothing)
+    End Function
+
+    Public Shared Async Function EjecutarAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of Integer)
+        Using cn As SqlConnection = Conexion(), cmd As New SqlCommand(sql, cn)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Await cn.OpenAsync()
+            Return Await cmd.ExecuteNonQueryAsync()
+        End Using
+    End Function
+
+    Public Shared Async Function EscalarAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of Object)
+        Using cn As SqlConnection = Conexion(), cmd As New SqlCommand(sql, cn)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Await cn.OpenAsync()
+            Return Await cmd.ExecuteScalarAsync()
+        End Using
+    End Function
+
+    Public Shared Async Function ContarAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of Integer)
+        Dim valor = Await EscalarAsync(sql, parametros)
+        Return If(valor Is Nothing OrElse IsDBNull(valor), 0, CInt(valor))
+    End Function
+
+    ''' <summary>Igual que EnTransaccion, pero el trabajo también es asíncrono.
+    '''
+    ''' VB no deja usar Await dentro de un Catch, así que la excepción se
+    ''' captura primero y el Rollback se espera después, ya fuera del Catch.
+    ''' ExceptionDispatchInfo relanza conservando la traza original; un simple
+    ''' "Throw capturada" la reescribiría a partir de esta línea.</summary>
+    Public Shared Async Function EnTransaccionAsync(trabajo As Func(Of SqlConnection, SqlTransaction, Task)) As Task
+        Using cn As SqlConnection = Conexion()
+            Await cn.OpenAsync()
+            Using tx As SqlTransaction = cn.BeginTransaction(IsolationLevel.Serializable)
+                Dim capturada As ExceptionDispatchInfo = Nothing
+                Try
+                    Await trabajo(cn, tx)
+                    Await tx.CommitAsync()
+                Catch ex As Exception
+                    capturada = ExceptionDispatchInfo.Capture(ex)
+                End Try
+
+                If capturada IsNot Nothing Then
+                    Try
+                        Await tx.RollbackAsync()
+                    Catch
+                        ' Si la conexión ya se cayó, el servidor deshace la transacción solo
+                    End Try
+                    capturada.Throw()
+                End If
+            End Using
+        End Using
+    End Function
+
+    Public Shared Async Function EjecutarEnAsync(cn As SqlConnection, tx As SqlTransaction, sql As String,
+                                                 ParamArray parametros As SqlParameter()) As Task(Of Integer)
+        Using cmd As New SqlCommand(sql, cn, tx)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Return Await cmd.ExecuteNonQueryAsync()
+        End Using
+    End Function
+
+    Public Shared Async Function EscalarEnAsync(cn As SqlConnection, tx As SqlTransaction, sql As String,
+                                                ParamArray parametros As SqlParameter()) As Task(Of Object)
+        Using cmd As New SqlCommand(sql, cn, tx)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Return Await cmd.ExecuteScalarAsync()
+        End Using
+    End Function
+
+    Public Shared Async Function ConsultarEnAsync(cn As SqlConnection, tx As SqlTransaction, sql As String,
+                                                  ParamArray parametros As SqlParameter()) As Task(Of DataTable)
+        Using cmd As New SqlCommand(sql, cn, tx)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Dim dt As New DataTable()
+            Using lector = Await cmd.ExecuteReaderAsync()
+                dt.Load(lector)
+            End Using
+            Return dt
+        End Using
+    End Function
+
+    Public Shared Async Function HayConexionAsync() As Task(Of Boolean)
+        Try
+            Await EscalarAsync("SELECT 1")
+            Return True
+        Catch ex As Exception
+            Registro.Advertencia($"Sin conexión a la base de datos: {ex.Message}")
+            Return False
+        End Try
     End Function
 
     ' ---------- Diagnóstico ----------
