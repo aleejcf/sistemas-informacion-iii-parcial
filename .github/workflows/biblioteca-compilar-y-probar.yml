@@ -1,0 +1,38 @@
+name: Biblioteca · Compilar y probar
+
+# Se ejecuta en cada cambio subido y en cada Pull Request
+on:
+  push:
+    branches: [ main, master ]
+    paths: [ 'SistemaBiblioteca/**', '.github/workflows/biblioteca-compilar-y-probar.yml' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Compilar Biblioteca y correr las pruebas
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: SistemaBiblioteca
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restaurar dependencias
+        run: dotnet restore SistemaBiblioteca.slnx
+
+      - name: Compilar la solución
+        run: dotnet build SistemaBiblioteca.slnx --no-restore --configuration Release
+
+      # Las pruebas que necesitan SQL Server se dan por buenas cuando no hay
+      # servidor disponible, así que aquí corren igual las de lógica pura.
+      - name: Correr las pruebas unitarias
+        run: dotnet test SistemaBiblioteca.Tests/SistemaBiblioteca.Tests.vbproj --configuration Release --verbosity normal
