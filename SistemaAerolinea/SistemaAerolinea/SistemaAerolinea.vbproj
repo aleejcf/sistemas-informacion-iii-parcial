@@ -30,6 +30,10 @@
     <Import Include="System.Windows.Media.Imaging" />
     <Import Include="System.Windows.Navigation" />
     <Import Include="System.Windows.Shapes" />
+
+    <!-- Con esto, las clases de Comun se usan sin escribir "Comun." delante,
+         igual que ya pasa con las de System.Windows de arriba. -->
+    <Import Include="Comun" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +41,10 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
     <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="ZXing.Net" Version="0.16.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Comun\Comun.vbproj" />
   </ItemGroup>
 
   <ItemGroup>
