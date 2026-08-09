@@ -408,6 +408,45 @@ Public Class LibrosPage
         CambiarEstado(sender, "Disponible", "Bueno")
     End Sub
 
+    Private Sub DarDeBaja_Click(sender As Object, e As RoutedEventArgs)
+        Dim boton = TryCast(sender, Button)
+        Dim fila = TryCast(boton?.Tag, DataRowView)
+        If fila Is Nothing Then Return
+
+        If DialogoBiblioteca.Show(
+            $"¿Dar de baja el ejemplar {fila("codigo_barras")}? Sale de circulación y solo se " &
+            "podrá vender, no prestar.", "Confirmar baja",
+            MessageBoxButton.YesNo, MessageBoxImage.Question) <> MessageBoxResult.Yes Then Return
+
+        CambiarEstado(sender, "Baja", fila("condicion").ToString())
+    End Sub
+
+    ''' <summary>Abre la ventana de venta para un ejemplar dado de baja. El precio
+    ''' y el comprador se piden ahí; aquí solo se decide si corresponde abrirla.</summary>
+    Private Sub Vender_Click(sender As Object, e As RoutedEventArgs)
+        Dim boton = TryCast(sender, Button)
+        Dim fila = TryCast(boton?.Tag, DataRowView)
+        If fila Is Nothing Then Return
+
+        If fila("estado").ToString() <> "Baja" Then
+            Avisar("Solo se pueden vender ejemplares dados de baja. Dale de baja primero con el botón 📤 Baja.")
+            Return
+        End If
+
+        Dim ventana As New VenderEjemplarWindow With {
+            .Owner = Window.GetWindow(Me),
+            .IdEjemplar = CInt(fila("idejemplar")),
+            .Titulo = fila("titulo").ToString(),
+            .CodigoBarras = fila("codigo_barras").ToString()
+        }
+        If ventana.ShowDialog() <> True Then Return
+
+        CargarEjemplares(txtTitulo.Text.Trim())
+        CargarLista()
+        DialogoBiblioteca.Show($"Ejemplar {fila("codigo_barras")} vendido.", "Venta registrada con éxito",
+                               MessageBoxButton.OK, MessageBoxImage.Information)
+    End Sub
+
     Private Sub CambiarEstado(sender As Object, estado As String, condicion As String)
         Dim boton = TryCast(sender, Button)
         Dim fila = TryCast(boton?.Tag, DataRowView)

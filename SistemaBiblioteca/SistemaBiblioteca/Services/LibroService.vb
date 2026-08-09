@@ -275,6 +275,72 @@ Public Class LibroService
         Return Nothing
     End Function
 
+    ' ======================= VENTA DE EJEMPLARES DADOS DE BAJA =======================
+
+    ''' <summary>Vende un ejemplar que ya está dado de baja. Solo copias en 'Baja'
+    ''' se pueden vender -no cualquiera del acervo circulante-, así la venta nunca
+    ''' compite con el préstamo por el mismo ejemplar. UPDLOCK evita que dos
+    ''' mostradores vendan la misma copia a la vez.</summary>
+    Public Shared Function VenderEjemplar(idEjemplar As Integer, precio As Decimal,
+                                          comprador As String) As String
+        If precio <= 0 Then Return "El precio debe ser mayor que cero."
+
+        Dim problema As String = Nothing
+        Dim codigoBarras As String = Nothing
+        Try
+            Db.EnTransaccion(
+                Sub(cn, tx)
+                    Dim fila = Db.ConsultarEn(cn, tx,
+                        "SELECT codigo_barras, idlibro, estado FROM ejemplar WITH (UPDLOCK, ROWLOCK)
+                         WHERE idejemplar = @e",
+                        New SqlParameter("@e", idEjemplar)).Rows
+
+                    If fila.Count = 0 Then
+                        problema = "No se encontró el ejemplar."
+                        Throw New InvalidOperationException(problema)
+                    End If
+
+                    Dim estado = fila(0)("estado").ToString()
+                    If estado <> "Baja" Then
+                        problema = $"Solo se pueden vender ejemplares dados de baja " &
+                                   $"(este está como {estado.ToLower()})."
+                        Throw New InvalidOperationException(problema)
+                    End If
+
+                    codigoBarras = fila(0)("codigo_barras").ToString()
+                    Dim idLibro = fila(0)("idlibro").ToString()
+
+                    Db.EjecutarEn(cn, tx,
+                        "INSERT INTO venta_ejemplar (idejemplar, idlibro, codigo_barras, precio,
+                                                     comprador, usuario_registra)
+                         VALUES (@e, @l, @c, @p, @co, @u)",
+                        New SqlParameter("@e", idEjemplar),
+                        New SqlParameter("@l", idLibro),
+                        New SqlParameter("@c", codigoBarras),
+                        New SqlParameter("@p", precio),
+                        New SqlParameter("@co", Db.Opcional(comprador)),
+                        New SqlParameter("@u", Sesion.NombreUsuario))
+
+                    Db.EjecutarEn(cn, tx, "UPDATE ejemplar SET estado = 'Vendido' WHERE idejemplar = @e",
+                                 New SqlParameter("@e", idEjemplar))
+                End Sub)
+
+        Catch ex As InvalidOperationException When problema IsNot Nothing
+            ' Rechazo previsto: la transacción ya se deshizo y `problema` explica por qué.
+        End Try
+
+        If problema IsNot Nothing Then Return problema
+
+        BitacoraService.Registrar(BitacoraService.EDITAR, "ejemplar",
+                                  $"{codigoBarras} vendido en L {precio:N2}")
+        Return Nothing
+    End Function
+
+    ''' <summary>Historial de ventas, más reciente primero.</summary>
+    Public Shared Function ListarVentas() As DataTable
+        Return Db.Consultar("SELECT * FROM dbo.v_venta_detalle ORDER BY fecha_venta DESC")
+    End Function
+
     ' ======================= REPORTES =======================
 
     Public Shared Function MasPrestados(Optional top As Integer = 8,

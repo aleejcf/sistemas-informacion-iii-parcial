@@ -153,7 +153,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="" Width="200">
+                            <DataGridTemplateColumn Header="" Width="340">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -163,6 +163,12 @@
                                             <Button Content="✅ Disponible" Style="{StaticResource BotonPlano}"
                                                     FontSize="10.5" Padding="7,4"
                                                     Click="VolverADisponible_Click" Tag="{Binding}"/>
+                                            <Button Content="📤 Baja" Style="{StaticResource BotonPlano}"
+                                                    FontSize="10.5" Padding="7,4"
+                                                    Click="DarDeBaja_Click" Tag="{Binding}"/>
+                                            <Button Content="💲 Vender" Style="{StaticResource BotonPlano}"
+                                                    FontSize="10.5" Padding="7,4"
+                                                    Click="Vender_Click" Tag="{Binding}"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
