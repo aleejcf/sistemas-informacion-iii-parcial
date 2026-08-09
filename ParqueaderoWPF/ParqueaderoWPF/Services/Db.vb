@@ -1,4 +1,5 @@
 Imports System.Data
+Imports System.Threading.Tasks
 Imports Microsoft.Data.SqlClient
 
 ''' <summary>Conexión central a SQL Server. Todas las consultas usan parámetros
@@ -56,6 +57,42 @@ Public Class Db
             If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
             cn.Open()
             Return cmd.ExecuteScalar()
+        End Using
+    End Function
+
+    ' ---------- Versiones asíncronas ----------
+    '
+    ' Cada consulta de esta clase bloquea el hilo que la llama; con SQL Server en
+    ' la misma red casi no se nota, pero es el hilo de la interfaz el que se
+    ' congela mientras tanto. Estas son la misma operación sin bloquear, para
+    ' pantallas nuevas o que se vayan actualizando: las síncronas de arriba
+    ' siguen ahí y no las usa nadie menos porque estas existan.
+
+    Public Shared Async Function ConsultarAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of DataTable)
+        Using cn As SqlConnection = Conexion(), cmd As New SqlCommand(sql, cn)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Await cn.OpenAsync()
+            Dim dt As New DataTable()
+            Using lector = Await cmd.ExecuteReaderAsync()
+                dt.Load(lector)
+            End Using
+            Return dt
+        End Using
+    End Function
+
+    Public Shared Async Function EjecutarAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of Integer)
+        Using cn As SqlConnection = Conexion(), cmd As New SqlCommand(sql, cn)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Await cn.OpenAsync()
+            Return Await cmd.ExecuteNonQueryAsync()
+        End Using
+    End Function
+
+    Public Shared Async Function EscalarAsync(sql As String, ParamArray parametros As SqlParameter()) As Task(Of Object)
+        Using cn As SqlConnection = Conexion(), cmd As New SqlCommand(sql, cn)
+            If parametros IsNot Nothing Then cmd.Parameters.AddRange(parametros)
+            Await cn.OpenAsync()
+            Return Await cmd.ExecuteScalarAsync()
         End Using
     End Function
 End Class
