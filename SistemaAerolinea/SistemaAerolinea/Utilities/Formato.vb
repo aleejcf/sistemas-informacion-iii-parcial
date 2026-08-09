@@ -1,32 +1,34 @@
-Imports System.Globalization
-
-''' <summary>Formatos que el sistema usa en todas partes: dinero en lempiras,
-''' fechas en español de Honduras y duraciones de vuelo.</summary>
+''' <summary>Formatos propios de ALAS. Los que comparten los tres sistemas —dinero,
+''' fechas, saludo— viven en Comun.Formato; aquí solo se reenvían, igual que
+''' Validador.vb.</summary>
 Public Class Formato
 
-    Public Shared ReadOnly Cultura As New CultureInfo("es-HN")
+    Public Shared ReadOnly Property Cultura As Globalization.CultureInfo
+        Get
+            Return Comun.Formato.Cultura
+        End Get
+    End Property
 
     ''' <summary>L 1,234.56</summary>
     Public Shared Function Dinero(valor As Decimal) As String
-        Return "L " & valor.ToString("N2", CultureInfo.InvariantCulture)
+        Return Comun.Formato.Dinero(valor)
     End Function
 
     Public Shared Function Dinero(valor As Object) As String
-        If valor Is Nothing OrElse IsDBNull(valor) Then Return "L 0.00"
-        Return Dinero(CDec(valor))
+        Return Comun.Formato.Dinero(valor)
     End Function
 
     ''' <summary>domingo, 02 de agosto de 2026</summary>
     Public Shared Function FechaLarga(valor As DateTime) As String
-        Return valor.ToString("dddd, dd 'de' MMMM 'de' yyyy", Cultura)
+        Return Comun.Formato.FechaLarga(valor)
     End Function
 
     Public Shared Function FechaHora(valor As DateTime) As String
-        Return valor.ToString("dd/MM/yyyy HH:mm")
+        Return Comun.Formato.FechaHora(valor)
     End Function
 
     Public Shared Function Hora(valor As DateTime) As String
-        Return valor.ToString("HH:mm")
+        Return Comun.Formato.Hora(valor)
     End Function
 
     ''' <summary>135 → "2h 15m"</summary>
@@ -59,9 +61,6 @@ Public Class Formato
 
     ''' <summary>Saludo según la hora del día, para la pantalla de inicio de sesión.</summary>
     Public Shared Function Saludo() As String
-        Dim hora = DateTime.Now.Hour
-        If hora >= 5 AndAlso hora < 12 Then Return "¡Buenos días!"
-        If hora >= 12 AndAlso hora < 19 Then Return "¡Buenas tardes!"
-        Return "¡Buenas noches!"
+        Return Comun.Formato.Saludo()
     End Function
 End Class
