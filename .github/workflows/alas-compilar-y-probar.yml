@@ -1,6 +1,7 @@
 name: ALAS · Compilar y probar
 
-# Se ejecuta en cada cambio subido y en cada Pull Request
+# Se ejecuta en cada cambio subido y en cada Pull Request.
+# (Recommit para que GitHub registre el workflow tras el push inicial del repo.)
 on:
   push:
     branches: [ main, master ]
