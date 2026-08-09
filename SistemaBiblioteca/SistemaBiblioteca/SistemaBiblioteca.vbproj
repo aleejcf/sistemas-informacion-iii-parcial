@@ -49,6 +49,9 @@
          máquina donde se entrega se edita el archivo de la carpeta de salida
          para apuntar a otro SQL Server, una recompilación no lo pisa. -->
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="portadas\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

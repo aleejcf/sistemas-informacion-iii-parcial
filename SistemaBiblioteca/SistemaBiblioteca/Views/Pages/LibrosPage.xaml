@@ -191,6 +191,27 @@
 
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10,4,0">
                     <StackPanel Margin="0,0,6,0">
+                        <TextBlock Text="PORTADA" Style="{StaticResource Etiqueta}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <Border Width="90" Height="130" Background="#F8FAFC" CornerRadius="8"
+                                    BorderBrush="{StaticResource BrushBorde}" BorderThickness="1.5">
+                                <Grid>
+                                    <TextBlock x:Name="lblSinPortada" Text="📚" FontSize="26"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                    <Image x:Name="imgPortada" Stretch="UniformToFill"/>
+                                </Grid>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
+                                <Button x:Name="btnPortada" Content="🖼 Elegir portada…"
+                                        Style="{StaticResource BotonContorno}" Padding="12,7" FontSize="12"/>
+                                <Button x:Name="btnPortadaIsbn" Content="🌐 Buscar por ISBN"
+                                        Style="{StaticResource BotonPlano}" Padding="12,6" FontSize="11.5"
+                                        Margin="0,6,0,0"
+                                        ToolTip="Busca la portada en Open Library usando el ISBN de arriba"/>
+                            </StackPanel>
+                        </StackPanel>
+
                         <TextBlock Text="CÓDIGO DEL LIBRO" Style="{StaticResource Etiqueta}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>

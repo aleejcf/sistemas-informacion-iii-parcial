@@ -125,6 +125,10 @@ Public Class CatalogoPage
         lblAutor.Text = Db.Texto(fila, "autor")
         lblCodigo.Text = libroSeleccionado
 
+        Dim bmpPortada = Portada.Cargar(libroSeleccionado)
+        imgPortadaFicha.Source = bmpPortada
+        lblSinPortadaFicha.Visibility = If(bmpPortada Is Nothing, Visibility.Visible, Visibility.Collapsed)
+
         Dim isbn = Db.Texto(fila, "isbn")
         lblIsbn.Text = If(isbn = "", "— sin ISBN —", isbn)
 

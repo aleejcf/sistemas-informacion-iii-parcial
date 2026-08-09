@@ -138,10 +138,28 @@
 
                     <!-- Ficha bibliográfica -->
                     <StackPanel Grid.Row="0">
-                        <TextBlock x:Name="lblTitulo" Style="{StaticResource TituloLibro}" FontSize="19"
-                                   TextWrapping="Wrap"/>
-                        <TextBlock x:Name="lblAutor" Style="{StaticResource Subtitulo}" FontSize="13"
-                                   Margin="0,4,0,0"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="86" Height="124" Background="#F8FAFC"
+                                    CornerRadius="8" VerticalAlignment="Top"
+                                    BorderBrush="{StaticResource BrushBorde}" BorderThickness="1.5">
+                                <Grid>
+                                    <TextBlock x:Name="lblSinPortadaFicha" Text="📚" FontSize="24"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{StaticResource BrushTextoSuave}"/>
+                                    <Image x:Name="imgPortadaFicha" Stretch="UniformToFill"/>
+                                </Grid>
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Top">
+                                <TextBlock x:Name="lblTitulo" Style="{StaticResource TituloLibro}" FontSize="19"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock x:Name="lblAutor" Style="{StaticResource Subtitulo}" FontSize="13"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Grid>
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <Border x:Name="pnlDisponibilidad" Style="{StaticResource Insignia}">

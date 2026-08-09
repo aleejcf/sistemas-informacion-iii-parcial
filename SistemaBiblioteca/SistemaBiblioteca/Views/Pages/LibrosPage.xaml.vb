@@ -1,4 +1,5 @@
 Imports System.Data
+Imports Microsoft.Win32
 
 ''' <summary>Catalogación: la ficha bibliográfica de cada obra y el inventario de
 ''' sus copias físicas. Arriba los títulos, abajo las copias del título elegido y
@@ -140,7 +141,65 @@ Public Class LibrosPage
         lblTituloFormulario.Text = "Editar título"
         lblSubtituloFormulario.Text = $"{editandoId} · {Db.Texto(fila, "titulo")}"
 
+        MostrarPortada(editandoId)
         CargarEjemplares(Db.Texto(fila, "titulo"))
+    End Sub
+
+    ' ======================= PORTADA =======================
+
+    Private Sub MostrarPortada(codigo As String)
+        Dim bmp = Portada.Cargar(codigo)
+        imgPortada.Source = bmp
+        lblSinPortada.Visibility = If(bmp Is Nothing, Visibility.Visible, Visibility.Collapsed)
+    End Sub
+
+    Private Sub btnPortada_Click(sender As Object, e As RoutedEventArgs) Handles btnPortada.Click
+        If String.IsNullOrWhiteSpace(txtCodigo.Text) Then
+            Avisar("Primero escribe o sugiere el código del libro.")
+            Return
+        End If
+
+        Dim dialogo As New OpenFileDialog With {
+            .Filter = "Imágenes|*.jpg;*.jpeg;*.png",
+            .Title = "Seleccionar portada del libro"
+        }
+        If dialogo.ShowDialog() <> True Then Return
+
+        Try
+            Portada.Guardar(txtCodigo.Text, dialogo.FileName)
+            MostrarPortada(txtCodigo.Text)
+        Catch ex As Exception
+            DialogoBiblioteca.Show(MensajeError.Traducir("No se pudo copiar la portada", ex), "Error",
+                                   MessageBoxButton.OK, MessageBoxImage.Error)
+        End Try
+    End Sub
+
+    Private Async Sub btnPortadaIsbn_Click(sender As Object, e As RoutedEventArgs) Handles btnPortadaIsbn.Click
+        If String.IsNullOrWhiteSpace(txtCodigo.Text) Then
+            Avisar("Primero escribe o sugiere el código del libro.")
+            Return
+        End If
+        If String.IsNullOrWhiteSpace(txtIsbn.Text) Then
+            Avisar("Este título no tiene ISBN escrito, así que no hay nada que buscar.")
+            Return
+        End If
+
+        btnPortadaIsbn.IsEnabled = False
+        Try
+            Dim encontrada = Await Portada.DescargarPorIsbnAsync(txtCodigo.Text, txtIsbn.Text)
+            If encontrada Then
+                MostrarPortada(txtCodigo.Text)
+            Else
+                DialogoBiblioteca.Show("No se encontró portada para ese ISBN en Open Library. " &
+                                       "Pasa seguido con ediciones locales o poco conocidas.",
+                                       "Sin resultados", MessageBoxButton.OK, MessageBoxImage.Information)
+            End If
+        Catch ex As Exception
+            DialogoBiblioteca.Show(MensajeError.Traducir("Buscar la portada por ISBN", ex), "Error",
+                                   MessageBoxButton.OK, MessageBoxImage.Error)
+        Finally
+            btnPortadaIsbn.IsEnabled = True
+        End Try
     End Sub
 
     Private Sub btnSugerir_Click(sender As Object, e As RoutedEventArgs) Handles btnSugerir.Click
@@ -264,6 +323,8 @@ Public Class LibrosPage
     Private Sub LimpiarFormulario()
         editandoId = ""
         ocupado = True
+        imgPortada.Source = Nothing
+        lblSinPortada.Visibility = Visibility.Visible
         txtCodigo.Clear()
         txtCodigo.IsEnabled = True
         txtTitulo.Clear()
